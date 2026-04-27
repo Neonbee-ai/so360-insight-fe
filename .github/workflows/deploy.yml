@@ -15,12 +15,12 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout this repo (nested)
+    - name: Checkout this repo (2-level nest under group dir)
       uses: actions/checkout@v4
       with:
-        path: workspace/this-repo
+        path: workspace/so360-insight/so360-insight-fe
 
-    - name: Checkout so360-shell-fe (sibling of parent)
+    - name: Checkout so360-shell-fe (matches ../../so360-shell-fe from FE)
       uses: actions/checkout@v4
       with:
         repository: Neonbee-ai/so360-shell-fe
@@ -47,9 +47,18 @@ jobs:
         (cd packages/formatters    && npm install --no-audit --no-fund && npm run build)
 
     - name: Build artefact
-      working-directory: workspace/this-repo
+      working-directory: workspace/so360-insight/so360-insight-fe
       run: |
         npm install --legacy-peer-deps --no-audit --no-fund --prefer-offline
+
+        # file:../../so360-shell-fe deps may not resolve cleanly via npm — cp
+        # built shell-fe packages directly into node_modules/@so360.
+        mkdir -p node_modules/@so360
+        for pkg in shell-context design-system event-bus formatters; do
+          rm -rf "node_modules/@so360/$pkg"
+          cp -r "../../so360-shell-fe/packages/$pkg" "node_modules/@so360/$pkg"
+        done
+
         if [ "${{ github.ref }}" = "refs/heads/develop" ]; then
           export VITE_BASE_URL=https://dev.insight.skyoffice360.com/
           export VITE_SO360_CORE_API=https://dev.api.skyoffice360.com/core
@@ -89,7 +98,7 @@ jobs:
         SSH_OPTS="-o ServerAliveInterval=30 -o ServerAliveCountMax=20 -o ConnectTimeout=30"
         ssh-keyscan $SERVER_IP >> ~/.ssh/known_hosts
         ssh $SSH_OPTS root@$SERVER_IP "mkdir -p '$NGINX_ROOT' && rm -rf '$NGINX_ROOT'/*"
-        rsync -avz --delete -e "ssh $SSH_OPTS" workspace/this-repo/dist/ "root@$SERVER_IP:$NGINX_ROOT/"
+        rsync -avz --delete -e "ssh $SSH_OPTS" workspace/so360-insight/so360-insight-fe/dist/ "root@$SERVER_IP:$NGINX_ROOT/"
         echo "Deployed to https://dev.insight.skyoffice360.com"
 
     - name: Deploy dist to Staging
@@ -101,7 +110,7 @@ jobs:
         SSH_OPTS="-o ServerAliveInterval=30 -o ServerAliveCountMax=20 -o ConnectTimeout=30"
         ssh-keyscan $SERVER_IP >> ~/.ssh/known_hosts
         ssh $SSH_OPTS root@$SERVER_IP "mkdir -p '$NGINX_ROOT' && rm -rf '$NGINX_ROOT'/*"
-        rsync -avz --delete -e "ssh $SSH_OPTS" workspace/this-repo/dist/ "root@$SERVER_IP:$NGINX_ROOT/"
+        rsync -avz --delete -e "ssh $SSH_OPTS" workspace/so360-insight/so360-insight-fe/dist/ "root@$SERVER_IP:$NGINX_ROOT/"
         echo "Deployed to https://staging.insight.skyoffice360.com"
 
     - name: Deploy dist to Production
@@ -113,5 +122,5 @@ jobs:
         SSH_OPTS="-o ServerAliveInterval=30 -o ServerAliveCountMax=20 -o ConnectTimeout=30"
         ssh-keyscan $SERVER_IP >> ~/.ssh/known_hosts
         ssh $SSH_OPTS root@$SERVER_IP "mkdir -p '$NGINX_ROOT' && rm -rf '$NGINX_ROOT'/*"
-        rsync -avz --delete -e "ssh $SSH_OPTS" workspace/this-repo/dist/ "root@$SERVER_IP:$NGINX_ROOT/"
+        rsync -avz --delete -e "ssh $SSH_OPTS" workspace/so360-insight/so360-insight-fe/dist/ "root@$SERVER_IP:$NGINX_ROOT/"
         echo "Deployed to https://cdn.neonbee.app/insight/"
