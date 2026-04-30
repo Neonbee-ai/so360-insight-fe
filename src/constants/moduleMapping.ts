@@ -9,4 +9,7 @@ export const SEGMENT_MODULE_DEPS: Record<string, string[]> = {
     delivery:  ['inventory', 'procurement', 'dailystore'],
     workforce: ['people', 'timesheet'],
     finance:   ['accounting'],
+    // 'manufacturing' intentionally not gated here — the Manufacturing module is
+    // always-visible at MVP. When the org has an `organization_modules` row for
+    // 'manufacturing', the standard gating elsewhere in the app still applies.
 };

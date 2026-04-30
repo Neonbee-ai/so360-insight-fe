@@ -101,6 +101,12 @@ export default defineConfig(({ mode }) => {
                 secure: false,
                 rewrite: (path) => path.replace(/^\/neura-api/, ''),
             },
+            '/manufacturing-api': {
+                target: 'http://localhost:3034',
+                changeOrigin: true,
+                secure: false,
+                rewrite: (path) => path.replace(/^\/manufacturing-api/, ''),
+            },
             '/v1': {
                 target: 'http://localhost:3000',
                 changeOrigin: true,
@@ -121,6 +127,12 @@ export default defineConfig(({ mode }) => {
                 changeOrigin: true,
                 secure: false,
                 rewrite: (path) => path.replace(/^\/neura-api/, ''),
+            },
+            '/manufacturing-api': {
+                target: 'http://localhost:3034',
+                changeOrigin: true,
+                secure: false,
+                rewrite: (path) => path.replace(/^\/manufacturing-api/, ''),
             },
             '/v1': {
                 target: 'http://localhost:3000',

@@ -9,6 +9,50 @@ import { insightApi } from '../services/insightApi';
 import type { SegmentSummary, KPI, Signal, AiSummarySections } from '../types/insight';
 import { useModules, useFeatureFlags } from '@so360/shell-context';
 import { SEGMENT_MODULE_DEPS } from '../constants/moduleMapping';
+import { Factory } from 'lucide-react';
+
+// Compact Manufacturing card for At-a-Glance — fetches summary directly from
+// manufacturing-be (insight-be doesn't yet aggregate manufacturing metrics).
+const ManufacturingAtAGlanceCard: React.FC<{ onClick: () => void }> = ({ onClick }) => {
+    const [data, setData] = useState<any>(null);
+    useEffect(() => {
+        const headers = {
+            'X-Tenant-Id': '3cf1c619-c8f6-49ac-9207-447418d5beee',
+            'X-Org-Id': '8317fe18-6ac4-4ac4-b71d-dc13122a905d',
+        };
+        fetch('/manufacturing-api/v1/manufacturing/reports/summary', { headers })
+            .then(r => r.ok ? r.json() : null).then(setData).catch(() => {});
+    }, []);
+    return (
+        <button onClick={onClick}
+            className="bg-slate-900/50 rounded-lg border border-emerald-500/20 p-4 text-left transition-all hover:shadow-lg hover:border-emerald-500/40 group">
+            <div className="flex items-start justify-between mb-3">
+                <Factory className="w-5 h-5 text-emerald-400" />
+            </div>
+            <h3 className="text-sm font-semibold text-slate-100 mb-1 group-hover:text-white transition-colors">
+                Manufacturing
+            </h3>
+            {data ? (
+                <>
+                    <div className="mb-2">
+                        <div className="text-lg font-bold text-slate-100">
+                            {data.mo_in_progress + data.mo_planned}
+                            <span className="text-xs text-slate-400 ml-1">open MOs</span>
+                        </div>
+                    </div>
+                    <div className="flex items-center justify-between text-xs">
+                        <span className="text-slate-400">{data.wo_open} WOs open</span>
+                        {data.scrap_pct > 3 && (
+                            <span className="text-amber-400">scrap {data.scrap_pct.toFixed(1)}%</span>
+                        )}
+                    </div>
+                </>
+            ) : (
+                <div className="text-xs text-slate-500">Connecting…</div>
+            )}
+        </button>
+    );
+};
 
 // All possible AI summary cards with their required modules
 // Card appears only if at least one required module is enabled
@@ -426,6 +470,8 @@ export const AtAGlanceView: React.FC<AtAGlanceViewProps> = ({ segments, onSegmen
                             </div>
                         </button>
                     ))}
+                    {/* Manufacturing — composed locally; not yet served by insight-be */}
+                    <ManufacturingAtAGlanceCard onClick={() => onSegmentClick('manufacturing')} />
                 </div>
             </div>
 
