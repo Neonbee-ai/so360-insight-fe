@@ -5,6 +5,7 @@ import { AlertCircle, RefreshCw } from 'lucide-react';
 import { TabNavigation, type Tab } from '../components/TabNavigation';
 import { AtAGlanceView } from '../components/AtAGlanceView';
 import { SegmentTabContent } from '../components/SegmentTabContent';
+import { ManufacturingSegment } from '../components/segments/ManufacturingSegment';
 import { DataFreshnessIndicator } from '../components/DataFreshnessIndicator';
 import { insightApi } from '../services/insightApi';
 import type { SegmentSummary } from '../types/insight';
@@ -103,11 +104,12 @@ export const InsightDashboard: React.FC<InsightDashboardProps> = ({ initialTab }
 
     // All segment tabs with their required modules
     const allSegmentTabs: Tab[] = [
-        { id: 'revenue',   label: 'Revenue',   icon: 'TrendingUp' },
-        { id: 'execution', label: 'Execution', icon: 'Zap' },
-        { id: 'delivery',  label: 'Delivery',  icon: 'Truck' },
-        { id: 'workforce', label: 'Workforce', icon: 'Users' },
-        { id: 'finance',   label: 'Finance',   icon: 'DollarSign' },
+        { id: 'revenue',       label: 'Revenue',       icon: 'TrendingUp' },
+        { id: 'execution',     label: 'Execution',     icon: 'Zap' },
+        { id: 'manufacturing', label: 'Manufacturing', icon: 'Factory' },
+        { id: 'delivery',      label: 'Delivery',      icon: 'Truck' },
+        { id: 'workforce',     label: 'Workforce',     icon: 'Users' },
+        { id: 'finance',       label: 'Finance',       icon: 'DollarSign' },
     ];
 
     // Filter segment tabs: show only if at least one required module is enabled
@@ -220,6 +222,8 @@ export const InsightDashboard: React.FC<InsightDashboardProps> = ({ initialTab }
                         >
                             {effectiveActiveTab === 'at-a-glance' ? (
                                 <AtAGlanceView segments={segments} onSegmentClick={handleSegmentClick} />
+                            ) : effectiveActiveTab === 'manufacturing' ? (
+                                <ManufacturingSegment />
                             ) : (
                                 <SegmentTabContent segmentCode={effectiveActiveTab} />
                             )}
