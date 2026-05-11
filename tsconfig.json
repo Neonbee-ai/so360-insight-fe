@@ -16,10 +16,7 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
-    "baseUrl": ".",
-    "paths": {
-      "@so360/formatters": ["../../so360-shell-fe/packages/formatters/src"]
-    }
+    "baseUrl": "."
   },
   "include": ["src"]
 }
