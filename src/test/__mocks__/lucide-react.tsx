@@ -1,0 +1,42 @@
+import React from 'react';
+
+const createIcon = (name: string) => {
+  const Icon = (props: any) => React.createElement('svg', { 'data-testid': `icon-${name}`, ...props });
+  Icon.displayName = name;
+  return Icon;
+};
+
+export const Activity = createIcon('Activity');
+export const AlertCircle = createIcon('AlertCircle');
+export const AlertTriangle = createIcon('AlertTriangle');
+export const ArrowLeft = createIcon('ArrowLeft');
+export const ArrowRight = createIcon('ArrowRight');
+export const Briefcase = createIcon('Briefcase');
+export const Calculator = createIcon('Calculator');
+export const Calendar = createIcon('Calendar');
+export const CheckCircle = createIcon('CheckCircle');
+export const Clock = createIcon('Clock');
+export const DollarSign = createIcon('DollarSign');
+export const Download = createIcon('Download');
+export const Factory = createIcon('Factory');
+export const FileImage = createIcon('FileImage');
+export const FileSpreadsheet = createIcon('FileSpreadsheet');
+export const Filter = createIcon('Filter');
+export const FolderKanban = createIcon('FolderKanban');
+export const GitBranch = createIcon('GitBranch');
+export const Inbox = createIcon('Inbox');
+export const Info = createIcon('Info');
+export const Lightbulb = createIcon('Lightbulb');
+export const Loader2 = createIcon('Loader2');
+export const Minus = createIcon('Minus');
+export const Package = createIcon('Package');
+export const RefreshCw = createIcon('RefreshCw');
+export const ShoppingCart = createIcon('ShoppingCart');
+export const Sparkles = createIcon('Sparkles');
+export const Store = createIcon('Store');
+export const TrendingDown = createIcon('TrendingDown');
+export const TrendingUp = createIcon('TrendingUp');
+export const UserCheck = createIcon('UserCheck');
+export const Users = createIcon('Users');
+export const Users2 = createIcon('Users2');
+export const Zap = createIcon('Zap');
