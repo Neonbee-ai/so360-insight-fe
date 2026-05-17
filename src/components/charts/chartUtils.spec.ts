@@ -136,5 +136,121 @@ describe('chartUtils', () => {
     it('When high value / Then returns light color', () => {
       expect(getHeatmapColor(90, 0, 100)).toBeDefined();
     });
+
+    it('When value is exactly at 20% boundary / Then returns slate-700', () => {
+      // normalized = 0.2 → falls through first branch, hits second
+      expect(getHeatmapColor(20, 0, 100)).toBe('#334155');
+    });
+
+    it('When value is at minimum / Then returns darkest tier', () => {
+      expect(getHeatmapColor(0, 0, 100)).toBe('#1e293b');
+    });
+
+    it('When value equals max / Then returns lightest tier', () => {
+      expect(getHeatmapColor(100, 0, 100)).toBe('#94a3b8');
+    });
+  });
+});
+
+import {
+  THEME_COLORS,
+  formatDateTime,
+  getResponsiveContainerProps,
+  getLegendStyle,
+  generateLabels,
+  getMinMaxValues,
+} from './chartUtils';
+
+describe('THEME_COLORS', () => {
+  describe('Given the theme color palette', () => {
+    it('When accessed / Then has background and border', () => {
+      expect(THEME_COLORS.background).toBeDefined();
+      expect(THEME_COLORS.border).toBeDefined();
+    });
+
+    it('When accessed / Then has text sub-object with primary/secondary/tertiary', () => {
+      expect(THEME_COLORS.text.primary).toBeDefined();
+      expect(THEME_COLORS.text.secondary).toBeDefined();
+      expect(THEME_COLORS.text.tertiary).toBeDefined();
+    });
+
+    it('When accessed / Then has tooltip sub-object', () => {
+      expect(THEME_COLORS.tooltip.background).toBeDefined();
+      expect(THEME_COLORS.tooltip.border).toBeDefined();
+      expect(THEME_COLORS.tooltip.text).toBeDefined();
+    });
+  });
+});
+
+describe('formatDateTime', () => {
+  describe('Given a Date string', () => {
+    it('When called with ISO string / Then returns a formatted string', () => {
+      const result = formatDateTime('2024-03-15T14:30:00Z');
+      expect(typeof result).toBe('string');
+      expect(result.length).toBeGreaterThan(0);
+    });
+
+    it('When called with a Date object / Then returns a formatted string', () => {
+      const result = formatDateTime(new Date('2024-06-01T09:00:00Z'));
+      expect(typeof result).toBe('string');
+    });
+  });
+});
+
+describe('getResponsiveContainerProps', () => {
+  describe('Given default height', () => {
+    it('When called without arguments / Then returns width 100% and height 300', () => {
+      const props = getResponsiveContainerProps();
+      expect(props.width).toBe('100%');
+      expect(props.height).toBe(300);
+    });
+
+    it('When called with custom height / Then returns that height', () => {
+      const props = getResponsiveContainerProps(450);
+      expect(props.height).toBe(450);
+    });
+  });
+});
+
+describe('getLegendStyle', () => {
+  describe('Given legend style', () => {
+    it('When called / Then returns iconSize, fontSize, and color', () => {
+      const style = getLegendStyle();
+      expect(style.iconSize).toBeDefined();
+      expect(style.fontSize).toBeDefined();
+      expect(style.color).toBeDefined();
+    });
+  });
+});
+
+describe('generateLabels', () => {
+  describe('Given an array of data objects', () => {
+    it('When called with key / Then returns array of label strings', () => {
+      const data = [{ name: 'Alpha' }, { name: 'Beta' }, { name: 'Gamma' }];
+      const labels = generateLabels(data, 'name');
+      expect(labels).toEqual(['Alpha', 'Beta', 'Gamma']);
+    });
+
+    it('When data is empty / Then returns empty array', () => {
+      expect(generateLabels([], 'name')).toEqual([]);
+    });
+  });
+});
+
+describe('getMinMaxValues', () => {
+  describe('Given numeric data', () => {
+    it('When called / Then returns correct min and max', () => {
+      const data = [{ val: 10 }, { val: 45 }, { val: 3 }, { val: 99 }];
+      const result = getMinMaxValues(data, 'val');
+      expect(result.min).toBe(3);
+      expect(result.max).toBe(99);
+    });
+
+    it('When single item / Then min equals max', () => {
+      const data = [{ val: 42 }];
+      const result = getMinMaxValues(data, 'val');
+      expect(result.min).toBe(42);
+      expect(result.max).toBe(42);
+    });
   });
 });
