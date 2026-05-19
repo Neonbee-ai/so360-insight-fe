@@ -26,6 +26,11 @@ export default defineConfig({
       reporter: ['text', 'text-summary'],
       include: ['src/**/*.{ts,tsx}'],
       exclude: ['src/test/**', 'src/**/*.spec.*', 'src/**/*.test.*', 'src/**/__mocks__/**'],
+      thresholds: {
+        lines: 75,
+        functions: 75,
+        branches: 60,
+      },
     },
   },
 });
