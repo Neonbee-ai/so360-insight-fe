@@ -58,6 +58,16 @@ class InsightApiClient {
             }
             return config;
         });
+
+        this.client.interceptors.response.use(
+            (response) => response,
+            (error) => {
+                if (error.response?.status === 402 && error.response?.data?.error === 'QUOTA_EXCEEDED') {
+                    window.dispatchEvent(new CustomEvent('__so360_quota_exceeded', { detail: error.response.data.resolution || error.response.data }));
+                }
+                return Promise.reject(error);
+            },
+        );
     }
 
     setTenantId(tenantId: string) {
