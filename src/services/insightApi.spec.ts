@@ -10,7 +10,7 @@ vi.mock('axios', () => ({
     create: () => ({
       get: mockGet,
       post: mockPost,
-      interceptors: { request: { use: vi.fn() } },
+      interceptors: { request: { use: vi.fn() }, response: { use: vi.fn() } },
     }),
   },
 }));
