@@ -5,9 +5,12 @@
 
 import React, { useState, useEffect } from 'react';
 import { Clock, AlertTriangle, CheckCircle } from 'lucide-react';
+import { useBusinessSettings } from '@so360/shell-context';
 import { insightApi } from '../services/insightApi';
 
 export const DataFreshnessIndicator: React.FC = () => {
+    const { settings } = useBusinessSettings();
+    const locale = settings?.document_language || 'en-US';
     const [freshness, setFreshness] = useState<any>(null);
     const [loading, setLoading] = useState(true);
 
@@ -39,10 +42,10 @@ export const DataFreshnessIndicator: React.FC = () => {
         const isToday = date.toDateString() === today.toDateString();
 
         if (isToday) {
-            return `Today at ${date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}`;
+            return `Today at ${date.toLocaleTimeString(locale, { hour: 'numeric', minute: '2-digit', hour12: true })}`;
         }
 
-        return date.toLocaleString('en-US', {
+        return date.toLocaleString(locale, {
             month: 'short',
             day: 'numeric',
             hour: 'numeric',
@@ -66,7 +69,7 @@ export const DataFreshnessIndicator: React.FC = () => {
     };
 
     const tooltipTitle = freshness.next_scheduled_refresh
-        ? `Next scheduled refresh: ${new Date(freshness.next_scheduled_refresh).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })} UTC`
+        ? `Next scheduled refresh: ${new Date(freshness.next_scheduled_refresh).toLocaleTimeString(locale, { hour: 'numeric', minute: '2-digit', hour12: true })} UTC`
         : 'Refreshes every 6 hours';
 
     return (

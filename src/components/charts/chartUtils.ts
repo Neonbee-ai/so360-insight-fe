@@ -95,9 +95,9 @@ export const formatPercentage = (value: number, decimals: number = 1): string =>
 };
 
 // DateTime formatter (uses hardcoded locale)
-export const formatDateTime = (date: Date | string): string => {
+export const formatDateTime = (date: Date | string, locale: string = 'en-US'): string => {
     const dateObj = typeof date === 'string' ? new Date(date) : date;
-    return dateObj.toLocaleString('en-US', {
+    return dateObj.toLocaleString(locale, {
         month: 'short',
         day: 'numeric',
         hour: 'numeric',
