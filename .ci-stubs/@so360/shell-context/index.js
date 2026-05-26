@@ -1,7 +1,11 @@
-export const useShellBridge = () => null;
-export const useShell = () => ({});
+export const useShellBridge = () => ({ isFeatureEnabled: () => true, isFeatureHidden: () => false });
+export const useShell = () => ({ currentOrg: { id: 'org-1' }, isFeatureEnabled: () => true });
 export const useModules = () => ({ modules: [], isModuleEnabled: () => true });
 export const useFeatureFlags = () => ({ isFeatureEnabled: () => true });
+export const useBusinessSettings = () => ({ settings: { currency: 'USD', timezone: 'UTC', base_currency: 'USD', document_language: 'en-US' } });
+export const useActivity = () => ({ recordActivity: async () => {} });
+export const useQuota = () => ({ quotas: [], isLoading: false, error: null, isExceeded: () => false, getQuota: () => null, getPercentage: () => 0, refresh: async () => {} });
+export const useSandboxLimit = () => ({ isSandboxMode: false, sandboxEntryLimit: 5, limitItems: (items) => items, isLimited: () => false });
 export const ShellContext = null;
 export const ShellContextType = null;
 export const eventBus = { publish: () => {}, subscribe: () => () => {} };
