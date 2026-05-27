@@ -21,7 +21,9 @@ vi.mock('./services/insightApi', () => ({
 }));
 
 vi.mock('./pages/InsightDashboard', () => ({
-  InsightDashboard: () => <div>InsightDashboard</div>,
+  InsightDashboard: ({ initialTab }: { initialTab?: string }) => (
+    <div data-testid="insight-dash" data-tab={initialTab ?? ''}>InsightDashboard</div>
+  ),
 }));
 vi.mock('./pages/SignalsPage', () => ({
   SignalsPage: () => <div>SignalsPage</div>,
@@ -65,6 +67,64 @@ describe('App', () => {
       render(<MemoryRouter initialEntries={['/signals']}><App /></MemoryRouter>);
       await waitFor(() => {
         expect(screen.getByText('SignalsPage')).toBeInTheDocument();
+      });
+    });
+  });
+
+  describe('Given SegmentRoute with SEGMENT_FLAG_MAP', () => {
+    const syncedBridge = (overrides: Record<string, any> = {}) => ({
+      currentTenant: { id: 't1' },
+      currentOrg: { id: 'o1' },
+      accessToken: 'tok',
+      ...overrides,
+    });
+
+    describe('When navigating to /finance and action:insight:export is hidden', () => {
+      it('Then redirects to overview (InsightDashboard at root, no initialTab)', async () => {
+        mockShellBridge = syncedBridge({
+          isFeatureHidden: (key: string) => key === 'action:insight:export',
+        });
+        render(<MemoryRouter initialEntries={['/finance']}><App /></MemoryRouter>);
+        await waitFor(() => {
+          const dash = screen.getByTestId('insight-dash');
+          expect(dash).toBeInTheDocument();
+          expect(dash.getAttribute('data-tab')).toBe('');
+        });
+      });
+    });
+
+    describe('When navigating to /finance and action:insight:export is NOT hidden', () => {
+      it('Then renders InsightDashboard with initialTab=finance', async () => {
+        mockShellBridge = syncedBridge({ isFeatureHidden: () => false });
+        render(<MemoryRouter initialEntries={['/finance']}><App /></MemoryRouter>);
+        await waitFor(() => {
+          const dash = screen.getByTestId('insight-dash');
+          expect(dash).toBeInTheDocument();
+          expect(dash.getAttribute('data-tab')).toBe('finance');
+        });
+      });
+    });
+
+    describe('When navigating to /revenue (not in SEGMENT_FLAG_MAP)', () => {
+      it('Then renders InsightDashboard with initialTab=revenue without any flag check', async () => {
+        mockShellBridge = syncedBridge({ isFeatureHidden: () => true });
+        render(<MemoryRouter initialEntries={['/revenue']}><App /></MemoryRouter>);
+        await waitFor(() => {
+          const dash = screen.getByTestId('insight-dash');
+          expect(dash).toBeInTheDocument();
+          expect(dash.getAttribute('data-tab')).toBe('revenue');
+        });
+      });
+    });
+
+    describe('When navigating to a segment with no shell bridge', () => {
+      it('Then SegmentRoute treats isFeatureHidden as false and renders InsightDashboard', async () => {
+        mockShellBridge = syncedBridge({ isFeatureHidden: undefined });
+        render(<MemoryRouter initialEntries={['/finance']}><App /></MemoryRouter>);
+        await waitFor(() => {
+          const dash = screen.getByTestId('insight-dash');
+          expect(dash.getAttribute('data-tab')).toBe('finance');
+        });
       });
     });
   });
