@@ -82,7 +82,7 @@ describe('App', () => {
     describe('When navigating to /finance and action:insight:export is hidden', () => {
       it('Then redirects to overview (InsightDashboard at root, no initialTab)', async () => {
         mockShellBridge = syncedBridge({
-          isFeatureHidden: (key: string) => key === 'action:insight:export',
+          getFeatureState: (key: string) => (key === 'action:insight:export' ? 'hidden' : 'enabled'),
         });
         render(<MemoryRouter initialEntries={['/finance']}><App /></MemoryRouter>);
         await waitFor(() => {
@@ -93,9 +93,9 @@ describe('App', () => {
       });
     });
 
-    describe('When navigating to /finance and action:insight:export is NOT hidden', () => {
+    describe('When navigating to /finance and action:insight:export is enabled', () => {
       it('Then renders InsightDashboard with initialTab=finance', async () => {
-        mockShellBridge = syncedBridge({ isFeatureHidden: () => false });
+        mockShellBridge = syncedBridge({ getFeatureState: () => 'enabled' });
         render(<MemoryRouter initialEntries={['/finance']}><App /></MemoryRouter>);
         await waitFor(() => {
           const dash = screen.getByTestId('insight-dash');
@@ -105,9 +105,32 @@ describe('App', () => {
       });
     });
 
+    describe('When navigating to /finance and action:insight:export is locked', () => {
+      it('Then shows the upgrade prompt instead of the dashboard', async () => {
+        mockShellBridge = syncedBridge({ getFeatureState: () => 'locked' });
+        render(<MemoryRouter initialEntries={['/finance']}><App /></MemoryRouter>);
+        await waitFor(() => {
+          expect(screen.getByText(/upgrade plan/i)).toBeInTheDocument();
+        });
+        expect(screen.queryByTestId('insight-dash')).not.toBeInTheDocument();
+      });
+    });
+
+    describe('When navigating to /finance and action:insight:export is disabled', () => {
+      it('Then shows the unavailable panel and NO upgrade prompt', async () => {
+        mockShellBridge = syncedBridge({ getFeatureState: () => 'disabled' });
+        render(<MemoryRouter initialEntries={['/finance']}><App /></MemoryRouter>);
+        await waitFor(() => {
+          expect(screen.getByText(/feature unavailable/i)).toBeInTheDocument();
+        });
+        expect(screen.queryByText(/upgrade plan/i)).not.toBeInTheDocument();
+        expect(screen.queryByTestId('insight-dash')).not.toBeInTheDocument();
+      });
+    });
+
     describe('When navigating to /revenue (not in SEGMENT_FLAG_MAP)', () => {
       it('Then renders InsightDashboard with initialTab=revenue without any flag check', async () => {
-        mockShellBridge = syncedBridge({ isFeatureHidden: () => true });
+        mockShellBridge = syncedBridge({ getFeatureState: () => 'hidden' });
         render(<MemoryRouter initialEntries={['/revenue']}><App /></MemoryRouter>);
         await waitFor(() => {
           const dash = screen.getByTestId('insight-dash');
@@ -117,9 +140,9 @@ describe('App', () => {
       });
     });
 
-    describe('When navigating to a segment with no shell bridge', () => {
-      it('Then SegmentRoute treats isFeatureHidden as false and renders InsightDashboard', async () => {
-        mockShellBridge = syncedBridge({ isFeatureHidden: undefined });
+    describe('When navigating to a segment with no getFeatureState on the bridge', () => {
+      it('Then SegmentRoute fails open to enabled and renders InsightDashboard', async () => {
+        mockShellBridge = syncedBridge({ getFeatureState: undefined });
         render(<MemoryRouter initialEntries={['/finance']}><App /></MemoryRouter>);
         await waitFor(() => {
           const dash = screen.getByTestId('insight-dash');
