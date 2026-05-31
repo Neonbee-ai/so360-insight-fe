@@ -53,7 +53,7 @@ export const STATUS_COLORS = {
 // Dark Theme Colors (consistent with SO360 design system)
 export const THEME_COLORS = {
     background: '#0f172a', // slate-900
-    cardBackground: 'rgba(15, 23, 42, 0.5)', // slate-900/50
+    cardBackground: 'rgb(var(--s-900) / 0.5)', // slate-900/50
     border: '#1e293b', // slate-800
     text: {
         primary: '#f1f5f9', // slate-100
