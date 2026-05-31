@@ -7,6 +7,9 @@ import * as LucideIcons from 'lucide-react';
 import { useFormatters } from '@so360/formatters';
 import { useShell } from '@so360/shell-context';
 
+const CURRENCY_UNITS = new Set(['$', '€', '£', '¥', '₹', 'USD', 'EUR', 'GBP', 'INR', 'AED', 'SAR', 'JPY', 'CAD', 'AUD', 'CHF', 'CNY', 'HKD', 'SGD', 'NZD', 'MXN', 'BRL', 'ZAR', 'OMR', 'KWD', 'BHD', 'QAR', 'EGP', 'NGN', 'KES']);
+const isCurrencyUnit = (unit: string) => CURRENCY_UNITS.has(unit?.toUpperCase?.() ?? '');
+
 export const SegmentOverview: React.FC = () => {
     const navigate = useNavigate();
     const [segments, setSegments] = useState<SegmentSummary[]>([]);
@@ -158,11 +161,11 @@ export const SegmentOverview: React.FC = () => {
                                     <div className="text-xs text-slate-500 mb-1">{segment.primary_kpi.kpi_name}</div>
                                     <div className="flex items-baseline gap-2">
                                         <span className="text-2xl font-bold text-slate-100">
-                                            {segment.primary_kpi.unit === '$' || segment.primary_kpi.unit === 'USD'
+                                            {isCurrencyUnit(segment.primary_kpi.unit)
                                                 ? formatters.formatCurrency(segment.primary_kpi.value)
                                                 : segment.primary_kpi.value.toFixed(1)}
                                         </span>
-                                        {segment.primary_kpi.unit !== '$' && segment.primary_kpi.unit !== 'USD' && (
+                                        {!isCurrencyUnit(segment.primary_kpi.unit) && (
                                             <span className="text-sm text-slate-400">{segment.primary_kpi.unit}</span>
                                         )}
                                     </div>
