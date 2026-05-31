@@ -29,7 +29,7 @@ const ManufacturingAtAGlanceCard: React.FC<{ onClick: () => void }> = ({ onClick
             <div className="flex items-start justify-between mb-3">
                 <Factory className="w-5 h-5 text-emerald-400" />
             </div>
-            <h3 className="text-sm font-semibold text-slate-100 mb-1 group-hover:text-white transition-colors">
+            <h3 className="text-sm font-semibold text-slate-100 mb-1 group-hover:text-slate-50 transition-colors">
                 Manufacturing
             </h3>
             {data ? (
@@ -445,7 +445,7 @@ export const AtAGlanceView: React.FC<AtAGlanceViewProps> = ({ segments, onSegmen
                             </div>
 
                             {/* Segment Name */}
-                            <h3 className="text-sm font-semibold text-slate-100 mb-1 group-hover:text-white transition-colors">
+                            <h3 className="text-sm font-semibold text-slate-100 mb-1 group-hover:text-slate-50 transition-colors">
                                 {segment.segment_name}
                             </h3>
 

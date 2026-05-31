@@ -120,7 +120,7 @@ export const NeuraSummaryCard: React.FC<NeuraSummaryCardProps> = ({
                 {onRetry && (
                     <button
                         onClick={onRetry}
-                        className={`${colors.button} text-white px-3 py-1.5 rounded text-sm transition-colors`}
+                        className={`${colors.button} text-slate-50 px-3 py-1.5 rounded text-sm transition-colors`}
                     >
                         Retry
                     </button>

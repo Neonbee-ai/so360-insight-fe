@@ -71,7 +71,7 @@ export const FunnelChartComponent: React.FC<FunnelChartProps> = ({
                                 }}
                             >
                                 {/* Stage Content */}
-                                <div className="flex items-center justify-between h-full px-4 text-white">
+                                <div className="flex items-center justify-between h-full px-4 text-slate-50">
                                     <div className="flex-1">
                                         <p className="font-semibold text-sm">{stage.name}</p>
                                         <p className="text-xs opacity-90">

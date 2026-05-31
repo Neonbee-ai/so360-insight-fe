@@ -150,7 +150,7 @@ export const SegmentOverview: React.FC = () => {
                                 </div>
                             </div>
 
-                            <h3 className="text-xl font-semibold text-slate-100 mb-2 group-hover:text-white transition-colors">
+                            <h3 className="text-xl font-semibold text-slate-100 mb-2 group-hover:text-slate-50 transition-colors">
                                 {segment.segment_name}
                             </h3>
                             <p className="text-sm text-slate-400 mb-4 line-clamp-2">{segment.description}</p>
