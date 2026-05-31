@@ -1,3 +1,4 @@
+@import '../../../so360-shell-fe/packages/theme/src/theme.css';
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
