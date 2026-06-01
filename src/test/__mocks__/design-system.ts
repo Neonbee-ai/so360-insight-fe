@@ -18,7 +18,8 @@ export const QuotaGate = ({ children }: any) => React.createElement(React.Fragme
 /**
  * FeatureGate — inline widget gating. Mirrors the real component's 5-state model.
  */
-export const FeatureGate = ({ state, children, fallback = null }: any): any => {
+export const FeatureGate = ({ state, loading, children, fallback = null }: any): any => {
+  if (loading) return null;
   if (state === 'hidden') return React.createElement(React.Fragment, null, fallback);
   if (state === 'enabled') return React.createElement(React.Fragment, null, children);
   // read_only / disabled / locked — render children (inert wrapper not needed in tests)
@@ -29,7 +30,8 @@ export const FeatureGate = ({ state, children, fallback = null }: any): any => {
  * FeatureRoute — route-level gating. Mirrors the real component's 5-state model exactly
  * so App.spec.tsx SegmentRoute tests pass without mocking @so360/design-system.
  */
-export const FeatureRoute = ({ state, children, hiddenFallback = null, lockedFallback, disabledFallback }: any): any => {
+export const FeatureRoute = ({ state, loading, children, hiddenFallback = null, lockedFallback, disabledFallback }: any): any => {
+  if (loading) return null;
   if (state === 'hidden') return React.createElement(React.Fragment, null, hiddenFallback ?? null);
   if (state === 'locked') return React.createElement(React.Fragment, null, lockedFallback ?? children);
   if (state === 'disabled') {
