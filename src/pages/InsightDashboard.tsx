@@ -29,7 +29,7 @@ export const InsightDashboard: React.FC<InsightDashboardProps> = ({ initialTab }
     const { isModuleEnabled } = useModules();
     const { isFeatureEnabled } = useFeatureFlags();
     const shell = useShellBridge();
-    const flagsLoaded = shell?.effectiveFlagsLoaded ?? false;
+    const flagsLoaded = shell?.effectiveFlagsLoaded;
     const canRefresh = flagsLoaded && (isFeatureEnabled('action:insight:refresh_on_demand') ?? true);
 
     // Sync active tab when navigating between segment routes (e.g. /insight/revenue → /insight/execution)

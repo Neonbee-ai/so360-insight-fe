@@ -21,7 +21,7 @@ export const SignalsPage: React.FC = () => {
     const { isModuleEnabled } = useModules();
     const { isFeatureEnabled } = useFeatureFlags();
     const shell = useShellBridge();
-    const flagsLoaded = shell?.effectiveFlagsLoaded ?? false;
+    const flagsLoaded = shell?.effectiveFlagsLoaded;
     const canAccessSignals = flagsLoaded && (isFeatureEnabled('submodule:insight:signals') ?? true);
     const [signals, setSignals] = useState<Signal[]>([]);
     const [loading, setLoading] = useState(true);

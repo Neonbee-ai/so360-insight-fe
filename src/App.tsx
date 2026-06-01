@@ -54,7 +54,7 @@ const SegmentRoute: React.FC = () => {
     return (
         <FeatureRoute
             state={state}
-            loading={!(shell?.effectiveFlagsLoaded ?? false)}
+            loading={(shell?.effectiveFlagsLoaded === false)}
             hiddenFallback={<Navigate to="/" replace />}
             lockedFallback={<UpgradeLocked />}
             disabledFallback={<FeatureUnavailable />}

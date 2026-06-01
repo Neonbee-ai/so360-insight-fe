@@ -30,7 +30,7 @@ export const ChartContainer: React.FC<ChartContainerProps> = ({
 }) => {
     const { isFeatureEnabled } = useFeatureFlags();
     const shell = useShellBridge();
-    const flagsLoaded = shell?.effectiveFlagsLoaded ?? false;
+    const flagsLoaded = shell?.effectiveFlagsLoaded;
     const canExport = flagsLoaded && (isFeatureEnabled('action:insight:chart_export') ?? true);
 
     return (
