@@ -51,6 +51,7 @@ describe('App', () => {
         currentTenant: { id: 't1' },
         currentOrg: { id: 'o1' },
         accessToken: 'tok',
+        effectiveFlagsLoaded: true,
       };
       render(<MemoryRouter initialEntries={['/']}><App /></MemoryRouter>);
       await waitFor(() => {
@@ -63,6 +64,7 @@ describe('App', () => {
         currentTenant: { id: 't1' },
         currentOrg: { id: 'o1' },
         accessToken: 'tok',
+        effectiveFlagsLoaded: true,
       };
       render(<MemoryRouter initialEntries={['/signals']}><App /></MemoryRouter>);
       await waitFor(() => {
@@ -76,6 +78,7 @@ describe('App', () => {
       currentTenant: { id: 't1' },
       currentOrg: { id: 'o1' },
       accessToken: 'tok',
+      effectiveFlagsLoaded: true,
       ...overrides,
     });
 

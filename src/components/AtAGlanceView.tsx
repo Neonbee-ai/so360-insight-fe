@@ -88,7 +88,7 @@ export const AtAGlanceView: React.FC<AtAGlanceViewProps> = ({ segments, onSegmen
     const { isModuleEnabled } = useModules();
     const { isFeatureEnabled } = useFeatureFlags();
     const shell = useShellBridge();
-    const flagsLoaded = shell?.effectiveFlagsLoaded ?? false;
+    const flagsLoaded = shell?.effectiveFlagsLoaded;
     const canShowAiSummary = flagsLoaded && (isFeatureEnabled('action:insight:ai_summary') ?? true);
     const canRegenerate = flagsLoaded && (isFeatureEnabled('action:insight:ai_summary_regenerate') ?? true);
     const stripPrefix = (code: string) => code.replace('module:', '');
@@ -376,8 +376,8 @@ export const AtAGlanceView: React.FC<AtAGlanceViewProps> = ({ segments, onSegmen
 
     return (
         <div className="space-y-8">
-            {/* Section 1: AI Executive Summary */}
-            {canShowAiSummary ? (
+            {/* Section 1: AI Executive Summary — hidden until flags resolve */}
+            {flagsLoaded !== false && (canShowAiSummary ? (
                 <div>
                     <h2 className="text-xl font-semibold text-slate-100 mb-4">AI Executive Summary</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -419,7 +419,7 @@ export const AtAGlanceView: React.FC<AtAGlanceViewProps> = ({ segments, onSegmen
                         Upgrade to Growth to unlock AI Summaries
                     </span>
                 </div>
-            )}
+            ))}
 
             {/* Section 2: Segment Summary Cards */}
             <div>
