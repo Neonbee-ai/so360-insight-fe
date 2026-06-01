@@ -3,6 +3,14 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { MemoryRouter } from 'react-router-dom';
 
+let mockShell: any = { effectiveFlagsLoaded: true, isFeatureEnabled: () => true };
+
+vi.mock('@so360/shell-context', () => ({
+  useShellBridge: () => mockShell,
+  useModules: () => ({ isModuleEnabled: () => true }),
+  useFeatureFlags: () => ({ isFeatureEnabled: () => true }),
+}));
+
 vi.mock('framer-motion', () => ({
   motion: { div: ({ children, ...props }: any) => <div {...props}>{children}</div> },
   AnimatePresence: ({ children }: any) => <>{children}</>,
@@ -47,6 +55,7 @@ const wrap = (ui: React.ReactElement) => render(<MemoryRouter>{ui}</MemoryRouter
 describe('InsightDashboard', () => {
   beforeEach(() => {
     vi.resetAllMocks();
+    mockShell = { effectiveFlagsLoaded: true, isFeatureEnabled: () => true };
   });
 
   describe('Given loading state', () => {
@@ -92,6 +101,29 @@ describe('InsightDashboard', () => {
       wrap(<InsightDashboard initialTab="manufacturing" />);
       await waitFor(() => {
         expect(screen.getByTestId('manufacturing')).toBeInTheDocument();
+      });
+    });
+  });
+
+  describe('Given effectiveFlagsLoaded is false', () => {
+    it('When flags are not yet resolved / Then refresh button is absent', async () => {
+      mockShell = { effectiveFlagsLoaded: false, isFeatureEnabled: () => true };
+      mockApi.getSegments.mockResolvedValue([]);
+      wrap(<InsightDashboard />);
+      await waitFor(() => {
+        expect(screen.getByText('Insight Dashboard')).toBeInTheDocument();
+      });
+      expect(screen.queryByRole('button', { name: /refresh/i })).not.toBeInTheDocument();
+    });
+  });
+
+  describe('Given effectiveFlagsLoaded is true and refresh_on_demand is enabled', () => {
+    it('When flags are resolved and feature is on / Then refresh button is present', async () => {
+      mockShell = { effectiveFlagsLoaded: true, isFeatureEnabled: () => true };
+      mockApi.getSegments.mockResolvedValue([]);
+      wrap(<InsightDashboard />);
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: /refresh/i })).toBeInTheDocument();
       });
     });
   });

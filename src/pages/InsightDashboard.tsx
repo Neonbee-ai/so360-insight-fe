@@ -9,7 +9,7 @@ import { ManufacturingSegment } from '../components/segments/ManufacturingSegmen
 import { DataFreshnessIndicator } from '../components/DataFreshnessIndicator';
 import { insightApi } from '../services/insightApi';
 import type { SegmentSummary } from '../types/insight';
-import { useModules, useFeatureFlags } from '@so360/shell-context';
+import { useModules, useFeatureFlags, useShellBridge } from '@so360/shell-context';
 import { SEGMENT_MODULE_DEPS } from '../constants/moduleMapping';
 
 interface InsightDashboardProps {
@@ -28,7 +28,9 @@ export const InsightDashboard: React.FC<InsightDashboardProps> = ({ initialTab }
     const freshnessKey = useRef(0);
     const { isModuleEnabled } = useModules();
     const { isFeatureEnabled } = useFeatureFlags();
-    const canRefresh = isFeatureEnabled('action:insight:refresh_on_demand');
+    const shell = useShellBridge();
+    const flagsLoaded = shell?.effectiveFlagsLoaded ?? false;
+    const canRefresh = flagsLoaded && (isFeatureEnabled('action:insight:refresh_on_demand') ?? true);
 
     // Sync active tab when navigating between segment routes (e.g. /insight/revenue → /insight/execution)
     useEffect(() => {

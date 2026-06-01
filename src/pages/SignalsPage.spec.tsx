@@ -3,6 +3,14 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import userEvent from '@testing-library/user-event';
 
+let mockShell: any = { effectiveFlagsLoaded: true, isFeatureEnabled: () => true };
+
+vi.mock('@so360/shell-context', () => ({
+  useShellBridge: () => mockShell,
+  useModules: () => ({ isModuleEnabled: () => true }),
+  useFeatureFlags: () => ({ isFeatureEnabled: () => true }),
+}));
+
 vi.mock('../services/insightApi', () => ({
   insightApi: {
     getSignals: vi.fn(),
@@ -27,6 +35,7 @@ const mockApi = insightApi as any;
 describe('SignalsPage', () => {
   beforeEach(() => {
     vi.resetAllMocks();
+    mockShell = { effectiveFlagsLoaded: true, isFeatureEnabled: () => true };
   });
 
   describe('Given signals loading', () => {
@@ -79,6 +88,27 @@ describe('SignalsPage', () => {
       await userEvent.click(allBtn);
       await waitFor(() => {
         expect(mockApi.getSignals).toHaveBeenCalledWith(expect.objectContaining({ unresolved_only: false }));
+      });
+    });
+  });
+
+  describe('Given effectiveFlagsLoaded is false', () => {
+    it('When flags are not yet resolved / Then signal cards and filter controls are absent', () => {
+      mockShell = { effectiveFlagsLoaded: false, isFeatureEnabled: () => true };
+      render(<SignalsPage />);
+      // canAccessSignals is false → shows upgrade panel, not the live signals list
+      expect(screen.queryByText('Loading signals...')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('signal-card')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('Given effectiveFlagsLoaded is true and signals feature is enabled', () => {
+    it('When flags are resolved and feature is on / Then signals page content is visible', async () => {
+      mockShell = { effectiveFlagsLoaded: true, isFeatureEnabled: () => true };
+      mockApi.getSignals.mockResolvedValue({ data: [] });
+      render(<SignalsPage />);
+      await waitFor(() => {
+        expect(screen.getByText('Signals')).toBeInTheDocument();
       });
     });
   });

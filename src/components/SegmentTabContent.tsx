@@ -13,7 +13,7 @@ import { WorkforceCharts } from './segments/WorkforceCharts';
 import { FinanceCharts } from './segments/FinanceCharts';
 import { NeuraSummaryCard } from './NeuraSummaryCard';
 import { insightApi } from '../services/insightApi';
-import { useModules, useFeatureFlags } from '@so360/shell-context';
+import { useModules, useFeatureFlags, useShellBridge } from '@so360/shell-context';
 import type { SegmentDetail, AiSummarySections } from '../types/insight';
 
 // Modules that must have at least one enabled for the AI summary to be shown/fetched
@@ -32,8 +32,10 @@ interface SegmentTabContentProps {
 export const SegmentTabContent: React.FC<SegmentTabContentProps> = ({ segmentCode }) => {
     const { isModuleEnabled } = useModules();
     const { isFeatureEnabled } = useFeatureFlags();
-    const canShowAiSummaryFeature = isFeatureEnabled('action:insight:ai_summary');
-    const canRegenerate = isFeatureEnabled('action:insight:ai_summary_regenerate');
+    const shell = useShellBridge();
+    const flagsLoaded = shell?.effectiveFlagsLoaded ?? false;
+    const canShowAiSummaryFeature = flagsLoaded && (isFeatureEnabled('action:insight:ai_summary') ?? true);
+    const canRegenerate = flagsLoaded && (isFeatureEnabled('action:insight:ai_summary_regenerate') ?? true);
     const [segment, setSegment] = useState<SegmentDetail | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);

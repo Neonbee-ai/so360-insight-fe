@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { ChartExport } from './ChartExport';
-import { useFeatureFlags } from '@so360/shell-context';
+import { useFeatureFlags, useShellBridge } from '@so360/shell-context';
 
 interface ChartContainerProps {
     title: string;
@@ -29,7 +29,9 @@ export const ChartContainer: React.FC<ChartContainerProps> = ({
     className = '',
 }) => {
     const { isFeatureEnabled } = useFeatureFlags();
-    const canExport = isFeatureEnabled('action:insight:chart_export');
+    const shell = useShellBridge();
+    const flagsLoaded = shell?.effectiveFlagsLoaded ?? false;
+    const canExport = flagsLoaded && (isFeatureEnabled('action:insight:chart_export') ?? true);
 
     return (
         <div className={`bg-slate-900/50 border border-slate-800 rounded-lg p-6 ${className}`}>

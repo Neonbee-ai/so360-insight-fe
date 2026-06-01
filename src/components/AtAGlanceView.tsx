@@ -7,7 +7,7 @@ import { NeuraSummaryCard } from './NeuraSummaryCard';
 import { ModuleCoveragePanel } from './ModuleCoveragePanel';
 import { insightApi } from '../services/insightApi';
 import type { SegmentSummary, KPI, Signal, AiSummarySections } from '../types/insight';
-import { useModules, useFeatureFlags } from '@so360/shell-context';
+import { useModules, useFeatureFlags, useShellBridge } from '@so360/shell-context';
 import { SEGMENT_MODULE_DEPS } from '../constants/moduleMapping';
 import { Factory } from 'lucide-react';
 
@@ -87,8 +87,10 @@ interface NeuraSummary {
 export const AtAGlanceView: React.FC<AtAGlanceViewProps> = ({ segments, onSegmentClick }) => {
     const { isModuleEnabled } = useModules();
     const { isFeatureEnabled } = useFeatureFlags();
-    const canShowAiSummary = isFeatureEnabled('action:insight:ai_summary');
-    const canRegenerate = isFeatureEnabled('action:insight:ai_summary_regenerate');
+    const shell = useShellBridge();
+    const flagsLoaded = shell?.effectiveFlagsLoaded ?? false;
+    const canShowAiSummary = flagsLoaded && (isFeatureEnabled('action:insight:ai_summary') ?? true);
+    const canRegenerate = flagsLoaded && (isFeatureEnabled('action:insight:ai_summary_regenerate') ?? true);
     const stripPrefix = (code: string) => code.replace('module:', '');
     const [topKPIs, setTopKPIs] = useState<KPI[]>([]);
     const [criticalSignals, setCriticalSignals] = useState<Signal[]>([]);

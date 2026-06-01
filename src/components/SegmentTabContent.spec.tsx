@@ -3,6 +3,14 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import userEvent from '@testing-library/user-event';
 
+let mockShell: any = { effectiveFlagsLoaded: true, isFeatureEnabled: () => true };
+
+vi.mock('@so360/shell-context', () => ({
+  useShellBridge: () => mockShell,
+  useModules: () => ({ isModuleEnabled: () => true }),
+  useFeatureFlags: () => ({ isFeatureEnabled: () => true }),
+}));
+
 vi.mock('../services/insightApi', () => ({
   insightApi: {
     getSegmentDetail: vi.fn(),
@@ -66,6 +74,7 @@ const mockSegmentDetail = {
 describe('SegmentTabContent', () => {
   beforeEach(() => {
     vi.resetAllMocks();
+    mockShell = { effectiveFlagsLoaded: true, isFeatureEnabled: () => true };
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
       ok: true,
       json: () => Promise.resolve({ summary: 'AI summary', sections: null, generated_at: '2024-01-01', cached: false }),
@@ -126,6 +135,31 @@ describe('SegmentTabContent', () => {
       render(<SegmentTabContent segmentCode="revenue" />);
       await waitFor(() => {
         expect(screen.getByTestId('signal-card')).toBeInTheDocument();
+      });
+    });
+  });
+
+  describe('Given effectiveFlagsLoaded is false', () => {
+    it('When flags are not yet resolved / Then AI Insights section is absent', async () => {
+      mockShell = { effectiveFlagsLoaded: false, isFeatureEnabled: () => true };
+      mockApi.getSegmentDetail.mockResolvedValue(mockSegmentDetail);
+      mockApi.getKPITrend.mockResolvedValue({ kpi_code: 'k1', kpi_name: 'Total Revenue', data: [] });
+      render(<SegmentTabContent segmentCode="revenue" />);
+      await waitFor(() => {
+        expect(screen.getByText('Revenue')).toBeInTheDocument();
+      });
+      expect(screen.queryByTestId('neura-summary')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('Given effectiveFlagsLoaded is true and ai_summary is enabled', () => {
+    it('When flags are resolved and feature is on / Then AI Insights section is present', async () => {
+      mockShell = { effectiveFlagsLoaded: true, isFeatureEnabled: () => true };
+      mockApi.getSegmentDetail.mockResolvedValue(mockSegmentDetail);
+      mockApi.getKPITrend.mockResolvedValue({ kpi_code: 'k1', kpi_name: 'Total Revenue', data: [] });
+      render(<SegmentTabContent segmentCode="revenue" />);
+      await waitFor(() => {
+        expect(screen.getByTestId('neura-summary')).toBeInTheDocument();
       });
     });
   });

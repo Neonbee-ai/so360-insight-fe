@@ -3,7 +3,7 @@ import { AlertCircle, Filter } from 'lucide-react';
 import { insightApi } from '../services/insightApi';
 import { SignalCard } from '../components/SignalCard';
 import type { Signal } from '../types/insight';
-import { useModules, useFeatureFlags } from '@so360/shell-context';
+import { useModules, useFeatureFlags, useShellBridge } from '@so360/shell-context';
 
 const MODULE_CODE_TO_ID: Record<string, string> = {
     'module:crm': 'crm',
@@ -20,7 +20,9 @@ const MODULE_CODE_TO_ID: Record<string, string> = {
 export const SignalsPage: React.FC = () => {
     const { isModuleEnabled } = useModules();
     const { isFeatureEnabled } = useFeatureFlags();
-    const canAccessSignals = isFeatureEnabled('submodule:insight:signals');
+    const shell = useShellBridge();
+    const flagsLoaded = shell?.effectiveFlagsLoaded ?? false;
+    const canAccessSignals = flagsLoaded && (isFeatureEnabled('submodule:insight:signals') ?? true);
     const [signals, setSignals] = useState<Signal[]>([]);
     const [loading, setLoading] = useState(true);
     const [severityFilter, setSeverityFilter] = useState<string>('all');

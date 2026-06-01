@@ -2,6 +2,14 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 
+let mockShell: any = { effectiveFlagsLoaded: true, isFeatureEnabled: () => true };
+
+vi.mock('@so360/shell-context', () => ({
+  useShellBridge: () => mockShell,
+  useModules: () => ({ isModuleEnabled: () => true }),
+  useFeatureFlags: () => ({ isFeatureEnabled: () => true }),
+}));
+
 vi.mock('../services/insightApi', () => ({
   insightApi: {
     getSignals: vi.fn(),
@@ -52,6 +60,7 @@ const mockSegments = [
 describe('AtAGlanceView', () => {
   beforeEach(() => {
     vi.resetAllMocks();
+    mockShell = { effectiveFlagsLoaded: true, isFeatureEnabled: () => true };
     mockApi.getSignals.mockResolvedValue({ data: [] });
     mockApi.getSegmentDetail.mockResolvedValue({
       kpis: [{ kpi_code: 'r1', kpi_name: 'Total Revenue', value: 50000, unit: 'USD', trend: 'up', category: 'critical', module_code: 'module:crm' }],
@@ -117,6 +126,27 @@ describe('AtAGlanceView', () => {
       });
       screen.getByText('Revenue').closest('button')?.click();
       expect(onClick).toHaveBeenCalledWith('revenue');
+    });
+  });
+
+  describe('Given effectiveFlagsLoaded is false', () => {
+    it('When flags are not yet resolved / Then AI Executive Summary section is absent', async () => {
+      mockShell = { effectiveFlagsLoaded: false, isFeatureEnabled: () => true };
+      render(<AtAGlanceView segments={mockSegments} onSegmentClick={vi.fn()} />);
+      await waitFor(() => {
+        expect(screen.getByText('Business Segments')).toBeInTheDocument();
+      });
+      expect(screen.queryByText('AI Executive Summary')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('Given effectiveFlagsLoaded is true and ai_summary is enabled', () => {
+    it('When flags are resolved and feature is on / Then AI Executive Summary section is present', async () => {
+      mockShell = { effectiveFlagsLoaded: true, isFeatureEnabled: () => true };
+      render(<AtAGlanceView segments={mockSegments} onSegmentClick={vi.fn()} />);
+      await waitFor(() => {
+        expect(screen.getByText('AI Executive Summary')).toBeInTheDocument();
+      });
     });
   });
 });

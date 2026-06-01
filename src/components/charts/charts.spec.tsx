@@ -1,6 +1,13 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { vi, describe, it, expect } from 'vitest';
+import { vi, describe, it, expect, beforeEach } from 'vitest';
+
+let mockShell: any = { effectiveFlagsLoaded: true, isFeatureEnabled: () => true };
+
+vi.mock('@so360/shell-context', () => ({
+  useShellBridge: () => mockShell,
+  useFeatureFlags: () => ({ isFeatureEnabled: () => true }),
+}));
 
 vi.mock('recharts', () => ({
   ResponsiveContainer: ({ children }: any) => <div data-testid="responsive-container">{children}</div>,
@@ -174,11 +181,39 @@ describe('WaterfallChartComponent', () => {
 });
 
 describe('ChartContainer', () => {
+  beforeEach(() => {
+    mockShell = { effectiveFlagsLoaded: true, isFeatureEnabled: () => true };
+  });
+
   describe('Given children', () => {
     it('When rendered / Then wraps children with title', () => {
-      render(<ChartContainer title="Sales"><div>chart</div></ChartContainer>);
+      render(<ChartContainer title="Sales" chartId="sales-chart"><div>chart</div></ChartContainer>);
       expect(screen.getByText('Sales')).toBeInTheDocument();
       expect(screen.getByText('chart')).toBeInTheDocument();
+    });
+  });
+
+  describe('Given effectiveFlagsLoaded is false', () => {
+    it('When flags are not yet resolved / Then export button is absent even with exportData', () => {
+      mockShell = { effectiveFlagsLoaded: false, isFeatureEnabled: () => true };
+      render(
+        <ChartContainer title="Sales" chartId="sales-chart" exportData={[{ x: 1 }]}>
+          <div>chart</div>
+        </ChartContainer>
+      );
+      expect(screen.queryByRole('button')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('Given effectiveFlagsLoaded is true and chart_export is enabled', () => {
+    it('When flags are resolved and exportData provided / Then export button is present', () => {
+      mockShell = { effectiveFlagsLoaded: true, isFeatureEnabled: () => true };
+      render(
+        <ChartContainer title="Sales" chartId="sales-chart" exportData={[{ x: 1 }]}>
+          <div>chart</div>
+        </ChartContainer>
+      );
+      expect(screen.getByText('Sales')).toBeInTheDocument();
     });
   });
 });
