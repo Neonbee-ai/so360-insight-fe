@@ -11,6 +11,7 @@ import { insightApi } from '../services/insightApi';
 export const DataFreshnessIndicator: React.FC = () => {
     const { settings } = useBusinessSettings();
     const locale = settings?.document_language || 'en-US';
+    const timezone = settings?.timezone || 'UTC';
     const [freshness, setFreshness] = useState<any>(null);
     const [loading, setLoading] = useState(true);
 
@@ -42,16 +43,17 @@ export const DataFreshnessIndicator: React.FC = () => {
         const isToday = date.toDateString() === today.toDateString();
 
         if (isToday) {
-            return `Today at ${date.toLocaleTimeString(locale, { hour: 'numeric', minute: '2-digit', hour12: true })}`;
+            return `Today at ${new Intl.DateTimeFormat(locale, { hour: 'numeric', minute: '2-digit', hour12: true, timeZone: timezone }).format(date)}`;
         }
 
-        return date.toLocaleString(locale, {
+        return new Intl.DateTimeFormat(locale, {
             month: 'short',
             day: 'numeric',
             hour: 'numeric',
             minute: '2-digit',
             hour12: true,
-        });
+            timeZone: timezone,
+        }).format(date);
     };
 
     const getStatusIcon = () => {
@@ -69,7 +71,7 @@ export const DataFreshnessIndicator: React.FC = () => {
     };
 
     const tooltipTitle = freshness.next_scheduled_refresh
-        ? `Next scheduled refresh: ${new Date(freshness.next_scheduled_refresh).toLocaleTimeString(locale, { hour: 'numeric', minute: '2-digit', hour12: true })} UTC`
+        ? `Next scheduled refresh: ${new Intl.DateTimeFormat(locale, { hour: 'numeric', minute: '2-digit', hour12: true, timeZone: timezone }).format(new Date(freshness.next_scheduled_refresh))} UTC`
         : 'Refreshes every 6 hours';
 
     return (

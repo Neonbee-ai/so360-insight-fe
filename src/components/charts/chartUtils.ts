@@ -94,16 +94,17 @@ export const formatPercentage = (value: number, decimals: number = 1): string =>
     return formatPercentageBase(value, 'en-US', decimals);
 };
 
-// DateTime formatter (uses hardcoded locale)
-export const formatDateTime = (date: Date | string, locale: string = 'en-US'): string => {
+// DateTime formatter (timezone-aware; defaults to UTC)
+export const formatDateTime = (date: Date | string, locale: string = 'en-US', timezone: string = 'UTC'): string => {
     const dateObj = typeof date === 'string' ? new Date(date) : date;
-    return dateObj.toLocaleString(locale, {
+    return new Intl.DateTimeFormat(locale, {
         month: 'short',
         day: 'numeric',
         hour: 'numeric',
         minute: '2-digit',
         hour12: true,
-    });
+        timeZone: timezone,
+    }).format(dateObj);
 };
 
 // Tooltip Style Generator

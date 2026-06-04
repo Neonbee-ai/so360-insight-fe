@@ -234,7 +234,7 @@ export const SegmentDetailPage: React.FC = () => {
                                     </div>
                                     <p className="text-sm opacity-90">{signal.description}</p>
                                     <div className="mt-3 flex items-center gap-4 text-xs opacity-75">
-                                        <span>{new Date(signal.created_at).toLocaleDateString()}</span>
+                                        <span>{new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'short', day: 'numeric', timeZone: 'UTC' }).format(new Date(signal.created_at))}</span>
                                         {signal.module_code && <span>{signal.module_code}</span>}
                                     </div>
                                 </div>

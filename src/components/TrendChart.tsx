@@ -45,8 +45,8 @@ export const TrendChart: React.FC<TrendChartProps> = ({ trendData, color = 'blue
     const isPositive = changePercentage >= 0;
 
     // Format date range
-    const firstDate = new Date(data[0].date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-    const lastDate = new Date(data[data.length - 1].date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    const firstDate = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' }).format(new Date(data[0].date));
+    const lastDate = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' }).format(new Date(data[data.length - 1].date));
 
     // Color scheme based on prop
     const colorClasses = {
