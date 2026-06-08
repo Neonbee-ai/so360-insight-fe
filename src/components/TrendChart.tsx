@@ -1,5 +1,6 @@
 import React from 'react';
 import type { TrendData } from '../types/insight';
+import { parseUtcDate } from '../utils/datetime';
 
 interface TrendChartProps {
     trendData: TrendData;
@@ -45,8 +46,8 @@ export const TrendChart: React.FC<TrendChartProps> = ({ trendData, color = 'blue
     const isPositive = changePercentage >= 0;
 
     // Format date range
-    const firstDate = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' }).format(new Date(data[0].date));
-    const lastDate = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' }).format(new Date(data[data.length - 1].date));
+    const firstDate = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' }).format(parseUtcDate(data[0].date));
+    const lastDate = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' }).format(parseUtcDate(data[data.length - 1].date));
 
     // Color scheme based on prop
     const colorClasses = {

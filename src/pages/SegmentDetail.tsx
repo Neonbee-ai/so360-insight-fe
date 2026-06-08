@@ -7,6 +7,7 @@ import type { SegmentDetail } from '../types/insight';
 import * as LucideIcons from 'lucide-react';
 import { useFormatters } from '@so360/formatters';
 import { useShell } from '@so360/shell-context';
+import { parseUtcDate } from '../utils/datetime';
 
 const CURRENCY_UNITS = new Set(['$', '€', '£', '¥', '₹', 'USD', 'EUR', 'GBP', 'INR', 'AED', 'SAR', 'JPY', 'CAD', 'AUD', 'CHF', 'CNY', 'HKD', 'SGD', 'NZD', 'MXN', 'BRL', 'ZAR', 'OMR', 'KWD', 'BHD', 'QAR', 'EGP', 'NGN', 'KES']);
 const isCurrencyUnit = (unit: string) => CURRENCY_UNITS.has(unit?.toUpperCase?.() ?? '');
@@ -234,7 +235,7 @@ export const SegmentDetailPage: React.FC = () => {
                                     </div>
                                     <p className="text-sm opacity-90">{signal.description}</p>
                                     <div className="mt-3 flex items-center gap-4 text-xs opacity-75">
-                                        <span>{new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'short', day: 'numeric', timeZone: 'UTC' }).format(new Date(signal.created_at))}</span>
+                                        <span>{new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'short', day: 'numeric', timeZone: 'UTC' }).format(parseUtcDate(signal.created_at))}</span>
                                         {signal.module_code && <span>{signal.module_code}</span>}
                                     </div>
                                 </div>

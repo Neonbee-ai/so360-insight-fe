@@ -2,6 +2,7 @@ import React from 'react';
 import { Sparkles, AlertCircle, RefreshCw, Activity, AlertTriangle, Lightbulb, Zap } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
 import type { AiSummarySections, Signal } from '../types/insight';
+import { parseUtcDate } from '../utils/datetime';
 
 interface NeuraSummaryCardProps {
     title: string;
@@ -297,7 +298,7 @@ const ActionSignalsContent: React.FC<{ signals?: Signal[] }> = ({ signals }) => 
 };
 
 function formatRelativeTime(isoTimestamp: string): string {
-    const diff = Math.floor((Date.now() - new Date(isoTimestamp).getTime()) / 1000);
+    const diff = Math.floor((Date.now() - parseUtcDate(isoTimestamp).getTime()) / 1000);
     if (diff < 60) return 'just now';
     if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
     if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;

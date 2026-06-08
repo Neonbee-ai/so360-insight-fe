@@ -7,6 +7,7 @@ import React, { useState, useEffect } from 'react';
 import { Clock, AlertTriangle, CheckCircle } from 'lucide-react';
 import { useBusinessSettings } from '@so360/shell-context';
 import { insightApi } from '../services/insightApi';
+import { parseUtcDate } from '../utils/datetime';
 
 export const DataFreshnessIndicator: React.FC = () => {
     const { settings } = useBusinessSettings();
@@ -38,7 +39,7 @@ export const DataFreshnessIndicator: React.FC = () => {
     }
 
     const formatTimestamp = (timestamp: string) => {
-        const date = new Date(timestamp);
+        const date = parseUtcDate(timestamp);
         const today = new Date();
         const isToday = date.toDateString() === today.toDateString();
 
@@ -71,7 +72,7 @@ export const DataFreshnessIndicator: React.FC = () => {
     };
 
     const tooltipTitle = freshness.next_scheduled_refresh
-        ? `Next scheduled refresh: ${new Intl.DateTimeFormat(locale, { hour: 'numeric', minute: '2-digit', hour12: true, timeZone: timezone }).format(new Date(freshness.next_scheduled_refresh))} UTC`
+        ? `Next scheduled refresh: ${new Intl.DateTimeFormat(locale, { hour: 'numeric', minute: '2-digit', hour12: true, timeZone: timezone }).format(parseUtcDate(freshness.next_scheduled_refresh))} UTC`
         : 'Refreshes every 6 hours';
 
     return (
