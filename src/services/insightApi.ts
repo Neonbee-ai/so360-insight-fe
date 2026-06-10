@@ -1,4 +1,5 @@
 import axios, { AxiosInstance } from 'axios';
+import { createTtlCache } from './ttlCache';
 import type {
     Dashboard,
     ModuleInsights,
@@ -9,26 +10,27 @@ import type {
     TrendData,
 } from '../types/insight';
 
-// TTL cache for API responses — prevents re-fetches on tab switches and re-renders
-const apiCache = new Map<string, { data: any; expiresAt: number }>();
+// Bounded TTL cache for API responses — prevents re-fetches on tab switches and
+// re-renders. Hard-capped (CACHE_MAX) so a long session with many distinct keys
+// cannot grow the map without limit — expired entries are reclaimed lazily on
+// read, so without a ceiling unread keys would accumulate for the whole session.
 const CACHE_TTL = 2 * 60 * 1000; // 2 minutes
+const CACHE_MAX = 100; // hard ceiling on retained entries
+const apiCache = createTtlCache<any>({ ttlMs: CACHE_TTL, maxEntries: CACHE_MAX });
 
 function cachedGet<T>(key: string, fetcher: () => Promise<T>): Promise<T> {
     const cached = apiCache.get(key);
-    if (cached && cached.expiresAt > Date.now()) {
-        return Promise.resolve(cached.data as T);
+    if (cached !== undefined) {
+        return Promise.resolve(cached as T);
     }
     return fetcher().then(data => {
-        apiCache.set(key, { data, expiresAt: Date.now() + CACHE_TTL });
+        apiCache.set(key, data);
         return data;
     });
 }
 
 function invalidateCache(prefix?: string): void {
-    if (!prefix) { apiCache.clear(); return; }
-    for (const key of apiCache.keys()) {
-        if (key.startsWith(prefix)) apiCache.delete(key);
-    }
+    apiCache.invalidate(prefix);
 }
 
 class InsightApiClient {

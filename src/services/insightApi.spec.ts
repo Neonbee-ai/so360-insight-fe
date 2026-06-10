@@ -143,4 +143,53 @@ describe('insightApi', () => {
       expect(result.cached).toBe(false);
     });
   });
+
+  describe('Given the bounded response cache', () => {
+    beforeEach(async () => {
+      // Isolate: clear the module-global cache between cases.
+      mockPost.mockResolvedValue({ data: { status: 'refreshed' } });
+      await insightApi.refreshInsight();
+      mockGet.mockReset();
+      mockPost.mockReset();
+    });
+
+    it('When the same key is read twice within TTL / Then the network is hit only once (cache-hit path)', async () => {
+      mockGet.mockResolvedValue({ data: { kpis: [] } });
+      await insightApi.getDashboard();
+      await insightApi.getDashboard();
+      expect(mockGet).toHaveBeenCalledTimes(1);
+    });
+
+    it('When refreshInsight() invalidates everything / Then the next read refetches', async () => {
+      mockGet.mockResolvedValue({ data: { v: 1 } });
+      await insightApi.getDashboard();
+
+      mockPost.mockResolvedValue({ data: { status: 'refreshed' } });
+      await insightApi.refreshInsight();
+
+      mockGet.mockResolvedValue({ data: { v: 2 } });
+      const after = await insightApi.getDashboard();
+      expect(after).toEqual({ v: 2 });
+      expect(mockGet).toHaveBeenCalledTimes(2);
+    });
+
+    it('When regenerateAiSummary() invalidates only its prefix / Then other cached keys survive', async () => {
+      mockGet.mockResolvedValue({ data: { kind: 'ai' } });
+      await insightApi.getAiSummary('a');
+      mockGet.mockResolvedValue({ data: { kind: 'chart' } });
+      await insightApi.getChartData('a', 'line');
+
+      mockPost.mockResolvedValue({ data: { regenerated: true } });
+      await insightApi.regenerateAiSummary('a');
+
+      mockGet.mockReset();
+      mockGet.mockResolvedValue({ data: { kind: 'ai2' } });
+      // ai-summary:a was invalidated -> refetch hits the network
+      await insightApi.getAiSummary('a');
+      expect(mockGet).toHaveBeenCalledTimes(1);
+      // chart:a:line was NOT invalidated -> still served from cache (no new call)
+      await insightApi.getChartData('a', 'line');
+      expect(mockGet).toHaveBeenCalledTimes(1);
+    });
+  });
 });
