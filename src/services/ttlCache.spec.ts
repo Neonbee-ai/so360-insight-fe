@@ -67,7 +67,7 @@ describe('createTtlCache', () => {
       t = 50;
       cache.set('a', 1);
       cache.set('b', 2);
-      t = 150; // 'old' is now expired
+      t = 120; // 'old' (expires at 100) is expired; 'a'/'b' (expire at 150) are live
       cache.set('c', 3); // triggers prune: 'old' removed, size back to 3
       expect(cache.get('old')).toBeUndefined();
       expect(cache.size()).toBe(3);
