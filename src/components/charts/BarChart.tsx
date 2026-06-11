@@ -66,7 +66,9 @@ const CustomTooltip: React.FC<CustomTooltipProps> = ({ active, payload, label, f
     );
 };
 
-export const BarChartComponent: React.FC<BarChartProps> = ({
+// Pure presentational chart (props-only, no context) — memoized so it does not
+// re-render when an unrelated parent state (e.g. cooldown tick) changes.
+const BarChartInner: React.FC<BarChartProps> = ({
     data,
     xAxisKey,
     series,
@@ -135,3 +137,6 @@ export const BarChartComponent: React.FC<BarChartProps> = ({
         </ResponsiveContainer>
     );
 };
+
+BarChartInner.displayName = 'BarChartComponent';
+export const BarChartComponent = React.memo(BarChartInner);

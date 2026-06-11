@@ -16,6 +16,70 @@ interface InsightDashboardProps {
     initialTab?: string;
 }
 
+const formatCooldown = (s: number) =>
+    Math.floor(s / 60) > 0 ? `${Math.floor(s / 60)}m ${s % 60}s` : `${s}s`;
+
+/**
+ * Isolated refresh button + cooldown countdown.
+ *
+ * The per-second countdown state lives entirely inside this tiny component, so
+ * the 1Hz `setCooldownSeconds(prev - 1)` tick re-renders ONLY this button — not
+ * the whole dashboard tree (KPIs, charts, segment cards). Behavior is identical:
+ * same label text, same disabled state, same spinner, same click handler.
+ */
+interface RefreshButtonProps {
+    onRefresh: () => void;
+    isRefreshing: boolean;
+    initialCooldownSeconds: number;
+}
+
+const RefreshButton: React.FC<RefreshButtonProps> = ({
+    onRefresh,
+    isRefreshing,
+    initialCooldownSeconds,
+}) => {
+    const [cooldownSeconds, setCooldownSeconds] = useState(initialCooldownSeconds);
+
+    // Re-seed the countdown whenever the parent reports a new cooldown window
+    // (e.g. after a refresh returns a fresh `cooldown_seconds_remaining`).
+    useEffect(() => {
+        setCooldownSeconds(initialCooldownSeconds);
+    }, [initialCooldownSeconds]);
+
+    // Cooldown countdown timer — ticks isolated to this component only.
+    useEffect(() => {
+        if (cooldownSeconds <= 0) return;
+        const timer = setInterval(() => {
+            setCooldownSeconds(prev => {
+                if (prev <= 1) { clearInterval(timer); return 0; }
+                return prev - 1;
+            });
+        }, 1000);
+        return () => clearInterval(timer);
+    }, [cooldownSeconds]);
+
+    const disabled = isRefreshing || cooldownSeconds > 0;
+
+    return (
+        <button
+            onClick={onRefresh}
+            disabled={disabled}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                disabled
+                    ? 'bg-slate-800 text-slate-500 cursor-not-allowed'
+                    : 'bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-slate-100'
+            }`}
+        >
+            <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+            {isRefreshing
+                ? 'Refreshing...'
+                : cooldownSeconds > 0
+                    ? `Refresh in ${formatCooldown(cooldownSeconds)}`
+                    : 'Refresh'}
+        </button>
+    );
+};
+
 export const InsightDashboard: React.FC<InsightDashboardProps> = ({ initialTab }) => {
     const [, setSearchParams] = useSearchParams();
     const [activeTab, setActiveTab] = useState<string>(initialTab || 'at-a-glance');
@@ -23,7 +87,11 @@ export const InsightDashboard: React.FC<InsightDashboardProps> = ({ initialTab }
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [isRefreshing, setIsRefreshing] = useState(false);
-    const [cooldownSeconds, setCooldownSeconds] = useState(0);
+    // Cooldown is tracked as an absolute deadline timestamp (ms) on the parent.
+    // The per-second countdown lives in <RefreshButton>; the parent only stores
+    // the window so its click guard can reject early — no 1Hz parent re-render.
+    const [cooldownUntil, setCooldownUntil] = useState(0);
+    const cooldownUntilRef = useRef(0);
     const [refreshError, setRefreshError] = useState<string | null>(null);
     const freshnessKey = useRef(0);
     const { isModuleEnabled } = useModules();
@@ -56,16 +124,22 @@ export const InsightDashboard: React.FC<InsightDashboardProps> = ({ initialTab }
         }
     };
 
+    const startCooldown = useCallback((seconds: number) => {
+        const until = Date.now() + seconds * 1000;
+        cooldownUntilRef.current = until;
+        setCooldownUntil(until);
+    }, []);
+
     const handleRefresh = useCallback(async () => {
-        if (isRefreshing || cooldownSeconds > 0) return;
+        if (isRefreshing || cooldownUntilRef.current > Date.now()) return;
         setIsRefreshing(true);
         setRefreshError(null);
         try {
             const result = await insightApi.refreshInsight();
             if (result.status === 'cooldown') {
-                setCooldownSeconds(result.cooldown_seconds_remaining || 900);
+                startCooldown(result.cooldown_seconds_remaining || 900);
             } else if (result.success) {
-                setCooldownSeconds(result.cooldown_seconds_remaining || 900);
+                startCooldown(result.cooldown_seconds_remaining || 900);
                 freshnessKey.current += 1;
                 await fetchSegments();
             } else {
@@ -76,22 +150,13 @@ export const InsightDashboard: React.FC<InsightDashboardProps> = ({ initialTab }
         } finally {
             setIsRefreshing(false);
         }
-    }, [isRefreshing, cooldownSeconds]);
+    }, [isRefreshing, startCooldown]);
 
-    // Cooldown countdown timer
-    useEffect(() => {
-        if (cooldownSeconds <= 0) return;
-        const timer = setInterval(() => {
-            setCooldownSeconds(prev => {
-                if (prev <= 1) { clearInterval(timer); return 0; }
-                return prev - 1;
-            });
-        }, 1000);
-        return () => clearInterval(timer);
-    }, [cooldownSeconds]);
-
-    const formatCooldown = (s: number) =>
-        Math.floor(s / 60) > 0 ? `${Math.floor(s / 60)}m ${s % 60}s` : `${s}s`;
+    // Seconds remaining at render time — passed once to <RefreshButton>, which
+    // owns the per-second ticking so the dashboard tree does not re-render.
+    const initialCooldownSeconds = cooldownUntil > Date.now()
+        ? Math.ceil((cooldownUntil - Date.now()) / 1000)
+        : 0;
 
     const handleTabChange = (tabId: string) => {
         setActiveTab(tabId);
@@ -184,22 +249,11 @@ export const InsightDashboard: React.FC<InsightDashboardProps> = ({ initialTab }
                     <div className="flex flex-col items-end gap-2 flex-shrink-0">
                         <DataFreshnessIndicator key={freshnessKey.current} />
                         {canRefresh ? (
-                            <button
-                                onClick={handleRefresh}
-                                disabled={isRefreshing || cooldownSeconds > 0}
-                                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                                    isRefreshing || cooldownSeconds > 0
-                                        ? 'bg-slate-800 text-slate-500 cursor-not-allowed'
-                                        : 'bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-slate-100'
-                                }`}
-                            >
-                                <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-                                {isRefreshing
-                                    ? 'Refreshing...'
-                                    : cooldownSeconds > 0
-                                        ? `Refresh in ${formatCooldown(cooldownSeconds)}`
-                                        : 'Refresh'}
-                            </button>
+                            <RefreshButton
+                                onRefresh={handleRefresh}
+                                isRefreshing={isRefreshing}
+                                initialCooldownSeconds={initialCooldownSeconds}
+                            />
                         ) : (
                             <span className="text-xs text-slate-500 italic">Upgrade to refresh on demand</span>
                         )}

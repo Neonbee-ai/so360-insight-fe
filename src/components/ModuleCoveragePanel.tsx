@@ -1,5 +1,5 @@
 import React from 'react';
-import * as LucideIcons from 'lucide-react';
+import { getInsightIcon } from '../constants/iconMap';
 import { useModules } from '@so360/shell-context';
 
 const MODULE_REGISTRY = [
@@ -34,7 +34,7 @@ export const ModuleCoveragePanel: React.FC = () => {
             <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-3">
                 {MODULE_REGISTRY.map(mod => {
                     const enabled = isModuleEnabled(mod.id);
-                    const Icon = (LucideIcons as any)[mod.icon];
+                    const Icon = getInsightIcon(mod.icon);
                     return (
                         <div key={mod.id} className={`
                             rounded-lg border p-3 flex flex-col gap-1.5

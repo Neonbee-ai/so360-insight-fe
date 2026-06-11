@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import * as LucideIcons from 'lucide-react';
+import { getInsightIcon } from '../constants/iconMap';
 
 export interface Tab {
     id: string;
@@ -17,7 +17,7 @@ interface TabNavigationProps {
 export const TabNavigation: React.FC<TabNavigationProps> = ({ tabs, activeTab, onChange }) => {
     const getIcon = (iconName?: string) => {
         if (!iconName) return null;
-        const IconComponent = (LucideIcons as any)[iconName];
+        const IconComponent = getInsightIcon(iconName);
         if (!IconComponent) return null;
         return <IconComponent className="w-5 h-5" />;
     };

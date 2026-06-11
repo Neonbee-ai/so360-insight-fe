@@ -82,4 +82,10 @@ describe('KPICard', () => {
       expect(screen.getByText('critical')).toBeInTheDocument();
     });
   });
+
+  describe('Performance', () => {
+    it('Then KPICard is wrapped in React.memo (skips re-render on identical props)', () => {
+      expect((KPICard as any).$$typeof).toBe(Symbol.for('react.memo'));
+    });
+  });
 });

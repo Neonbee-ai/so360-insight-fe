@@ -1,10 +1,26 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { Routes, Route, Navigate, useParams, useNavigate } from 'react-router-dom';
 import { useShellBridge } from '@so360/shell-context';
 import { FeatureRoute } from '@so360/design-system';
 import { MfeShellInitializer } from './components/MfeShellInitializer';
-import { InsightDashboard } from './pages/InsightDashboard';
-import { SignalsPage } from './pages/SignalsPage';
+
+// Route components are lazy-loaded so recharts (~150KB gz, pulled in transitively
+// by the dashboard's chart components) and the route trees are split out of the
+// initial federated chunk and fetched only when a route actually renders.
+const InsightDashboard = lazy(() =>
+    import('./pages/InsightDashboard').then(m => ({ default: m.InsightDashboard }))
+);
+const SignalsPage = lazy(() =>
+    import('./pages/SignalsPage').then(m => ({ default: m.SignalsPage }))
+);
+
+// Lightweight fallback shown while a lazy route chunk loads. Mirrors the
+// existing "initializing" visual language so the swap is imperceptible.
+const RouteFallback: React.FC = () => (
+    <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+        <div className="text-slate-400">Loading…</div>
+    </div>
+);
 
 // Flag-to-segment map: segments that require a specific plan flag
 const SEGMENT_FLAG_MAP: Record<string, string> = {
@@ -67,13 +83,15 @@ const SegmentRoute: React.FC = () => {
 function App() {
     return (
         <MfeShellInitializer>
-            <Routes>
-                <Route path="/" element={<InsightDashboard />} />
-                <Route path="signals" element={<SignalsPage />} />
+            <Suspense fallback={<RouteFallback />}>
+                <Routes>
+                    <Route path="/" element={<InsightDashboard />} />
+                    <Route path="signals" element={<SignalsPage />} />
 
-                {/* Path-based segment routes — URL stays as /insight/revenue etc. */}
-                <Route path=":segmentCode" element={<SegmentRoute />} />
-            </Routes>
+                    {/* Path-based segment routes — URL stays as /insight/revenue etc. */}
+                    <Route path=":segmentCode" element={<SegmentRoute />} />
+                </Routes>
+            </Suspense>
         </MfeShellInitializer>
     );
 }

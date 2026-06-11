@@ -1,6 +1,6 @@
 import React from 'react';
 import { Sparkles, AlertCircle, RefreshCw, Activity, AlertTriangle, Lightbulb, Zap } from 'lucide-react';
-import * as LucideIcons from 'lucide-react';
+import { getInsightIcon } from '../constants/iconMap';
 import type { AiSummarySections, Signal } from '../types/insight';
 import { parseUtcDate } from '../utils/datetime';
 
@@ -35,7 +35,7 @@ export const NeuraSummaryCard: React.FC<NeuraSummaryCardProps> = ({
     onRegenerate,
     regenerating = false,
 }) => {
-    const IconComponent = (LucideIcons as any)[icon];
+    const IconComponent = getInsightIcon(icon);
 
     // Color mappings
     const colorClasses = {

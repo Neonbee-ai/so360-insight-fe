@@ -46,7 +46,7 @@ describe('App', () => {
   });
 
   describe('Given shell context', () => {
-    it('When synced / Then renders dashboard', async () => {
+    it('When synced / Then lazily resolves and renders the dashboard route', async () => {
       mockShellBridge = {
         currentTenant: { id: 't1' },
         currentOrg: { id: 'o1' },
@@ -54,6 +54,7 @@ describe('App', () => {
         effectiveFlagsLoaded: true,
       };
       render(<MemoryRouter initialEntries={['/']}><App /></MemoryRouter>);
+      // Route components are React.lazy → resolved asynchronously under Suspense.
       await waitFor(() => {
         expect(screen.getByText('InsightDashboard')).toBeInTheDocument();
       });

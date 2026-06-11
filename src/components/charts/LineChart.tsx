@@ -65,7 +65,9 @@ const CustomTooltip: React.FC<CustomTooltipProps> = ({ active, payload, label, f
     );
 };
 
-export const LineChartComponent: React.FC<LineChartProps> = ({
+// Pure presentational chart (props-only, no context) — memoized so it does not
+// re-render when an unrelated parent state (e.g. cooldown tick) changes.
+const LineChartInner: React.FC<LineChartProps> = ({
     data,
     xAxisKey,
     series,
@@ -117,3 +119,6 @@ export const LineChartComponent: React.FC<LineChartProps> = ({
         </ResponsiveContainer>
     );
 };
+
+LineChartInner.displayName = 'LineChartComponent';
+export const LineChartComponent = React.memo(LineChartInner);

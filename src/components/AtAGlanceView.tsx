@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { TrendingUp, TrendingDown, Minus, AlertCircle } from 'lucide-react';
-import * as LucideIcons from 'lucide-react';
+import { getInsightIcon } from '../constants/iconMap';
 import { KPICard } from './KPICard';
 import { SignalCard } from './SignalCard';
 import { NeuraSummaryCard } from './NeuraSummaryCard';
@@ -300,7 +300,7 @@ export const AtAGlanceView: React.FC<AtAGlanceViewProps> = ({ segments, onSegmen
     };
 
     const getSegmentIcon = (iconName: string) => {
-        const IconComponent = (LucideIcons as any)[iconName];
+        const IconComponent = getInsightIcon(iconName);
         if (!IconComponent) return null;
         return <IconComponent className="w-8 h-8" />;
     };

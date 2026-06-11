@@ -86,6 +86,17 @@ export default defineConfig(({ mode }) => {
         minify: 'esbuild',
         cssCodeSplit: false,
         emptyOutDir: false,
+        rollupOptions: {
+            output: {
+                // Split recharts (~150KB gz) into its own chunk so it is NOT part
+                // of the initial federated entry. Combined with route-level
+                // React.lazy, recharts is fetched only when a chart route renders.
+                manualChunks(id) {
+                    if (id.includes('node_modules/recharts')) return 'recharts';
+                    return undefined;
+                },
+            },
+        },
     },
     server: {
         port: 3024,

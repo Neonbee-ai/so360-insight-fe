@@ -7,7 +7,9 @@ interface KPICardProps {
     kpi: KPI;
 }
 
-export const KPICard: React.FC<KPICardProps> = ({ kpi }) => {
+// Pure presentational card (props-only, no context) — memoized so the KPI grid
+// does not re-render on unrelated dashboard state changes (e.g. cooldown tick).
+const KPICardInner: React.FC<KPICardProps> = ({ kpi }) => {
     const getTrendIcon = () => {
         if (kpi.trend === 'up') return <TrendingUp className="w-5 h-5 text-green-500" />;
         if (kpi.trend === 'down') return <TrendingDown className="w-5 h-5 text-red-500" />;
@@ -56,3 +58,6 @@ export const KPICard: React.FC<KPICardProps> = ({ kpi }) => {
         </div>
     );
 };
+
+KPICardInner.displayName = 'KPICard';
+export const KPICard = React.memo(KPICardInner);

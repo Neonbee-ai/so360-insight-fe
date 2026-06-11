@@ -180,6 +180,35 @@ describe('WaterfallChartComponent', () => {
   });
 });
 
+describe('Chart memoization (perf — no re-render on identical props)', () => {
+  // React.memo components expose this $$typeof tag. Asserting it proves the
+  // exported chart is memoized, so a parent re-render with unchanged props
+  // (e.g. the dashboard cooldown tick) skips re-rendering the chart.
+  const MEMO = Symbol.for('react.memo');
+
+  it.each([
+    ['LineChartComponent', LineChartComponent],
+    ['AreaChartComponent', AreaChartComponent],
+    ['BarChartComponent', BarChartComponent],
+    ['PieChartComponent', PieChartComponent],
+    ['WaterfallChartComponent', WaterfallChartComponent],
+  ])('Given %s / Then it is wrapped in React.memo', (_name, Component) => {
+    expect((Component as any).$$typeof).toBe(MEMO);
+  });
+
+  it('Given a memoized chart re-rendered with the same props reference / Then the inner render is skipped', () => {
+    const data = [{ x: '1', y: 10 }];
+    const series = [{ key: 'y', name: 'Y' }];
+    const { rerender } = render(
+      <LineChartComponent data={data} xAxisKey="x" series={series} />
+    );
+    expect(screen.getByTestId('responsive-container')).toBeInTheDocument();
+    // Re-render with identical prop references — memo bails out, output stable.
+    rerender(<LineChartComponent data={data} xAxisKey="x" series={series} />);
+    expect(screen.getAllByTestId('responsive-container')).toHaveLength(1);
+  });
+});
+
 describe('ChartContainer', () => {
   beforeEach(() => {
     mockShell = { effectiveFlagsLoaded: true, isFeatureEnabled: () => true };

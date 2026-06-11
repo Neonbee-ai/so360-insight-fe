@@ -68,6 +68,16 @@ describe('Production build configuration (MFE perf contract)', () => {
     it('Then CSS code splitting stays disabled (module federation requirement)', () => {
       expect(config.build?.cssCodeSplit).toBe(false);
     });
+
+    it('Then recharts is split into its own manualChunk (kept out of the initial entry)', () => {
+      const manualChunks = config.build?.rollupOptions?.output?.manualChunks;
+      expect(typeof manualChunks).toBe('function');
+      // recharts modules route to the dedicated "recharts" chunk
+      expect(manualChunks('/repo/node_modules/recharts/es6/chart/LineChart.js')).toBe('recharts');
+      // unrelated modules are left to Rollup's default chunking (undefined)
+      expect(manualChunks('/repo/src/pages/InsightDashboard.tsx')).toBeUndefined();
+      expect(manualChunks('/repo/node_modules/react/index.js')).toBeUndefined();
+    });
   });
 
   describe('Given the module federation shared dependency list', () => {

@@ -61,7 +61,9 @@ const CustomTooltip: React.FC<CustomTooltipProps> = ({ active, payload, label, f
     );
 };
 
-export const AreaChartComponent: React.FC<AreaChartProps> = ({
+// Pure presentational chart (props-only, no context) — memoized so it does not
+// re-render when an unrelated parent state (e.g. cooldown tick) changes.
+const AreaChartInner: React.FC<AreaChartProps> = ({
     data,
     xAxisKey,
     yAxisKey,
@@ -122,3 +124,6 @@ export const AreaChartComponent: React.FC<AreaChartProps> = ({
         </ResponsiveContainer>
     );
 };
+
+AreaChartInner.displayName = 'AreaChartComponent';
+export const AreaChartComponent = React.memo(AreaChartInner);

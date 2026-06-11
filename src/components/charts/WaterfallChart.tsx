@@ -57,7 +57,9 @@ const CustomTooltip: React.FC<CustomTooltipProps> = ({ active, payload, formatVa
     );
 };
 
-export const WaterfallChartComponent: React.FC<WaterfallChartProps> = ({
+// Pure presentational chart (props-only, no context) — memoized so it does not
+// re-render when an unrelated parent state (e.g. cooldown tick) changes.
+const WaterfallChartInner: React.FC<WaterfallChartProps> = ({
     data,
     height = 350,
     formatValue,
@@ -127,3 +129,6 @@ export const WaterfallChartComponent: React.FC<WaterfallChartProps> = ({
         </div>
     );
 };
+
+WaterfallChartInner.displayName = 'WaterfallChartComponent';
+export const WaterfallChartComponent = React.memo(WaterfallChartInner);

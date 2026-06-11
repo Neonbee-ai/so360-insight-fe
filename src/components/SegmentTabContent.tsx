@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Loader2, AlertCircle } from 'lucide-react';
-import * as LucideIcons from 'lucide-react';
+import { getInsightIcon } from '../constants/iconMap';
 import { KPICard } from './KPICard';
 import { SignalCard } from './SignalCard';
 import { TrendChart } from './TrendChart';
@@ -151,7 +151,7 @@ export const SegmentTabContent: React.FC<SegmentTabContentProps> = ({ segmentCod
     };
 
     const getSegmentIcon = (iconName: string) => {
-        const IconComponent = (LucideIcons as any)[iconName];
+        const IconComponent = getInsightIcon(iconName);
         if (!IconComponent) return null;
         return <IconComponent className="w-10 h-10" />;
     };

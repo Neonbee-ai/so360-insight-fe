@@ -4,7 +4,7 @@ import { ArrowLeft, TrendingUp, TrendingDown, Minus, AlertCircle, Loader2 } from
 import { insightApi } from '../services/insightApi';
 import { TrendChart } from '../components/TrendChart';
 import type { SegmentDetail } from '../types/insight';
-import * as LucideIcons from 'lucide-react';
+import { getInsightIcon } from '../constants/iconMap';
 import { useFormatters } from '@so360/formatters';
 import { useShell } from '@so360/shell-context';
 import { parseUtcDate } from '../utils/datetime';
@@ -47,7 +47,7 @@ export const SegmentDetailPage: React.FC = () => {
     };
 
     const getSegmentIcon = (iconName: string) => {
-        const IconComponent = (LucideIcons as any)[iconName];
+        const IconComponent = getInsightIcon(iconName);
         if (!IconComponent) return null;
         return <IconComponent className="w-10 h-10" />;
     };

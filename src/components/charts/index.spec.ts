@@ -10,22 +10,26 @@ describe('Chart barrel exports', () => {
 
     it('When imported / Then exports LineChartComponent', () => {
       expect(ChartExports.LineChartComponent).toBeDefined();
-      expect(typeof ChartExports.LineChartComponent).toBe('function');
+      // Memoized with React.memo → exported value is a memo object, not a function.
+      expect(['function', 'object']).toContain(typeof ChartExports.LineChartComponent);
     });
 
     it('When imported / Then exports AreaChartComponent', () => {
       expect(ChartExports.AreaChartComponent).toBeDefined();
-      expect(typeof ChartExports.AreaChartComponent).toBe('function');
+      // Memoized with React.memo → exported value is a memo object, not a function.
+      expect(['function', 'object']).toContain(typeof ChartExports.AreaChartComponent);
     });
 
     it('When imported / Then exports BarChartComponent', () => {
       expect(ChartExports.BarChartComponent).toBeDefined();
-      expect(typeof ChartExports.BarChartComponent).toBe('function');
+      // Memoized with React.memo → exported value is a memo object, not a function.
+      expect(['function', 'object']).toContain(typeof ChartExports.BarChartComponent);
     });
 
     it('When imported / Then exports PieChartComponent', () => {
       expect(ChartExports.PieChartComponent).toBeDefined();
-      expect(typeof ChartExports.PieChartComponent).toBe('function');
+      // Memoized with React.memo → exported value is a memo object, not a function.
+      expect(['function', 'object']).toContain(typeof ChartExports.PieChartComponent);
     });
 
     it('When imported / Then exports FunnelChartComponent', () => {
@@ -40,7 +44,8 @@ describe('Chart barrel exports', () => {
 
     it('When imported / Then exports WaterfallChartComponent', () => {
       expect(ChartExports.WaterfallChartComponent).toBeDefined();
-      expect(typeof ChartExports.WaterfallChartComponent).toBe('function');
+      // Memoized with React.memo → exported value is a memo object, not a function.
+      expect(['function', 'object']).toContain(typeof ChartExports.WaterfallChartComponent);
     });
 
     it('When imported / Then exports ChartContainer', () => {

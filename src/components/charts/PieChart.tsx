@@ -89,7 +89,9 @@ const renderCustomLabel = ({
     );
 };
 
-export const PieChartComponent: React.FC<PieChartProps> = ({
+// Pure presentational chart (props-only, no context) — memoized so it does not
+// re-render when an unrelated parent state (e.g. cooldown tick) changes.
+const PieChartInner: React.FC<PieChartProps> = ({
     data,
     height = 300,
     showLegend = true,
@@ -146,3 +148,6 @@ export const PieChartComponent: React.FC<PieChartProps> = ({
         </ResponsiveContainer>
     );
 };
+
+PieChartInner.displayName = 'PieChartComponent';
+export const PieChartComponent = React.memo(PieChartInner);

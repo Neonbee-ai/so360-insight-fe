@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { TrendingUp, TrendingDown, Minus, AlertCircle } from 'lucide-react';
 import { insightApi } from '../services/insightApi';
 import type { SegmentSummary } from '../types/insight';
-import * as LucideIcons from 'lucide-react';
+import { getInsightIcon } from '../constants/iconMap';
 import { useFormatters } from '@so360/formatters';
 import { useShell } from '@so360/shell-context';
 
@@ -51,7 +51,7 @@ export const SegmentOverview: React.FC = () => {
     };
 
     const getSegmentIcon = (iconName: string) => {
-        const IconComponent = (LucideIcons as any)[iconName];
+        const IconComponent = getInsightIcon(iconName);
         if (!IconComponent) return null;
         return <IconComponent className="w-8 h-8" />;
     };
