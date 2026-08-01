@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Loader2, Factory, AlertCircle } from 'lucide-react';
+import { formatNumber } from '../charts/chartUtils';
 
 /**
  * Manufacturing segment for the Insight Dashboard.
@@ -41,7 +42,7 @@ interface WcUtil {
 const headers = { 'Content-Type': 'application/json', 'X-Tenant-Id': TENANT, 'X-Org-Id': ORG };
 
 const fmtPct = (n: number) => `${(n ?? 0).toFixed(1)}%`;
-const fmtNum = (n: number) => (n ?? 0).toLocaleString();
+const fmtNum = (n: number) => formatNumber(n ?? 0);
 
 const Tile: React.FC<{ label: string; value: React.ReactNode; sub?: string; tone?: 'default' | 'pos' | 'neg' }> =
     ({ label, value, sub, tone = 'default' }) => {

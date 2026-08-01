@@ -50,5 +50,23 @@ describe('ManufacturingSegment', () => {
       expect(screen.getByText('Work Centre Utilisation (OEE)')).toBeInTheDocument();
       expect(screen.getByText('Assembly')).toBeInTheDocument();
     });
+
+    it('When rendered / Then formats whole-number tiles with thousands separators', async () => {
+      const summary = {
+        mo_total: 50, mo_in_progress: 10, mo_done: 30, mo_planned: 10,
+        wo_open: 15, on_time_pct: 92, scrap_pct: 2.5, cost_variance_pct: 3,
+        total_produced: 5000, total_scrap_qty: 125,
+      };
+      const util: any[] = [];
+      vi.stubGlobal('fetch', vi.fn()
+        .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(summary) })
+        .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(util) })
+      );
+      render(<ManufacturingSegment />);
+      await waitFor(() => {
+        expect(screen.getByText('Total Produced')).toBeInTheDocument();
+      });
+      expect(screen.getByText('5,000')).toBeInTheDocument();
+    });
   });
 });

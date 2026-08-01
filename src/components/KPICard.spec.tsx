@@ -30,10 +30,10 @@ describe('KPICard', () => {
       expect(screen.getByText('Total Revenue')).toBeInTheDocument();
     });
 
-    it('When rendered / Then shows the value and unit', () => {
+    it('When rendered / Then shows the value formatted as currency (no raw unit shown)', () => {
       render(<KPICard kpi={baseKPI} />);
-      expect(screen.getByText('50000')).toBeInTheDocument();
-      expect(screen.getByText('USD')).toBeInTheDocument();
+      expect(screen.getByText('$50,000.00')).toBeInTheDocument();
+      expect(screen.queryByText('USD')).not.toBeInTheDocument();
     });
 
     it('When rendered / Then shows the trend percentage with + prefix', () => {
@@ -86,6 +86,36 @@ describe('KPICard', () => {
   describe('Performance', () => {
     it('Then KPICard is wrapped in React.memo (skips re-render on identical props)', () => {
       expect((KPICard as any).$$typeof).toBe(Symbol.for('react.memo'));
+    });
+  });
+
+  describe('Given a KPI with unit "%"', () => {
+    it('When rendered / Then shows a percentage with 1 decimal place', () => {
+      render(<KPICard kpi={{ ...baseKPI, value: 51.11894553134968, unit: '%' }} />);
+      expect(screen.getByText('51.1%')).toBeInTheDocument();
+    });
+  });
+
+  describe('Given a KPI with a non-USD 3-letter currency unit', () => {
+    it('When rendered / Then shows the value formatted with that currency symbol', () => {
+      render(<KPICard kpi={{ ...baseKPI, value: 284000, unit: 'INR' }} />);
+      expect(screen.getByText(/₹|INR/)).toBeInTheDocument();
+    });
+  });
+
+  describe('Given a KPI with unit "days"', () => {
+    it('When rendered / Then shows the value rounded to 1 decimal with the unit', () => {
+      render(<KPICard kpi={{ ...baseKPI, value: 72.17595983031289, unit: 'days' }} />);
+      expect(screen.getByText('72.2')).toBeInTheDocument();
+      expect(screen.getByText('days')).toBeInTheDocument();
+    });
+  });
+
+  describe('Given a KPI with a plain count unit', () => {
+    it('When rendered / Then shows a whole number with thousands separators', () => {
+      render(<KPICard kpi={{ ...baseKPI, value: 1248, unit: 'orders' }} />);
+      expect(screen.getByText('1,248')).toBeInTheDocument();
+      expect(screen.getByText('orders')).toBeInTheDocument();
     });
   });
 });

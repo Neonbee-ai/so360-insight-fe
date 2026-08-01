@@ -88,10 +88,30 @@ export const formatCompactNumber = (value: number): string => {
 // These formatters use context: currency, date format, locale
 export { formatCurrency, formatDate } from '@so360/formatters';
 
-// Wrapper for formatPercentage to match chart signature (value, decimals)
+// Wrapper for formatPercentage to match chart signature (value, decimals).
+// @so360/formatters' formatPercentage uses Intl's 'percent' style, which expects
+// a FRACTION (0.15 -> "15%") — but every caller in this codebase passes a value
+// already scaled 0-100 (e.g. 45.2 meaning "45.2%"), so we divide by 100 here
+// rather than at each call site.
 import { formatPercentage as formatPercentageBase } from '@so360/formatters';
 export const formatPercentage = (value: number, decimals: number = 1): string => {
-    return formatPercentageBase(value, 'en-US', decimals);
+    return formatPercentageBase(value / 100, 'en-US', decimals);
+};
+
+export type KpiFormatKind = 'currency' | 'percentage' | 'time' | 'count';
+
+/**
+ * Classify a KPI's free-text `unit` column into a display format kind.
+ * `unit` is either the literal sentinel 'currency' (live-fallback path, before
+ * the org's base currency is resolved) or a resolved 3-letter ISO code (e.g.
+ * 'INR', 'AED') once snapshotted — see batch-computation.service.ts.
+ */
+export const classifyKpiUnit = (unit: string): KpiFormatKind => {
+    if (!unit) return 'count';
+    if (unit === 'currency' || /^[A-Z]{3}$/.test(unit)) return 'currency';
+    if (unit === '%') return 'percentage';
+    if (unit === 'days' || unit === 'hours') return 'time';
+    return 'count';
 };
 
 // DateTime formatter (timezone-aware; defaults to UTC)
