@@ -8,6 +8,7 @@ vi.mock('@so360/shell-context', () => ({
   useShellBridge: () => mockShell,
   useModules: () => ({ isModuleEnabled: () => true }),
   useFeatureFlags: () => ({ isFeatureEnabled: () => true }),
+  useShell: () => ({ currentOrg: { id: 'mock-org-id', tenant_id: 'mock-tenant-id', name: 'Mock Org' } }),
 }));
 
 vi.mock('../services/insightApi', () => ({
