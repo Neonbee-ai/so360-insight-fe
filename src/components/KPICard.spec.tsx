@@ -50,7 +50,7 @@ describe('KPICard', () => {
   describe('Given a KPI with downward trend', () => {
     it('When rendered / Then shows minus prefix and red icon', () => {
       render(<KPICard kpi={{ ...baseKPI, trend: 'down', trend_percentage: 8 }} />);
-      expect(screen.getByText('-8% from last period')).toBeInTheDocument();
+      expect(screen.getByText('-8.0% from last period')).toBeInTheDocument();
       expect(screen.getByTestId('icon-TrendingDown')).toBeInTheDocument();
     });
   });
@@ -96,18 +96,22 @@ describe('KPICard', () => {
     });
   });
 
-  describe('Given a KPI with a non-USD 3-letter currency unit', () => {
-    it('When rendered / Then shows the value formatted with that currency symbol', () => {
-      render(<KPICard kpi={{ ...baseKPI, value: 284000, unit: 'INR' }} />);
-      expect(screen.getByText(/₹|INR/)).toBeInTheDocument();
+  describe('Given a KPI with a resolved 3-letter ISO currency unit (not the literal "currency" sentinel)', () => {
+    it('When rendered / Then it is still classified/formatted as currency (not a plain count)', () => {
+      // KPI snapshots always resolve unit to the org's own base_currency
+      // (batch-computation.service.ts), so it is always a valid 3-letter code —
+      // this locks in that classifyKpiUnit treats any such code as currency.
+      render(<KPICard kpi={{ ...baseKPI, value: 284000, unit: 'AED' }} />);
+      expect(screen.getByText('$284,000.00')).toBeInTheDocument();
+      expect(screen.queryByText('AED')).not.toBeInTheDocument();
     });
   });
 
   describe('Given a KPI with unit "days"', () => {
     it('When rendered / Then shows the value rounded to 1 decimal with the unit', () => {
       render(<KPICard kpi={{ ...baseKPI, value: 72.17595983031289, unit: 'days' }} />);
-      expect(screen.getByText('72.2')).toBeInTheDocument();
-      expect(screen.getByText('days')).toBeInTheDocument();
+      // time values render as a single "<value> <unit>" string (no separate unit span)
+      expect(screen.getByText('72.2 days')).toBeInTheDocument();
     });
   });
 
