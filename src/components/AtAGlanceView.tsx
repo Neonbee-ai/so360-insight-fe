@@ -7,22 +7,24 @@ import { NeuraSummaryCard } from './NeuraSummaryCard';
 import { ModuleCoveragePanel } from './ModuleCoveragePanel';
 import { insightApi } from '../services/insightApi';
 import type { SegmentSummary, KPI, Signal, AiSummarySections } from '../types/insight';
-import { useModules, useFeatureFlags, useShellBridge } from '@so360/shell-context';
+import { useModules, useFeatureFlags, useShellBridge, useShell } from '@so360/shell-context';
 import { SEGMENT_MODULE_DEPS } from '../constants/moduleMapping';
 import { Factory } from 'lucide-react';
 
 // Compact Manufacturing card for At-a-Glance — fetches summary directly from
 // manufacturing-be (insight-be doesn't yet aggregate manufacturing metrics).
 const ManufacturingAtAGlanceCard: React.FC<{ onClick: () => void }> = ({ onClick }) => {
+    const { currentOrg } = useShell();
     const [data, setData] = useState<any>(null);
     useEffect(() => {
+        if (!currentOrg?.id) return;
         const headers = {
-            'X-Tenant-Id': '3cf1c619-c8f6-49ac-9207-447418d5beee',
-            'X-Org-Id': '8317fe18-6ac4-4ac4-b71d-dc13122a905d',
+            'X-Tenant-Id': currentOrg.tenant_id || '',
+            'X-Org-Id': currentOrg.id,
         };
         fetch('/manufacturing-api/v1/manufacturing/reports/summary', { headers })
             .then(r => r.ok ? r.json() : null).then(setData).catch(() => {});
-    }, []);
+    }, [currentOrg?.id, currentOrg?.tenant_id]);
     return (
         <button onClick={onClick}
             className="bg-slate-900/50 rounded-lg border border-emerald-500/20 p-4 text-left transition-all hover:shadow-lg hover:border-emerald-500/40 group">

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Loader2, Factory, AlertCircle } from 'lucide-react';
 import { formatNumber } from '../charts/chartUtils';
+import { useShell } from '@so360/shell-context';
 
 /**
  * Manufacturing segment for the Insight Dashboard.
@@ -13,9 +14,6 @@ import { formatNumber } from '../charts/chartUtils';
  * yet have a manufacturing segment). When insight-be adds one, this component can
  * be replaced with the standard `SegmentTabContent` flow.
  */
-
-const TENANT = '3cf1c619-c8f6-49ac-9207-447418d5beee';
-const ORG = '8317fe18-6ac4-4ac4-b71d-dc13122a905d';
 
 interface MfgSummary {
     mo_total: number;
@@ -39,8 +37,6 @@ interface WcUtil {
     target_pct: number;
 }
 
-const headers = { 'Content-Type': 'application/json', 'X-Tenant-Id': TENANT, 'X-Org-Id': ORG };
-
 const fmtPct = (n: number) => `${(n ?? 0).toFixed(1)}%`;
 const fmtNum = (n: number) => formatNumber(n ?? 0);
 
@@ -57,12 +53,23 @@ const Tile: React.FC<{ label: string; value: React.ReactNode; sub?: string; tone
     };
 
 export const ManufacturingSegment: React.FC = () => {
+    const { currentOrg } = useShell();
     const [summary, setSummary] = useState<MfgSummary | null>(null);
     const [util, setUtil] = useState<WcUtil[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
+        if (!currentOrg?.id) {
+            setLoading(false);
+            setError('No active organization selected');
+            return;
+        }
+        const headers = {
+            'Content-Type': 'application/json',
+            'X-Tenant-Id': currentOrg.tenant_id || '',
+            'X-Org-Id': currentOrg.id,
+        };
         let cancelled = false;
         const load = async () => {
             try {
@@ -86,7 +93,7 @@ export const ManufacturingSegment: React.FC = () => {
         load();
         const t = setInterval(load, 30_000);
         return () => { cancelled = true; clearInterval(t); };
-    }, []);
+    }, [currentOrg?.id, currentOrg?.tenant_id]);
 
     if (loading && !summary) {
         return (

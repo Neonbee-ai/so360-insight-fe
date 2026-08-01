@@ -68,5 +68,41 @@ describe('ManufacturingSegment', () => {
       });
       expect(screen.getByText('5,000')).toBeInTheDocument();
     });
+
+    it('When rendered / Then requests use the logged-in org/tenant, not a hardcoded UUID', async () => {
+      const summary = {
+        mo_total: 1, mo_in_progress: 0, mo_done: 1, mo_planned: 0,
+        wo_open: 0, on_time_pct: 100, scrap_pct: 0, cost_variance_pct: 0,
+        total_produced: 1, total_scrap_qty: 0,
+      };
+      const fetchMock = vi.fn()
+        .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(summary) })
+        .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve([]) });
+      vi.stubGlobal('fetch', fetchMock);
+      render(<ManufacturingSegment />);
+      await waitFor(() => expect(fetchMock).toHaveBeenCalled());
+
+      const [, callOptions] = fetchMock.mock.calls[0];
+      // shell-context mock's currentOrg — never the previously hardcoded UUIDs
+      expect(callOptions.headers['X-Org-Id']).toBe('mock-org-id');
+      expect(callOptions.headers['X-Tenant-Id']).toBe('mock-tenant-id');
+      expect(callOptions.headers['X-Org-Id']).not.toBe('8317fe18-6ac4-4ac4-b71d-dc13122a905d');
+    });
+  });
+
+  describe('Given no active organization is selected', () => {
+    it('When rendered / Then shows an error instead of fetching with a fallback org', async () => {
+      const fetchMock = vi.fn();
+      vi.stubGlobal('fetch', fetchMock);
+      const shellMock = await import('@so360/shell-context');
+      const spy = vi.spyOn(shellMock, 'useShell').mockReturnValue({ currentOrg: null } as any);
+
+      render(<ManufacturingSegment />);
+      await waitFor(() => {
+        expect(screen.getByText('Manufacturing metrics unavailable')).toBeInTheDocument();
+      });
+      expect(fetchMock).not.toHaveBeenCalled();
+      spy.mockRestore();
+    });
   });
 });
