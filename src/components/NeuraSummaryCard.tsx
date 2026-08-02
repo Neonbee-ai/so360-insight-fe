@@ -13,6 +13,7 @@ interface NeuraSummaryCardProps {
     signals?: Signal[];
     generatedAt?: string | null;  // ISO timestamp of when summary was generated
     cached?: boolean;             // Whether this came from cache
+    degraded?: boolean;           // True when Neura failed and this is stale data served as a fallback
     loading?: boolean;
     error?: string | null;
     onRetry?: () => void;
@@ -29,6 +30,7 @@ export const NeuraSummaryCard: React.FC<NeuraSummaryCardProps> = ({
     signals,
     generatedAt,
     cached,
+    degraded = false,
     loading = false,
     error = null,
     onRetry,
@@ -250,6 +252,14 @@ export const NeuraSummaryCard: React.FC<NeuraSummaryCardProps> = ({
                         })}
                     </div>
                 )
+            )}
+
+            {/* Degraded banner: regeneration failed, this is stale data served as a fallback */}
+            {degraded && (
+                <div className="flex items-start gap-2 text-amber-400 text-xs mt-3 mb-1">
+                    <AlertCircle className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
+                    <p>AI regeneration failed — showing the last known summary instead.</p>
+                </div>
             )}
 
             {/* Footer: generated timestamp */}

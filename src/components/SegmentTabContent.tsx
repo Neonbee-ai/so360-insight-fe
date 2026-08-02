@@ -46,6 +46,7 @@ export const SegmentTabContent: React.FC<SegmentTabContentProps> = ({ segmentCod
     const [neuraSections, setNeuraSections] = useState<AiSummarySections | null>(null);
     const [neuraGeneratedAt, setNeuraGeneratedAt] = useState<string | null>(null);
     const [neuraCached, setNeuraCached] = useState(false);
+    const [neuraDegraded, setNeuraDegraded] = useState(false);
     const [neuraRegenerating, setNeuraRegenerating] = useState(false);
     const [neuraError, setNeuraError] = useState<string | null>(null);
 
@@ -78,6 +79,7 @@ export const SegmentTabContent: React.FC<SegmentTabContentProps> = ({ segmentCod
             setNeuraSections(data.sections || null);
             setNeuraGeneratedAt(data.generated_at || null);
             setNeuraCached(data.cached ?? false);
+            setNeuraDegraded(data.degraded ?? false);
         } catch (err) {
             setNeuraError(err instanceof Error ? err.message : 'Failed to load AI insights');
         } finally {
@@ -94,6 +96,7 @@ export const SegmentTabContent: React.FC<SegmentTabContentProps> = ({ segmentCod
             setNeuraSections(data.sections || null);
             setNeuraGeneratedAt(data.generated_at || null);
             setNeuraCached(false);
+            setNeuraDegraded(data.degraded ?? false);
         } catch (err) {
             setNeuraError(err instanceof Error ? err.message : 'Regeneration failed');
         } finally {
@@ -264,6 +267,7 @@ export const SegmentTabContent: React.FC<SegmentTabContentProps> = ({ segmentCod
                         signals={unresolvedForCard}
                         generatedAt={neuraGeneratedAt}
                         cached={neuraCached}
+                        degraded={neuraDegraded}
                         loading={neuraLoading}
                         regenerating={neuraRegenerating}
                         error={neuraError}

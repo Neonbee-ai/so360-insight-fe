@@ -28,7 +28,9 @@ vi.mock('./SignalCard', () => ({
   SignalCard: (props: any) => <div data-testid="signal-card">{props.signal.title}</div>,
 }));
 vi.mock('./NeuraSummaryCard', () => ({
-  NeuraSummaryCard: (props: any) => <div data-testid="neura-card">{props.title}</div>,
+  NeuraSummaryCard: (props: any) => (
+    <div data-testid="neura-card" data-degraded={String(!!props.degraded)}>{props.title}</div>
+  ),
 }));
 vi.mock('./ModuleCoveragePanel', () => ({
   ModuleCoveragePanel: () => <div data-testid="module-coverage" />,
@@ -114,6 +116,16 @@ describe('AtAGlanceView', () => {
       render(<AtAGlanceView segments={mockSegments} onSegmentClick={vi.fn()} />);
       await waitFor(() => {
         expect(screen.getByText('Important KPIs Across All Segments')).toBeInTheDocument();
+      });
+    });
+
+    it('When the backend flags a summary as degraded (Neura failed, stale data served) / Then it is passed through to NeuraSummaryCard', async () => {
+      mockApi.getAiSummary.mockResolvedValue({
+        summary: 'Old text', sections: null, generated_at: '2024-01-01', cached: true, degraded: true,
+      });
+      render(<AtAGlanceView segments={mockSegments} onSegmentClick={vi.fn()} />);
+      await waitFor(() => {
+        expect(screen.getAllByTestId('neura-card')[0]).toHaveAttribute('data-degraded', 'true');
       });
     });
   });

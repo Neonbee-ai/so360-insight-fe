@@ -80,4 +80,36 @@ describe('NeuraSummaryCard', () => {
       expect(screen.getByText(/just now/)).toBeInTheDocument();
     });
   });
+
+  describe('Given the summary is degraded (Neura failed, stale data served as a fallback)', () => {
+    it('When degraded is true / Then shows a visible warning instead of looking like a successful refresh', () => {
+      render(
+        <NeuraSummaryCard
+          title="Finance"
+          icon="DollarSign"
+          color="blue"
+          summary="Old summary text"
+          generatedAt={new Date().toISOString()}
+          cached={true}
+          degraded={true}
+        />
+      );
+      expect(screen.getByText(/AI regeneration failed/)).toBeInTheDocument();
+    });
+
+    it('When degraded is false / Then no warning is shown', () => {
+      render(
+        <NeuraSummaryCard
+          title="Finance"
+          icon="DollarSign"
+          color="blue"
+          summary="Fresh summary text"
+          generatedAt={new Date().toISOString()}
+          cached={false}
+          degraded={false}
+        />
+      );
+      expect(screen.queryByText(/AI regeneration failed/)).not.toBeInTheDocument();
+    });
+  });
 });

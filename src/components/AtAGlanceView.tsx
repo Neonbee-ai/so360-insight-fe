@@ -81,6 +81,7 @@ interface NeuraSummary {
     sections: AiSummarySections | null;
     generatedAt: string | null;
     cached: boolean;
+    degraded?: boolean;
     loading: boolean;
     regenerating: boolean;
     error: string | null;
@@ -229,6 +230,7 @@ export const AtAGlanceView: React.FC<AtAGlanceViewProps> = ({ segments, onSegmen
                     sections: data.sections || null,
                     generatedAt: data.generated_at || null,
                     cached: data.cached ?? false,
+                    degraded: data.degraded ?? false,
                     loading: false,
                     error: null,
                 };
@@ -282,6 +284,7 @@ export const AtAGlanceView: React.FC<AtAGlanceViewProps> = ({ segments, onSegmen
                     sections: data.sections || null,
                     generatedAt: data.generated_at || null,
                     cached: false,
+                    degraded: data.degraded ?? false,
                     regenerating: false,
                     error: null,
                 };
@@ -403,6 +406,7 @@ export const AtAGlanceView: React.FC<AtAGlanceViewProps> = ({ segments, onSegmen
                                     signals={segmentSignals}
                                     generatedAt={summary.generatedAt}
                                     cached={summary.cached}
+                                    degraded={summary.degraded}
                                     loading={summary.loading}
                                     regenerating={summary.regenerating}
                                     error={summary.error}

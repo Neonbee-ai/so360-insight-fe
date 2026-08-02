@@ -41,7 +41,9 @@ vi.mock('./DataFreshnessIndicator', () => ({
   DataFreshnessIndicator: () => <div data-testid="freshness" />,
 }));
 vi.mock('./NeuraSummaryCard', () => ({
-  NeuraSummaryCard: (props: any) => <div data-testid="neura-summary">{props.title}</div>,
+  NeuraSummaryCard: (props: any) => (
+    <div data-testid="neura-summary" data-degraded={String(!!props.degraded)}>{props.title}</div>
+  ),
 }));
 vi.mock('./KPICard', () => ({
   KPICard: (props: any) => <div data-testid="kpi-card">{props.kpi.kpi_name}</div>,
@@ -181,6 +183,18 @@ describe('SegmentTabContent', () => {
       render(<SegmentTabContent segmentCode="finance" />);
       await waitFor(() => {
         expect(mockApi.getAiSummary).toHaveBeenCalledWith('finance');
+      });
+    });
+
+    it('When the backend flags the response as degraded (Neura failed, stale data served) / Then it is passed through to NeuraSummaryCard', async () => {
+      mockApi.getSegmentDetail.mockResolvedValue(mockSegmentDetail);
+      mockApi.getKPITrend.mockResolvedValue({ kpi_code: 'k1', kpi_name: 'Total Revenue', data: [] });
+      mockApi.getAiSummary.mockResolvedValue({
+        summary: 'Old summary', sections: null, generated_at: '2024-01-01', cached: true, degraded: true,
+      });
+      render(<SegmentTabContent segmentCode="finance" />);
+      await waitFor(() => {
+        expect(screen.getByTestId('neura-summary')).toHaveAttribute('data-degraded', 'true');
       });
     });
   });
