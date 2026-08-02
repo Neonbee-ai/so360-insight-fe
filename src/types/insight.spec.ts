@@ -1,41 +1,41 @@
 /**
  * BDD unit tests for insight type definitions.
  * These tests validate the runtime shape of type-compatible objects and
- * the SignalSeverity enum values that have a concrete JS representation.
+ * the AlertSeverity enum values that have a concrete JS representation.
  */
 import { describe, it, expect } from 'vitest';
-import { SignalSeverity } from './insight';
+import { AlertSeverity } from './insight';
 import type {
   KPI,
-  Signal,
-  SignalsSummary,
+  Alert,
+  AlertsSummary,
   Dashboard,
   ModuleInsights,
-  SignalsResponse,
+  AlertsResponse,
   SegmentSummary,
   SegmentDetail,
   TrendData,
   RecommendedAction,
 } from './insight';
 
-// ─── SignalSeverity enum ──────────────────────────────────────────────────────
+// ─── AlertSeverity enum ──────────────────────────────────────────────────────
 
-describe('SignalSeverity', () => {
-  describe('Given the SignalSeverity enum', () => {
+describe('AlertSeverity', () => {
+  describe('Given the AlertSeverity enum', () => {
     it('When INFO accessed / Then equals "info"', () => {
-      expect(SignalSeverity.INFO).toBe('info');
+      expect(AlertSeverity.INFO).toBe('info');
     });
 
     it('When WARNING accessed / Then equals "warning"', () => {
-      expect(SignalSeverity.WARNING).toBe('warning');
+      expect(AlertSeverity.WARNING).toBe('warning');
     });
 
     it('When CRITICAL accessed / Then equals "critical"', () => {
-      expect(SignalSeverity.CRITICAL).toBe('critical');
+      expect(AlertSeverity.CRITICAL).toBe('critical');
     });
 
     it('When all values listed / Then has exactly three members', () => {
-      const values = Object.values(SignalSeverity);
+      const values = Object.values(AlertSeverity);
       expect(values).toHaveLength(3);
       expect(values).toContain('info');
       expect(values).toContain('warning');
@@ -100,46 +100,46 @@ describe('KPI type', () => {
   });
 });
 
-// ─── Signal type ──────────────────────────────────────────────────────────────
+// ─── Alert type ──────────────────────────────────────────────────────────────
 
-describe('Signal type', () => {
-  describe('Given a valid Signal object', () => {
-    const signal: Signal = {
+describe('Alert type', () => {
+  describe('Given a valid Alert object', () => {
+    const alert: Alert = {
       id: 'sig-001',
       tenant_id: 'tenant-abc',
       org_id: 'org-xyz',
       title: 'Low Inventory Alert',
       description: 'Stock level below reorder point',
-      severity: SignalSeverity.WARNING,
+      severity: AlertSeverity.WARNING,
       module_code: 'module:inventory',
       created_at: '2026-05-17T10:00:00Z',
     };
 
     it('When constructed / Then id is a string', () => {
-      expect(typeof signal.id).toBe('string');
+      expect(typeof alert.id).toBe('string');
     });
 
     it('When constructed / Then severity equals WARNING', () => {
-      expect(signal.severity).toBe('warning');
+      expect(alert.severity).toBe('warning');
     });
 
     it('When optional fields absent / Then resolved_at is undefined', () => {
-      expect(signal.resolved_at).toBeUndefined();
+      expect(alert.resolved_at).toBeUndefined();
     });
 
     it('When optional fields absent / Then recommended_actions is undefined', () => {
-      expect(signal.recommended_actions).toBeUndefined();
+      expect(alert.recommended_actions).toBeUndefined();
     });
   });
 
-  describe('Given a resolved Signal', () => {
-    const signal: Signal = {
+  describe('Given a resolved Alert', () => {
+    const alert: Alert = {
       id: 'sig-002',
       tenant_id: 'tenant-abc',
       org_id: 'org-xyz',
       title: 'Resolved Alert',
       description: 'Was resolved',
-      severity: SignalSeverity.INFO,
+      severity: AlertSeverity.INFO,
       module_code: 'module:crm',
       created_at: '2026-05-10T08:00:00Z',
       resolved_at: '2026-05-10T09:00:00Z',
@@ -148,11 +148,11 @@ describe('Signal type', () => {
     };
 
     it('When resolved_at set / Then it is a date string', () => {
-      expect(typeof signal.resolved_at).toBe('string');
+      expect(typeof alert.resolved_at).toBe('string');
     });
 
     it('When resolved_by set / Then it contains user id', () => {
-      expect(signal.resolved_by).toBe('user-001');
+      expect(alert.resolved_by).toBe('user-001');
     });
   });
 });
@@ -194,11 +194,11 @@ describe('RecommendedAction type', () => {
   });
 });
 
-// ─── SignalsSummary type ──────────────────────────────────────────────────────
+// ─── AlertsSummary type ──────────────────────────────────────────────────────
 
-describe('SignalsSummary type', () => {
+describe('AlertsSummary type', () => {
   describe('Given a valid summary', () => {
-    const summary: SignalsSummary = { total: 10, critical: 2, warning: 5, info: 3 };
+    const summary: AlertsSummary = { total: 10, critical: 2, warning: 5, info: 3 };
 
     it('When constructed / Then total equals sum of severities', () => {
       expect(summary.total).toBe(summary.critical + summary.warning + summary.info);
@@ -254,11 +254,11 @@ describe('ModuleInsights type', () => {
   });
 });
 
-// ─── SignalsResponse type ─────────────────────────────────────────────────────
+// ─── AlertsResponse type ─────────────────────────────────────────────────────
 
-describe('SignalsResponse type', () => {
+describe('AlertsResponse type', () => {
   describe('Given a paginated response', () => {
-    const response: SignalsResponse = {
+    const response: AlertsResponse = {
       data: [],
       total: 42,
       page: 1,

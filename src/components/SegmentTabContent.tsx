@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Loader2, AlertCircle } from 'lucide-react';
 import { getInsightIcon } from '../constants/iconMap';
 import { KPICard } from './KPICard';
-import { SignalCard } from './SignalCard';
+import { AlertCard } from './AlertCard';
 import { TrendChart } from './TrendChart';
 import { DataFreshnessIndicator } from './DataFreshnessIndicator';
 import { TimeRangeSelector, TimeRange, getDaysForRange } from './TimeRangeSelector';
@@ -160,17 +160,17 @@ export const SegmentTabContent: React.FC<SegmentTabContentProps> = ({ segmentCod
         return colorMap[colorScheme.primary] || 'text-slate-400';
     };
 
-    const handleResolveSignal = async (signalId: string) => {
+    const handleResolveAlert = async (alertId: string) => {
         try {
-            await insightApi.resolveSignal(signalId);
+            await insightApi.resolveAlert(alertId);
             if (segment) {
                 setSegment({
                     ...segment,
-                    signals: segment.signals.filter((s) => s.id !== signalId),
+                    signals: segment.signals.filter((s) => s.id !== alertId),
                 });
             }
         } catch (err) {
-            console.error('Failed to resolve signal:', err);
+            console.error('Failed to resolve alert:', err);
         }
     };
 
@@ -224,7 +224,7 @@ export const SegmentTabContent: React.FC<SegmentTabContentProps> = ({ segmentCod
         );
     }
 
-    const unresolvedSignals = segment.signals.filter((s) => !s.resolved_at);
+    const unresolvedAlerts = segment.signals.filter((s) => !s.resolved_at);
 
     return (
         <div className="space-y-8">
@@ -240,7 +240,7 @@ export const SegmentTabContent: React.FC<SegmentTabContentProps> = ({ segmentCod
                         <div className="flex items-center gap-4 mt-3 text-sm">
                             <span className="text-slate-500">{segment.kpis.length} KPIs</span>
                             <span className="text-slate-600">•</span>
-                            <span className="text-slate-500">{unresolvedSignals.length} Active Signals</span>
+                            <span className="text-slate-500">{unresolvedAlerts.length} Active Alerts</span>
                         </div>
                     </div>
                 </div>
@@ -325,22 +325,22 @@ export const SegmentTabContent: React.FC<SegmentTabContentProps> = ({ segmentCod
                 </div>
             )}
 
-            {/* Section 4: Active Signals */}
-            {unresolvedSignals.length > 0 && (
+            {/* Section 4: Active Alerts */}
+            {unresolvedAlerts.length > 0 && (
                 <div>
                     <h2 className="text-xl font-semibold text-slate-100 mb-4">
-                        Active Signals ({unresolvedSignals.length})
+                        Active Alerts ({unresolvedAlerts.length})
                     </h2>
                     <div className="space-y-3">
-                        {unresolvedSignals.slice(0, 10).map((signal) => (
-                            <SignalCard key={signal.id} signal={signal} onResolve={handleResolveSignal} />
+                        {unresolvedAlerts.slice(0, 10).map((alert) => (
+                            <AlertCard key={alert.id} alert={alert} onResolve={handleResolveAlert} />
                         ))}
                     </div>
 
-                    {unresolvedSignals.length > 10 && (
+                    {unresolvedAlerts.length > 10 && (
                         <div className="mt-4 text-center">
                             <p className="text-sm text-slate-400">
-                                Showing first 10 of {unresolvedSignals.length} signals
+                                Showing first 10 of {unresolvedAlerts.length} alerts
                             </p>
                         </div>
                     )}
@@ -354,10 +354,10 @@ export const SegmentTabContent: React.FC<SegmentTabContentProps> = ({ segmentCod
                 </div>
             )}
 
-            {unresolvedSignals.length === 0 && segment.kpis.length > 0 && (
+            {unresolvedAlerts.length === 0 && segment.kpis.length > 0 && (
                 <div className="text-center py-8 bg-slate-900/30 rounded-lg border border-slate-800">
                     <AlertCircle className="w-12 h-12 text-slate-600 mx-auto mb-3" />
-                    <p className="text-slate-400">No active signals for this segment</p>
+                    <p className="text-slate-400">No active alerts for this segment</p>
                 </div>
             )}
         </div>

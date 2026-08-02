@@ -15,7 +15,7 @@ vi.mock('../services/insightApi', () => ({
   insightApi: {
     getSegmentDetail: vi.fn(),
     getKPITrend: vi.fn(),
-    resolveSignal: vi.fn(),
+    resolveAlert: vi.fn(),
     getAuthHeaders: vi.fn(() => ({})),
     getAiSummary: vi.fn(),
     regenerateAiSummary: vi.fn(),
@@ -48,8 +48,8 @@ vi.mock('./NeuraSummaryCard', () => ({
 vi.mock('./KPICard', () => ({
   KPICard: (props: any) => <div data-testid="kpi-card">{props.kpi.kpi_name}</div>,
 }));
-vi.mock('./SignalCard', () => ({
-  SignalCard: (props: any) => <div data-testid="signal-card">{props.signal.title}</div>,
+vi.mock('./AlertCard', () => ({
+  AlertCard: (props: any) => <div data-testid="alert-card">{props.alert.title}</div>,
 }));
 vi.mock('./TrendChart', () => ({
   TrendChart: (props: any) => <div data-testid="trend-chart">{props.trendData.kpi_name}</div>,
@@ -131,12 +131,12 @@ describe('SegmentTabContent', () => {
       });
     });
 
-    it('When segment has unresolved signals / Then shows signal cards', async () => {
+    it('When segment has unresolved alerts / Then shows alert cards', async () => {
       mockApi.getSegmentDetail.mockResolvedValue(mockSegmentDetail);
       mockApi.getKPITrend.mockResolvedValue({ kpi_code: 'k1', kpi_name: 'Revenue', data: [] });
       render(<SegmentTabContent segmentCode="revenue" />);
       await waitFor(() => {
-        expect(screen.getByTestId('signal-card')).toBeInTheDocument();
+        expect(screen.getByTestId('alert-card')).toBeInTheDocument();
       });
     });
   });

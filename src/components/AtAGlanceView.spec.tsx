@@ -13,9 +13,9 @@ vi.mock('@so360/shell-context', () => ({
 
 vi.mock('../services/insightApi', () => ({
   insightApi: {
-    getSignals: vi.fn(),
+    getAlerts: vi.fn(),
     getSegmentDetail: vi.fn(),
-    resolveSignal: vi.fn(),
+    resolveAlert: vi.fn(),
     getAiSummary: vi.fn(),
     regenerateAiSummary: vi.fn(),
   },
@@ -24,8 +24,8 @@ vi.mock('../services/insightApi', () => ({
 vi.mock('./KPICard', () => ({
   KPICard: (props: any) => <div data-testid="kpi-card">{props.kpi.kpi_name}</div>,
 }));
-vi.mock('./SignalCard', () => ({
-  SignalCard: (props: any) => <div data-testid="signal-card">{props.signal.title}</div>,
+vi.mock('./AlertCard', () => ({
+  AlertCard: (props: any) => <div data-testid="alert-card">{props.alert.title}</div>,
 }));
 vi.mock('./NeuraSummaryCard', () => ({
   NeuraSummaryCard: (props: any) => (
@@ -64,7 +64,7 @@ describe('AtAGlanceView', () => {
   beforeEach(() => {
     vi.resetAllMocks();
     mockShell = { effectiveFlagsLoaded: true, isFeatureEnabled: () => true };
-    mockApi.getSignals.mockResolvedValue({ data: [] });
+    mockApi.getAlerts.mockResolvedValue({ data: [] });
     mockApi.getSegmentDetail.mockResolvedValue({
       kpis: [{ kpi_code: 'r1', kpi_name: 'Total Revenue', value: 50000, unit: 'USD', trend: 'up', category: 'critical', module_code: 'module:crm' }],
     });
@@ -77,7 +77,7 @@ describe('AtAGlanceView', () => {
 
   describe('Given loading state', () => {
     it('When data is being fetched / Then shows skeleton', () => {
-      mockApi.getSignals.mockReturnValue(new Promise(() => {}));
+      mockApi.getAlerts.mockReturnValue(new Promise(() => {}));
       const { container } = render(<AtAGlanceView segments={mockSegments} onSegmentClick={vi.fn()} />);
       expect(container.querySelector('.animate-pulse')).toBeInTheDocument();
     });
@@ -105,10 +105,10 @@ describe('AtAGlanceView', () => {
       });
     });
 
-    it('When no critical signals / Then shows no signals message', async () => {
+    it('When no critical alerts / Then shows no alerts message', async () => {
       render(<AtAGlanceView segments={mockSegments} onSegmentClick={vi.fn()} />);
       await waitFor(() => {
-        expect(screen.getByText('No critical signals at this time')).toBeInTheDocument();
+        expect(screen.getByText('No critical alerts at this time')).toBeInTheDocument();
       });
     });
 

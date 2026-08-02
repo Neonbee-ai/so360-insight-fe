@@ -1,15 +1,15 @@
 import React from 'react';
 import { AlertCircle, AlertTriangle, Info, CheckCircle, ArrowRight } from 'lucide-react';
-import type { Signal } from '../types/insight';
+import type { Alert } from '../types/insight';
 import { useFormatters } from '@so360/formatters';
 import { useShell } from '@so360/shell-context';
 
-interface SignalCardProps {
-    signal: Signal;
-    onResolve: (signalId: string) => void;
+interface AlertCardProps {
+    alert: Alert;
+    onResolve: (alertId: string) => void;
 }
 
-export const SignalCard: React.FC<SignalCardProps> = ({ signal, onResolve }) => {
+export const AlertCard: React.FC<AlertCardProps> = ({ alert, onResolve }) => {
     const { businessSettings } = useShell();
     const formatters = useFormatters({
         currency: businessSettings?.base_currency || 'USD',
@@ -18,7 +18,7 @@ export const SignalCard: React.FC<SignalCardProps> = ({ signal, onResolve }) => 
     });
 
     const getSeverityIcon = () => {
-        switch (signal.severity) {
+        switch (alert.severity) {
             case 'critical':
                 return <AlertCircle className="w-5 h-5 text-red-500" />;
             case 'warning':
@@ -29,7 +29,7 @@ export const SignalCard: React.FC<SignalCardProps> = ({ signal, onResolve }) => 
     };
 
     const getSeverityColor = () => {
-        switch (signal.severity) {
+        switch (alert.severity) {
             case 'critical':
                 return 'border-red-500/30 bg-red-500/5';
             case 'warning':
@@ -40,7 +40,7 @@ export const SignalCard: React.FC<SignalCardProps> = ({ signal, onResolve }) => 
     };
 
     const getSeverityBadgeColor = () => {
-        switch (signal.severity) {
+        switch (alert.severity) {
             case 'critical':
                 return 'bg-red-500/20 text-red-400';
             case 'warning':
@@ -50,7 +50,7 @@ export const SignalCard: React.FC<SignalCardProps> = ({ signal, onResolve }) => 
         }
     };
 
-    const hasActions = signal.recommended_actions && signal.recommended_actions.length > 0;
+    const hasActions = alert.recommended_actions && alert.recommended_actions.length > 0;
 
     const handleNavigate = (path: string) => {
         window.location.href = path;
@@ -62,19 +62,19 @@ export const SignalCard: React.FC<SignalCardProps> = ({ signal, onResolve }) => 
                 <div className="flex items-start gap-3 flex-1">
                     {getSeverityIcon()}
                     <div className="flex-1">
-                        <h3 className="text-slate-100 font-semibold mb-1">{signal.title}</h3>
-                        <p className="text-sm text-slate-400">{signal.description}</p>
+                        <h3 className="text-slate-100 font-semibold mb-1">{alert.title}</h3>
+                        <p className="text-sm text-slate-400">{alert.description}</p>
                     </div>
                 </div>
                 <span className={`px-2 py-1 rounded text-xs font-medium ${getSeverityBadgeColor()}`}>
-                    {signal.severity.toUpperCase()}
+                    {alert.severity.toUpperCase()}
                 </span>
             </div>
 
             {/* Recommended Actions */}
-            {hasActions && !signal.resolved_at && (
+            {hasActions && !alert.resolved_at && (
                 <div className="mt-3 flex flex-wrap gap-2">
-                    {signal.recommended_actions!.map((action, idx) => (
+                    {alert.recommended_actions!.map((action, idx) => (
                         <button
                             key={idx}
                             onClick={() => handleNavigate(action.path)}
@@ -90,12 +90,12 @@ export const SignalCard: React.FC<SignalCardProps> = ({ signal, onResolve }) => 
 
             <div className="flex items-center justify-between mt-4">
                 <div className="text-xs text-slate-500">
-                    {formatters.formatDateTime(signal.created_at)}
+                    {formatters.formatDateTime(alert.created_at)}
                 </div>
 
-                {!signal.resolved_at ? (
+                {!alert.resolved_at ? (
                     <button
-                        onClick={() => onResolve(signal.id)}
+                        onClick={() => onResolve(alert.id)}
                         className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded transition-colors"
                     >
                         Resolve

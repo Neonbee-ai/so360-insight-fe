@@ -1,4 +1,4 @@
-export enum SignalSeverity {
+export enum AlertSeverity {
     INFO = 'info',
     WARNING = 'warning',
     CRITICAL = 'critical',
@@ -13,6 +13,7 @@ export interface KPI {
     trend_percentage?: number;
     category: string;
     module_code: string;
+    kpi_type?: 'performance' | 'counter';
     sparkline_data?: Array<{
         date: string;
         value: number;
@@ -26,13 +27,13 @@ export interface RecommendedAction {
     description?: string;
 }
 
-export interface Signal {
+export interface Alert {
     id: string;
     tenant_id: string;
     org_id: string;
     title: string;
     description: string;
-    severity: SignalSeverity;
+    severity: AlertSeverity;
     module_code: string;
     entity_type?: string;
     entity_id?: string;
@@ -44,7 +45,7 @@ export interface Signal {
     recommended_actions?: RecommendedAction[];
 }
 
-export interface SignalsSummary {
+export interface AlertsSummary {
     total: number;
     critical: number;
     warning: number;
@@ -53,19 +54,19 @@ export interface SignalsSummary {
 
 export interface Dashboard {
     kpis: KPI[];
-    signals_summary: SignalsSummary;
+    signals_summary: AlertsSummary;
     computed_at: string;
 }
 
 export interface ModuleInsights {
     module_code: string;
     kpis: KPI[];
-    active_signals: Signal[];
+    active_signals: Alert[];
     computed_at: string;
 }
 
-export interface SignalsResponse {
-    data: Signal[];
+export interface AlertsResponse {
+    data: Alert[];
     total: number;
     page: number;
     limit: number;
@@ -99,7 +100,7 @@ export interface SegmentDetail {
         secondary: string;
     };
     kpis: KPI[];
-    signals: Signal[];
+    signals: Alert[];
     trends: TrendData[];
 }
 

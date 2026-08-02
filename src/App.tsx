@@ -10,8 +10,8 @@ import { MfeShellInitializer } from './components/MfeShellInitializer';
 const InsightDashboard = lazy(() =>
     import('./pages/InsightDashboard').then(m => ({ default: m.InsightDashboard }))
 );
-const SignalsPage = lazy(() =>
-    import('./pages/SignalsPage').then(m => ({ default: m.SignalsPage }))
+const AlertsPage = lazy(() =>
+    import('./pages/AlertsPage').then(m => ({ default: m.AlertsPage }))
 );
 
 // Lightweight fallback shown while a lazy route chunk loads. Mirrors the
@@ -86,7 +86,7 @@ function App() {
             <Suspense fallback={<RouteFallback />}>
                 <Routes>
                     <Route path="/" element={<InsightDashboard />} />
-                    <Route path="signals" element={<SignalsPage />} />
+                    <Route path="alerts" element={<AlertsPage />} />
 
                     {/* Path-based segment routes — URL stays as /insight/revenue etc. */}
                     <Route path=":segmentCode" element={<SegmentRoute />} />

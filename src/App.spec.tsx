@@ -25,8 +25,8 @@ vi.mock('./pages/InsightDashboard', () => ({
     <div data-testid="insight-dash" data-tab={initialTab ?? ''}>InsightDashboard</div>
   ),
 }));
-vi.mock('./pages/SignalsPage', () => ({
-  SignalsPage: () => <div>SignalsPage</div>,
+vi.mock('./pages/AlertsPage', () => ({
+  AlertsPage: () => <div>AlertsPage</div>,
 }));
 
 import App from './App';
@@ -60,16 +60,16 @@ describe('App', () => {
       });
     });
 
-    it('When navigating to signals / Then renders signals page', async () => {
+    it('When navigating to alerts / Then renders alerts page', async () => {
       mockShellBridge = {
         currentTenant: { id: 't1' },
         currentOrg: { id: 'o1' },
         accessToken: 'tok',
         effectiveFlagsLoaded: true,
       };
-      render(<MemoryRouter initialEntries={['/signals']}><App /></MemoryRouter>);
+      render(<MemoryRouter initialEntries={['/alerts']}><App /></MemoryRouter>);
       await waitFor(() => {
-        expect(screen.getByText('SignalsPage')).toBeInTheDocument();
+        expect(screen.getByText('AlertsPage')).toBeInTheDocument();
       });
     });
   });

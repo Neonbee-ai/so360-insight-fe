@@ -35,6 +35,7 @@ const KPICardInner: React.FC<KPICardProps> = ({ kpi }) => {
     };
 
     const displayUnit = classifyKpiUnit(kpi.unit) === 'count' ? kpi.unit : '';
+    const isCounter = kpi.kpi_type === 'counter';
 
     const getTrendIcon = () => {
         if (kpi.trend === 'up') return <TrendingUp className="w-5 h-5 text-green-500" />;
@@ -55,7 +56,7 @@ const KPICardInner: React.FC<KPICardProps> = ({ kpi }) => {
                     <p className="text-sm text-slate-400 mb-1">{kpi.kpi_name}</p>
                     <p className="text-xs text-slate-500">{kpi.category}</p>
                 </div>
-                {getTrendIcon()}
+                {!isCounter && getTrendIcon()}
             </div>
 
             <div className="flex items-baseline gap-2 mb-2">
@@ -63,7 +64,7 @@ const KPICardInner: React.FC<KPICardProps> = ({ kpi }) => {
                 {displayUnit && <span className="text-sm text-slate-400">{displayUnit}</span>}
             </div>
 
-            {kpi.trend_percentage !== undefined && (
+            {!isCounter && kpi.trend_percentage !== undefined && (
                 <div className={`text-sm ${getTrendColor()}`}>
                     {kpi.trend === 'up' ? '+' : kpi.trend === 'down' ? '-' : ''}
                     {formatNumber(Math.abs(kpi.trend_percentage), 1)}% from last period
@@ -71,7 +72,7 @@ const KPICardInner: React.FC<KPICardProps> = ({ kpi }) => {
             )}
 
             {/* 7-Day Sparkline */}
-            {kpi.sparkline_data && kpi.sparkline_data.length > 0 && (
+            {!isCounter && kpi.sparkline_data && kpi.sparkline_data.length > 0 && (
                 <div className="mt-3 pt-3 border-t border-slate-800">
                     <p className="text-xs text-slate-500 mb-1">Last 7 days</p>
                     <SparklineChart

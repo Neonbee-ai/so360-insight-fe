@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { AlertCircle, Filter } from 'lucide-react';
 import { insightApi } from '../services/insightApi';
-import { SignalCard } from '../components/SignalCard';
-import type { Signal } from '../types/insight';
+import { AlertCard } from '../components/AlertCard';
+import type { Alert } from '../types/insight';
 import { useModules, useFeatureFlags, useShellBridge } from '@so360/shell-context';
 
 const MODULE_CODE_TO_ID: Record<string, string> = {
@@ -17,65 +17,65 @@ const MODULE_CODE_TO_ID: Record<string, string> = {
     'module:dailystore': 'dailystore',
 };
 
-export const SignalsPage: React.FC = () => {
+export const AlertsPage: React.FC = () => {
     const { isModuleEnabled } = useModules();
     const { isFeatureEnabled } = useFeatureFlags();
     const shell = useShellBridge();
     const flagsLoaded = shell?.effectiveFlagsLoaded;
-    const canAccessSignals = flagsLoaded && (isFeatureEnabled('submodule:insight:signals') ?? true);
-    const [signals, setSignals] = useState<Signal[]>([]);
+    const canAccessAlerts = flagsLoaded && (isFeatureEnabled('submodule:insight:signals') ?? true);
+    const [alerts, setAlerts] = useState<Alert[]>([]);
     const [loading, setLoading] = useState(true);
     const [severityFilter, setSeverityFilter] = useState<string>('all');
     const [unresolvedOnly, setUnresolvedOnly] = useState(true);
 
     useEffect(() => {
-        if (canAccessSignals) {
-            loadSignals();
+        if (canAccessAlerts) {
+            loadAlerts();
         }
-    }, [severityFilter, unresolvedOnly, canAccessSignals]);
+    }, [severityFilter, unresolvedOnly, canAccessAlerts]);
 
-    const loadSignals = async () => {
+    const loadAlerts = async () => {
         try {
             setLoading(true);
-            const response = await insightApi.getSignals({
+            const response = await insightApi.getAlerts({
                 severity: severityFilter !== 'all' ? severityFilter : undefined,
                 unresolved_only: unresolvedOnly,
                 limit: 50,
             });
-            setSignals(response.data);
+            setAlerts(response.data);
         } catch (err) {
-            console.error('Failed to load signals:', err);
+            console.error('Failed to load alerts:', err);
         } finally {
             setLoading(false);
         }
     };
 
-    const handleResolveSignal = async (signalId: string) => {
+    const handleResolveAlert = async (alertId: string) => {
         try {
-            await insightApi.resolveSignal(signalId, 'Resolved from signals page');
-            loadSignals();
+            await insightApi.resolveAlert(alertId, 'Resolved from alerts page');
+            loadAlerts();
         } catch (err) {
-            console.error('Failed to resolve signal:', err);
+            console.error('Failed to resolve alert:', err);
         }
     };
 
-    const visibleSignals = signals.filter(signal => {
-        if (!signal.module_code) return true;
-        const moduleId = MODULE_CODE_TO_ID[signal.module_code];
+    const visibleAlerts = alerts.filter(alert => {
+        if (!alert.module_code) return true;
+        const moduleId = MODULE_CODE_TO_ID[alert.module_code];
         return !moduleId || isModuleEnabled(moduleId);
     });
 
-    if (!canAccessSignals) {
+    if (!canAccessAlerts) {
         return (
             <div className="min-h-screen bg-slate-950 p-6">
                 <div className="max-w-2xl mx-auto mt-16 text-center">
                     <AlertCircle className="w-16 h-16 text-slate-600 mx-auto mb-4" />
-                    <h2 className="text-2xl font-bold text-slate-100 mb-2">AI Signals</h2>
+                    <h2 className="text-2xl font-bold text-slate-100 mb-2">AI Alerts</h2>
                     <p className="text-slate-400 mb-6">
                         Intelligent anomaly detection and automated alerts are available on Growth plans and above.
                     </p>
                     <div className="inline-block px-4 py-2 bg-blue-600/20 border border-blue-500/30 rounded-lg text-blue-400 text-sm font-medium">
-                        Upgrade to Growth to unlock Signals
+                        Upgrade to Growth to unlock Alerts
                     </div>
                 </div>
             </div>
@@ -89,7 +89,7 @@ export const SignalsPage: React.FC = () => {
                 <div className="mb-8">
                     <div className="flex items-center gap-3 mb-2">
                         <AlertCircle className="w-8 h-8 text-yellow-500" />
-                        <h1 className="text-3xl font-bold text-slate-100">Signals</h1>
+                        <h1 className="text-3xl font-bold text-slate-100">Alerts</h1>
                     </div>
                     <p className="text-slate-400">Manage and resolve intelligent alerts</p>
                 </div>
@@ -142,21 +142,21 @@ export const SignalsPage: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Signals List */}
+                {/* Alerts List */}
                 {loading ? (
-                    <div className="text-center text-slate-400 py-12">Loading signals...</div>
-                ) : visibleSignals.length > 0 ? (
+                    <div className="text-center text-slate-400 py-12">Loading alerts...</div>
+                ) : visibleAlerts.length > 0 ? (
                     <div className="space-y-4">
-                        {visibleSignals.map((signal) => (
-                            <SignalCard key={signal.id} signal={signal} onResolve={handleResolveSignal} />
+                        {visibleAlerts.map((alert) => (
+                            <AlertCard key={alert.id} alert={alert} onResolve={handleResolveAlert} />
                         ))}
                     </div>
                 ) : (
                     <div className="bg-slate-900/50 border border-slate-800 rounded-lg p-12 text-center">
                         <AlertCircle className="w-12 h-12 text-slate-600 mx-auto mb-4" />
-                        <p className="text-slate-400 text-lg mb-2">No signals found</p>
+                        <p className="text-slate-400 text-lg mb-2">No alerts found</p>
                         <p className="text-slate-500 text-sm">
-                            {unresolvedOnly ? 'All signals have been resolved!' : 'No signals match the current filters.'}
+                            {unresolvedOnly ? 'All alerts have been resolved!' : 'No alerts match the current filters.'}
                         </p>
                     </div>
                 )}

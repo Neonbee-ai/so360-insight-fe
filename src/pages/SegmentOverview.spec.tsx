@@ -82,11 +82,11 @@ describe('SegmentOverview', () => {
       });
     });
 
-    it('When segment has signals / Then shows signal count', async () => {
+    it('When segment has signals / Then shows alert count', async () => {
       mockApi.getSegments.mockResolvedValue(segments);
       wrap(<SegmentOverview />);
       await waitFor(() => {
-        expect(screen.getByText('2 signals')).toBeInTheDocument();
+        expect(screen.getByText('2 alerts')).toBeInTheDocument();
       });
     });
   });

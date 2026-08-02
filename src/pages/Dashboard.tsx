@@ -2,14 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { Activity, TrendingUp, AlertCircle } from 'lucide-react';
 import { insightApi } from '../services/insightApi';
 import { KPICard } from '../components/KPICard';
-import { SignalCard } from '../components/SignalCard';
-import type { Dashboard as DashboardType, Signal } from '../types/insight';
+import { AlertCard } from '../components/AlertCard';
+import type { Dashboard as DashboardType, Alert } from '../types/insight';
 import { useFormatters } from '@so360/formatters';
 import { useShell } from '@so360/shell-context';
 
 export const Dashboard: React.FC = () => {
     const [dashboard, setDashboard] = useState<DashboardType | null>(null);
-    const [recentSignals, setRecentSignals] = useState<Signal[]>([]);
+    const [recentAlerts, setRecentAlerts] = useState<Alert[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -22,12 +22,12 @@ export const Dashboard: React.FC = () => {
 
     useEffect(() => {
         loadDashboard();
-        loadRecentSignals();
+        loadRecentAlerts();
 
         // Auto-refresh every 5 minutes so stale KPI data is updated without user interaction
         const pollInterval = setInterval(() => {
             loadDashboard();
-            loadRecentSignals();
+            loadRecentAlerts();
         }, 5 * 60 * 1000);
 
         return () => clearInterval(pollInterval);
@@ -47,22 +47,22 @@ export const Dashboard: React.FC = () => {
         }
     };
 
-    const loadRecentSignals = async () => {
+    const loadRecentAlerts = async () => {
         try {
-            const response = await insightApi.getSignals({ unresolved_only: true, limit: 5 });
-            setRecentSignals(response.data);
+            const response = await insightApi.getAlerts({ unresolved_only: true, limit: 5 });
+            setRecentAlerts(response.data);
         } catch (err) {
-            console.error('Failed to load signals:', err);
+            console.error('Failed to load alerts:', err);
         }
     };
 
-    const handleResolveSignal = async (signalId: string) => {
+    const handleResolveAlert = async (alertId: string) => {
         try {
-            await insightApi.resolveSignal(signalId, 'Resolved from dashboard');
-            loadRecentSignals();
+            await insightApi.resolveAlert(alertId, 'Resolved from dashboard');
+            loadRecentAlerts();
             loadDashboard();
         } catch (err) {
-            console.error('Failed to resolve signal:', err);
+            console.error('Failed to resolve alert:', err);
         }
     };
 
@@ -91,16 +91,16 @@ export const Dashboard: React.FC = () => {
                         <Activity className="w-8 h-8 text-blue-500" />
                         <h1 className="text-3xl font-bold text-slate-100">Insight Dashboard</h1>
                     </div>
-                    <p className="text-slate-400">Real-time KPIs and intelligent signals across all modules</p>
+                    <p className="text-slate-400">Real-time KPIs and intelligent alerts across all modules</p>
                 </div>
 
-                {/* Signals Summary */}
+                {/* Alerts Summary */}
                 {dashboard && (
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
                         <div className="bg-slate-900/50 border border-slate-800 rounded-lg p-4">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="text-sm text-slate-400 mb-1">Total Signals</p>
+                                    <p className="text-sm text-slate-400 mb-1">Total Alerts</p>
                                     <p className="text-2xl font-bold text-slate-100">{dashboard.signals_summary.total}</p>
                                 </div>
                                 <AlertCircle className="w-8 h-8 text-slate-600" />
@@ -149,20 +149,20 @@ export const Dashboard: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Recent Signals */}
+                {/* Recent Alerts */}
                 <div>
                     <div className="flex items-center gap-2 mb-4">
                         <AlertCircle className="w-5 h-5 text-yellow-500" />
-                        <h2 className="text-xl font-semibold text-slate-100">Active Signals</h2>
+                        <h2 className="text-xl font-semibold text-slate-100">Active Alerts</h2>
                     </div>
                     <div className="space-y-4">
-                        {recentSignals.length > 0 ? (
-                            recentSignals.map((signal) => (
-                                <SignalCard key={signal.id} signal={signal} onResolve={handleResolveSignal} />
+                        {recentAlerts.length > 0 ? (
+                            recentAlerts.map((alert) => (
+                                <AlertCard key={alert.id} alert={alert} onResolve={handleResolveAlert} />
                             ))
                         ) : (
                             <div className="bg-slate-900/50 border border-slate-800 rounded-lg p-8 text-center">
-                                <p className="text-slate-400">No active signals. Everything looks good!</p>
+                                <p className="text-slate-400">No active alerts. Everything looks good!</p>
                             </div>
                         )}
                     </div>

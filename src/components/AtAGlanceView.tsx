@@ -2,11 +2,11 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { TrendingUp, TrendingDown, Minus, AlertCircle } from 'lucide-react';
 import { getInsightIcon } from '../constants/iconMap';
 import { KPICard } from './KPICard';
-import { SignalCard } from './SignalCard';
+import { AlertCard } from './AlertCard';
 import { NeuraSummaryCard } from './NeuraSummaryCard';
 import { ModuleCoveragePanel } from './ModuleCoveragePanel';
 import { insightApi } from '../services/insightApi';
-import type { SegmentSummary, KPI, Signal, AiSummarySections } from '../types/insight';
+import type { SegmentSummary, KPI, Alert, AiSummarySections } from '../types/insight';
 import { useModules, useFeatureFlags, useShellBridge, useShell } from '@so360/shell-context';
 import { SEGMENT_MODULE_DEPS } from '../constants/moduleMapping';
 import { Factory } from 'lucide-react';
@@ -96,7 +96,7 @@ export const AtAGlanceView: React.FC<AtAGlanceViewProps> = ({ segments, onSegmen
     const canRegenerate = flagsLoaded && (isFeatureEnabled('action:insight:ai_summary_regenerate') ?? true);
     const stripPrefix = (code: string) => code.replace('module:', '');
     const [topKPIs, setTopKPIs] = useState<KPI[]>([]);
-    const [criticalSignals, setCriticalSignals] = useState<Signal[]>([]);
+    const [criticalAlerts, setCriticalAlerts] = useState<Alert[]>([]);
     const [loading, setLoading] = useState(true);
 
     // Determine which summary cards to show based on enabled modules
@@ -155,14 +155,14 @@ export const AtAGlanceView: React.FC<AtAGlanceViewProps> = ({ segments, onSegmen
         try {
             setLoading(true);
 
-            // Fetch critical signals
-            const signalsResponse = await insightApi.getSignals({
+            // Fetch critical alerts
+            const alertsResponse = await insightApi.getAlerts({
                 severity: 'critical,warning',
                 unresolved_only: true,
                 limit: 10,
             });
-            setCriticalSignals(
-                signalsResponse.data.filter((s: any) => isModuleEnabled(stripPrefix(s.module_code || '')))
+            setCriticalAlerts(
+                alertsResponse.data.filter((s: any) => isModuleEnabled(stripPrefix(s.module_code || '')))
             );
 
             // Only fetch segments whose required modules are enabled
@@ -343,12 +343,12 @@ export const AtAGlanceView: React.FC<AtAGlanceViewProps> = ({ segments, onSegmen
         }
     };
 
-    const handleResolveSignal = async (signalId: string) => {
+    const handleResolveAlert = async (alertId: string) => {
         try {
-            await insightApi.resolveSignal(signalId);
-            setCriticalSignals((prev) => prev.filter((s) => s.id !== signalId));
+            await insightApi.resolveAlert(alertId);
+            setCriticalAlerts((prev) => prev.filter((s) => s.id !== alertId));
         } catch (err) {
-            console.error('Failed to resolve signal:', err);
+            console.error('Failed to resolve alert:', err);
         }
     };
 
@@ -388,8 +388,8 @@ export const AtAGlanceView: React.FC<AtAGlanceViewProps> = ({ segments, onSegmen
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {neuraSummaries.map((summary, index) => {
                             const cfg = visibleCardConfigs[index];
-                            const segmentSignals = cfg
-                                ? criticalSignals.filter(s =>
+                            const segmentAlerts = cfg
+                                ? criticalAlerts.filter(s =>
                                     cfg.requiredModules.some(mod =>
                                         (s.module_code || '').replace('module:', '') === mod
                                     )
@@ -403,7 +403,7 @@ export const AtAGlanceView: React.FC<AtAGlanceViewProps> = ({ segments, onSegmen
                                     color={summary.color}
                                     summary={summary.summary}
                                     sections={summary.sections}
-                                    signals={segmentSignals}
+                                    signals={segmentAlerts}
                                     generatedAt={summary.generatedAt}
                                     cached={summary.cached}
                                     degraded={summary.degraded}
@@ -473,7 +473,7 @@ export const AtAGlanceView: React.FC<AtAGlanceViewProps> = ({ segments, onSegmen
                             <div className="flex items-center justify-between text-xs">
                                 <span className="text-slate-400">{segment.kpi_count} KPIs</span>
                                 {segment.signal_count > 0 && (
-                                    <span className="text-amber-400">{segment.signal_count} signals</span>
+                                    <span className="text-amber-400">{segment.signal_count} alerts</span>
                                 )}
                             </div>
                         </button>
@@ -497,25 +497,25 @@ export const AtAGlanceView: React.FC<AtAGlanceViewProps> = ({ segments, onSegmen
                 </div>
             )}
 
-            {/* Section 4: Critical Signals */}
-            {criticalSignals.length > 0 && (
+            {/* Section 4: Critical Alerts */}
+            {criticalAlerts.length > 0 && (
                 <div>
                     <h2 className="text-xl font-semibold text-slate-100 mb-4">
-                        Critical Signals ({criticalSignals.length})
+                        Critical Alerts ({criticalAlerts.length})
                     </h2>
                     <div className="space-y-3 max-h-96 overflow-y-auto">
-                        {criticalSignals.map((signal) => (
-                            <SignalCard key={signal.id} signal={signal} onResolve={handleResolveSignal} />
+                        {criticalAlerts.map((alert) => (
+                            <AlertCard key={alert.id} alert={alert} onResolve={handleResolveAlert} />
                         ))}
                     </div>
                 </div>
             )}
 
-            {/* Empty state for signals */}
-            {criticalSignals.length === 0 && (
+            {/* Empty state for alerts */}
+            {criticalAlerts.length === 0 && (
                 <div className="text-center py-8 bg-slate-900/30 rounded-lg border border-slate-800">
                     <AlertCircle className="w-12 h-12 text-slate-600 mx-auto mb-3" />
-                    <p className="text-slate-400">No critical signals at this time</p>
+                    <p className="text-slate-400">No critical alerts at this time</p>
                 </div>
             )}
 

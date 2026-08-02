@@ -64,18 +64,18 @@ describe('insightApi', () => {
     });
   });
 
-  describe('Given getSignals', () => {
+  describe('Given getAlerts', () => {
     it('When filters provided / Then passes params', async () => {
       mockGet.mockResolvedValue({ data: { data: [], total: 0 } });
-      await insightApi.getSignals({ severity: 'critical', page: 1, limit: 10 });
-      expect(mockGet).toHaveBeenCalledWith('/signals', { params: expect.objectContaining({ severity: 'critical' }) });
+      await insightApi.getAlerts({ severity: 'critical', page: 1, limit: 10 });
+      expect(mockGet).toHaveBeenCalledWith('/alerts', { params: expect.objectContaining({ severity: 'critical' }) });
     });
   });
 
-  describe('Given resolveSignal', () => {
+  describe('Given resolveAlert', () => {
     it('When called / Then sends POST', async () => {
       mockPost.mockResolvedValue({ data: { id: 's1', resolved_at: '2024-01-01' } });
-      const result = await insightApi.resolveSignal('s1', 'Done');
+      const result = await insightApi.resolveAlert('s1', 'Done');
       expect(result.resolved_at).toBeDefined();
     });
   });

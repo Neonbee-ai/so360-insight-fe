@@ -1,7 +1,7 @@
 import React from 'react';
 import { Sparkles, AlertCircle, RefreshCw, Activity, AlertTriangle, Lightbulb, Zap } from 'lucide-react';
 import { getInsightIcon } from '../constants/iconMap';
-import type { AiSummarySections, Signal } from '../types/insight';
+import type { AiSummarySections, Alert } from '../types/insight';
 import { parseUtcDate } from '../utils/datetime';
 
 interface NeuraSummaryCardProps {
@@ -10,7 +10,7 @@ interface NeuraSummaryCardProps {
     color: 'blue' | 'green' | 'purple' | 'orange';
     summary: string | null;
     sections?: AiSummarySections | null;
-    signals?: Signal[];
+    signals?: Alert[];
     generatedAt?: string | null;  // ISO timestamp of when summary was generated
     cached?: boolean;             // Whether this came from cache
     degraded?: boolean;           // True when Neura failed and this is stale data served as a fallback
@@ -226,8 +226,8 @@ export const NeuraSummaryCard: React.FC<NeuraSummaryCardProps> = ({
                         'bg-amber-500/8',
                         'text-amber-400',
                         Zap,
-                        'Action Signals',
-                        <ActionSignalsContent signals={signals} />,
+                        'Action Alerts',
+                        <ActionAlertsContent signals={signals} />,
                     )}
                 </div>
             ) : (
@@ -272,11 +272,11 @@ export const NeuraSummaryCard: React.FC<NeuraSummaryCardProps> = ({
     );
 };
 
-const ActionSignalsContent: React.FC<{ signals?: Signal[] }> = ({ signals }) => {
+const ActionAlertsContent: React.FC<{ signals?: Alert[] }> = ({ signals }) => {
     const items = (signals || []).slice(0, 2);
 
     if (items.length === 0) {
-        return <p className="text-sm text-slate-500 italic">No active signals for this segment.</p>;
+        return <p className="text-sm text-slate-500 italic">No active alerts for this segment.</p>;
     }
 
     return (

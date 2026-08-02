@@ -122,4 +122,26 @@ describe('KPICard', () => {
       expect(screen.getByText('orders')).toBeInTheDocument();
     });
   });
+
+  describe('Given a counter KPI (kpi_type: "counter")', () => {
+    it('When rendered / Then does not show a trend icon, trend percentage, or sparkline', () => {
+      render(
+        <KPICard
+          kpi={{
+            ...baseKPI,
+            kpi_type: 'counter',
+            value: 42,
+            unit: 'tickets',
+            sparkline_data: [{ date: '2026-01-01', value: 10 }],
+          }}
+        />
+      );
+      expect(screen.queryByTestId('icon-TrendingUp')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('icon-TrendingDown')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('icon-Minus')).not.toBeInTheDocument();
+      expect(screen.queryByText('+12.5% from last period')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('sparkline')).not.toBeInTheDocument();
+      expect(screen.getByText('42')).toBeInTheDocument();
+    });
+  });
 });

@@ -5,16 +5,16 @@ import { vi, describe, it, expect, beforeEach } from 'vitest';
 vi.mock('../services/insightApi', () => ({
   insightApi: {
     getDashboard: vi.fn(),
-    getSignals: vi.fn(),
-    resolveSignal: vi.fn(),
+    getAlerts: vi.fn(),
+    resolveAlert: vi.fn(),
   },
 }));
 
 vi.mock('../components/KPICard', () => ({
   KPICard: (props: any) => <div data-testid="kpi-card">{props.kpi.kpi_name}</div>,
 }));
-vi.mock('../components/SignalCard', () => ({
-  SignalCard: (props: any) => <div data-testid="signal-card">{props.signal.title}</div>,
+vi.mock('../components/AlertCard', () => ({
+  AlertCard: (props: any) => <div data-testid="alert-card">{props.alert.title}</div>,
 }));
 
 import { Dashboard } from './Dashboard';
@@ -36,7 +36,7 @@ describe('Dashboard', () => {
   describe('Given loading state', () => {
     it('When data is being fetched / Then shows loading', () => {
       mockApi.getDashboard.mockReturnValue(new Promise(() => {}));
-      mockApi.getSignals.mockReturnValue(new Promise(() => {}));
+      mockApi.getAlerts.mockReturnValue(new Promise(() => {}));
       render(<Dashboard />);
       expect(screen.getByText('Loading insights...')).toBeInTheDocument();
     });
@@ -45,7 +45,7 @@ describe('Dashboard', () => {
   describe('Given error state', () => {
     it('When API fails / Then shows error', async () => {
       mockApi.getDashboard.mockRejectedValue(new Error('Server down'));
-      mockApi.getSignals.mockResolvedValue({ data: [] });
+      mockApi.getAlerts.mockResolvedValue({ data: [] });
       render(<Dashboard />);
       await waitFor(() => {
         expect(screen.getByText(/Error: Server down/)).toBeInTheDocument();
@@ -54,9 +54,9 @@ describe('Dashboard', () => {
   });
 
   describe('Given data loaded', () => {
-    it('When rendered / Then shows signals summary and KPIs', async () => {
+    it('When rendered / Then shows alerts summary and KPIs', async () => {
       mockApi.getDashboard.mockResolvedValue(dashboardData);
-      mockApi.getSignals.mockResolvedValue({ data: [] });
+      mockApi.getAlerts.mockResolvedValue({ data: [] });
       render(<Dashboard />);
       await waitFor(() => {
         expect(screen.getByText('Insight Dashboard')).toBeInTheDocument();
@@ -66,21 +66,21 @@ describe('Dashboard', () => {
       expect(screen.getByTestId('kpi-card')).toBeInTheDocument();
     });
 
-    it('When no signals / Then shows no active signals message', async () => {
+    it('When no alerts / Then shows no active alerts message', async () => {
       mockApi.getDashboard.mockResolvedValue(dashboardData);
-      mockApi.getSignals.mockResolvedValue({ data: [] });
+      mockApi.getAlerts.mockResolvedValue({ data: [] });
       render(<Dashboard />);
       await waitFor(() => {
         expect(screen.getByText(/Everything looks good/)).toBeInTheDocument();
       });
     });
 
-    it('When signals exist / Then renders signal cards', async () => {
+    it('When alerts exist / Then renders alert cards', async () => {
       mockApi.getDashboard.mockResolvedValue(dashboardData);
-      mockApi.getSignals.mockResolvedValue({ data: [{ id: 's1', title: 'Alert', description: 'desc', severity: 'warning', created_at: '2024-01-01' }] });
+      mockApi.getAlerts.mockResolvedValue({ data: [{ id: 's1', title: 'Alert', description: 'desc', severity: 'warning', created_at: '2024-01-01' }] });
       render(<Dashboard />);
       await waitFor(() => {
-        expect(screen.getByTestId('signal-card')).toBeInTheDocument();
+        expect(screen.getByTestId('alert-card')).toBeInTheDocument();
       });
     });
   });

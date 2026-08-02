@@ -3,8 +3,8 @@ import { createTtlCache } from './ttlCache';
 import type {
     Dashboard,
     ModuleInsights,
-    SignalsResponse,
-    Signal,
+    AlertsResponse,
+    Alert,
     SegmentSummary,
     SegmentDetail,
     TrendData,
@@ -106,21 +106,21 @@ class InsightApiClient {
         });
     }
 
-    async getSignals(params?: {
+    async getAlerts(params?: {
         severity?: string;
         module_code?: string;
         unresolved_only?: boolean;
         page?: number;
         limit?: number;
-    }): Promise<SignalsResponse> {
-        return cachedGet(`signals:${JSON.stringify(params || {})}`, async () => {
-            const response = await this.client.get<SignalsResponse>('/signals', { params });
+    }): Promise<AlertsResponse> {
+        return cachedGet(`alerts:${JSON.stringify(params || {})}`, async () => {
+            const response = await this.client.get<AlertsResponse>('/alerts', { params });
             return response.data;
         });
     }
 
-    async resolveSignal(signalId: string, resolutionNote?: string): Promise<Signal> {
-        const response = await this.client.post<Signal>(`/signal/resolve/${signalId}`, {
+    async resolveAlert(alertId: string, resolutionNote?: string): Promise<Alert> {
+        const response = await this.client.post<Alert>(`/alert/resolve/${alertId}`, {
             resolution_note: resolutionNote,
         });
         return response.data;

@@ -4,7 +4,7 @@
  * Entries expire after `ttlMs`. Critically, the map is ALSO hard-capped at
  * `maxEntries`: expired entries are reclaimed lazily (only on read of that key),
  * so a long-lived session that fetches many distinct keys — segments × charts ×
- * KPI codes × signal-filter permutations — would otherwise retain every key (and
+ * KPI codes × alert-filter permutations — would otherwise retain every key (and
  * its full API payload) for the whole session, growing memory without limit.
  *
  * `now` is injectable so time-based behaviour is deterministically testable.

@@ -194,7 +194,7 @@ export const SegmentOverview: React.FC = () => {
                                 {segment.signal_count > 0 && (
                                     <div className="flex items-center gap-1.5 text-amber-400">
                                         <AlertCircle className="w-4 h-4" />
-                                        <span>{segment.signal_count} signals</span>
+                                        <span>{segment.signal_count} alerts</span>
                                     </div>
                                 )}
                             </div>

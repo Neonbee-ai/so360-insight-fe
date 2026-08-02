@@ -217,36 +217,36 @@ export const SegmentDetailPage: React.FC = () => {
                     </div>
                 )}
 
-                {/* Active Signals */}
+                {/* Active Alerts */}
                 {segment.signals && segment.signals.length > 0 && (
                     <div>
-                        <h2 className="text-xl font-semibold text-slate-100 mb-4">Active Signals</h2>
+                        <h2 className="text-xl font-semibold text-slate-100 mb-4">Active Alerts</h2>
                         <div className="space-y-4">
-                            {segment.signals.slice(0, 5).map((signal) => (
+                            {segment.signals.slice(0, 5).map((alert) => (
                                 <div
-                                    key={signal.id}
-                                    className={`rounded-lg border p-4 ${getSeverityColor(signal.severity)}`}
+                                    key={alert.id}
+                                    className={`rounded-lg border p-4 ${getSeverityColor(alert.severity)}`}
                                 >
                                     <div className="flex items-start justify-between mb-2">
-                                        <h3 className="font-semibold">{signal.title}</h3>
+                                        <h3 className="font-semibold">{alert.title}</h3>
                                         <span className="text-xs uppercase font-medium px-2 py-1 bg-slate-900/50 rounded">
-                                            {signal.severity}
+                                            {alert.severity}
                                         </span>
                                     </div>
-                                    <p className="text-sm opacity-90">{signal.description}</p>
+                                    <p className="text-sm opacity-90">{alert.description}</p>
                                     <div className="mt-3 flex items-center gap-4 text-xs opacity-75">
-                                        <span>{new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'short', day: 'numeric', timeZone: 'UTC' }).format(parseUtcDate(signal.created_at))}</span>
-                                        {signal.module_code && <span>{signal.module_code}</span>}
+                                        <span>{new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'short', day: 'numeric', timeZone: 'UTC' }).format(parseUtcDate(alert.created_at))}</span>
+                                        {alert.module_code && <span>{alert.module_code}</span>}
                                     </div>
                                 </div>
                             ))}
 
                             {segment.signals.length > 5 && (
                                 <button
-                                    onClick={() => navigate('/signals')}
+                                    onClick={() => navigate('/alerts')}
                                     className="w-full py-3 bg-slate-800/50 hover:bg-slate-800 text-slate-300 rounded-lg transition-colors text-sm font-medium"
                                 >
-                                    View all {segment.signals.length} signals →
+                                    View all {segment.signals.length} alerts →
                                 </button>
                             )}
                         </div>
@@ -255,7 +255,7 @@ export const SegmentDetailPage: React.FC = () => {
 
                 {(!segment.signals || segment.signals.length === 0) && (
                     <div className="text-center py-12 bg-slate-900/30 rounded-lg border border-slate-800">
-                        <p className="text-slate-500">No active signals for this segment</p>
+                        <p className="text-slate-500">No active alerts for this segment</p>
                     </div>
                 )}
             </div>

@@ -78,19 +78,19 @@ describe('SegmentDetailPage', () => {
       });
     });
 
-    it('When signals exist / Then shows active signals', async () => {
+    it('When signals exist / Then shows active alerts', async () => {
       mockApi.getSegmentDetail.mockResolvedValue(segmentDetail);
       wrap('/revenue');
       await waitFor(() => {
-        expect(screen.getByText('Active Signals')).toBeInTheDocument();
+        expect(screen.getByText('Active Alerts')).toBeInTheDocument();
       });
     });
 
-    it('When no signals / Then shows no active signals message', async () => {
+    it('When no signals / Then shows no active alerts message', async () => {
       mockApi.getSegmentDetail.mockResolvedValue({ ...segmentDetail, signals: [] });
       wrap('/revenue');
       await waitFor(() => {
-        expect(screen.getByText('No active signals for this segment')).toBeInTheDocument();
+        expect(screen.getByText('No active alerts for this segment')).toBeInTheDocument();
       });
     });
   });
