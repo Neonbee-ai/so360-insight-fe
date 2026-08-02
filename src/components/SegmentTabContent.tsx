@@ -73,12 +73,7 @@ export const SegmentTabContent: React.FC<SegmentTabContentProps> = ({ segmentCod
         try {
             setNeuraLoading(true);
             setNeuraError(null);
-            const response = await fetch(`/v1/insight/ai-summary/${segmentCode}`, {
-                method: 'GET',
-                headers: insightApi.getAuthHeaders(),
-            });
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
-            const data = await response.json();
+            const data = await insightApi.getAiSummary(segmentCode);
             setNeuraSummary(data.summary || null);
             setNeuraSections(data.sections || null);
             setNeuraGeneratedAt(data.generated_at || null);
@@ -94,12 +89,7 @@ export const SegmentTabContent: React.FC<SegmentTabContentProps> = ({ segmentCod
         try {
             setNeuraRegenerating(true);
             setNeuraError(null);
-            const response = await fetch(`/v1/insight/ai-summary/${segmentCode}/regenerate`, {
-                method: 'POST',
-                headers: insightApi.getAuthHeaders(),
-            });
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
-            const data = await response.json();
+            const data = await insightApi.regenerateAiSummary(segmentCode);
             setNeuraSummary(data.summary || null);
             setNeuraSections(data.sections || null);
             setNeuraGeneratedAt(data.generated_at || null);

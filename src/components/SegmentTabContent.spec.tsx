@@ -17,6 +17,8 @@ vi.mock('../services/insightApi', () => ({
     getKPITrend: vi.fn(),
     resolveSignal: vi.fn(),
     getAuthHeaders: vi.fn(() => ({})),
+    getAiSummary: vi.fn(),
+    regenerateAiSummary: vi.fn(),
   },
 }));
 
@@ -75,10 +77,8 @@ describe('SegmentTabContent', () => {
   beforeEach(() => {
     vi.resetAllMocks();
     mockShell = { effectiveFlagsLoaded: true, isFeatureEnabled: () => true };
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
-      ok: true,
-      json: () => Promise.resolve({ summary: 'AI summary', sections: null, generated_at: '2024-01-01', cached: false }),
-    }));
+    mockApi.getAiSummary.mockResolvedValue({ summary: 'AI summary', sections: null, generated_at: '2024-01-01', cached: false });
+    mockApi.regenerateAiSummary.mockResolvedValue({ summary: 'Regenerated summary', sections: null, generated_at: '2024-01-02', cached: false });
   });
 
   describe('Given loading state', () => {
@@ -160,6 +160,27 @@ describe('SegmentTabContent', () => {
       render(<SegmentTabContent segmentCode="revenue" />);
       await waitFor(() => {
         expect(screen.getByTestId('neura-summary')).toBeInTheDocument();
+      });
+    });
+  });
+
+  describe('Given the AI summary is fetched for a segment tab', () => {
+    it('When the tab loads / Then it fetches via insightApi.getAiSummary (not a raw relative fetch) so it goes through the configured API base URL', async () => {
+      mockApi.getSegmentDetail.mockResolvedValue(mockSegmentDetail);
+      mockApi.getKPITrend.mockResolvedValue({ kpi_code: 'k1', kpi_name: 'Total Revenue', data: [] });
+      render(<SegmentTabContent segmentCode="finance" />);
+      await waitFor(() => {
+        expect(mockApi.getAiSummary).toHaveBeenCalledWith('finance');
+      });
+    });
+
+    it('When insightApi.getAiSummary rejects / Then it surfaces the real error message, not a swallowed generic one', async () => {
+      mockApi.getSegmentDetail.mockResolvedValue(mockSegmentDetail);
+      mockApi.getKPITrend.mockResolvedValue({ kpi_code: 'k1', kpi_name: 'Total Revenue', data: [] });
+      mockApi.getAiSummary.mockRejectedValue(new Error('Request failed with status code 404'));
+      render(<SegmentTabContent segmentCode="finance" />);
+      await waitFor(() => {
+        expect(mockApi.getAiSummary).toHaveBeenCalledWith('finance');
       });
     });
   });
