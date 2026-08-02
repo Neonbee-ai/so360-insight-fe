@@ -44,6 +44,10 @@ import {
     Clock,
     Store,
     Inbox,
+    Headset,
+    FileText,
+    FileSignature,
+    ClipboardList,
 } from 'lucide-react';
 
 export const INSIGHT_ICON_MAP: Record<string, LucideIcon> = {
@@ -67,6 +71,10 @@ export const INSIGHT_ICON_MAP: Record<string, LucideIcon> = {
     Clock,
     Store,
     Inbox,
+    Headset,
+    FileText,
+    FileSignature,
+    ClipboardList,
 };
 
 /** Resolve an icon component by name; returns undefined for unknown names. */

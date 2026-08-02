@@ -3,16 +3,21 @@ import { getInsightIcon } from '../constants/iconMap';
 import { useModules } from '@so360/shell-context';
 
 const MODULE_REGISTRY = [
-    { id: 'crm',         name: 'CRM',          icon: 'Users',         color: 'blue',   kpis: 5, signals: 2 },
+    { id: 'crm',         name: 'CRM',          icon: 'Users',         color: 'blue',   kpis: 6, signals: 2 },
     { id: 'accounting',  name: 'Accounting',   icon: 'Calculator',    color: 'green',  kpis: 7, signals: 4 },
     { id: 'inventory',   name: 'Inventory',    icon: 'Package',       color: 'orange', kpis: 3, signals: 3 },
-    { id: 'procurement', name: 'Procurement',  icon: 'ShoppingCart',  color: 'purple', kpis: 3, signals: 2 },
+    { id: 'procurement', name: 'Procurement',  icon: 'ShoppingCart',  color: 'purple', kpis: 2, signals: 2 },
     { id: 'projects',    name: 'Projects',     icon: 'FolderKanban',  color: 'sky',    kpis: 3, signals: 2 },
     { id: 'flow',        name: 'Flow',         icon: 'GitBranch',     color: 'indigo', kpis: 2, signals: 1 },
     { id: 'people',      name: 'People',       icon: 'UserCheck',     color: 'pink',   kpis: 3, signals: 1 },
     { id: 'timesheet',   name: 'Timesheet',    icon: 'Clock',         color: 'yellow', kpis: 2, signals: 2 },
     { id: 'dailystore',  name: 'Daily Store',  icon: 'Store',         color: 'teal',   kpis: 5, signals: 0 },
-    { id: 'inbox',       name: 'Inbox',        icon: 'Inbox',         color: 'cyan',   kpis: 4, signals: 2 },
+    { id: 'inbox',       name: 'Inbox',        icon: 'Inbox',         color: 'cyan',   kpis: 6, signals: 2 },
+    { id: 'fulfillment', name: 'Fulfillment',  icon: 'Truck',         color: 'lime',   kpis: 6, signals: 0 },
+    { id: 'support',     name: 'Support',      icon: 'Headset',       color: 'red',    kpis: 5, signals: 1 },
+    { id: 'documents',   name: 'Documents',    icon: 'FileText',      color: 'slate',  kpis: 2, signals: 0 },
+    { id: 'sign',        name: 'Sign',         icon: 'FileSignature', color: 'violet', kpis: 2, signals: 0 },
+    { id: 'forms',       name: 'Forms',        icon: 'ClipboardList', color: 'amber',  kpis: 3, signals: 0 },
 ];
 
 export const ModuleCoveragePanel: React.FC = () => {

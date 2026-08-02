@@ -22,9 +22,9 @@ describe('ModuleCoveragePanel', () => {
       expect(screen.getByText('Module Coverage')).toBeInTheDocument();
     });
 
-    it('When rendered / Then shows "10 of 10 modules active"', () => {
+    it('When rendered / Then shows "15 of 15 modules active"', () => {
       render(<ModuleCoveragePanel />);
-      expect(screen.getByText(/10 of 10 modules active/)).toBeInTheDocument();
+      expect(screen.getByText(/15 of 15 modules active/)).toBeInTheDocument();
     });
 
     it('When rendered / Then shows module names', () => {
@@ -34,10 +34,19 @@ describe('ModuleCoveragePanel', () => {
       expect(screen.getByText('Inventory')).toBeInTheDocument();
     });
 
+    it('When rendered / Then shows the newly integrated modules', () => {
+      render(<ModuleCoveragePanel />);
+      expect(screen.getByText('Support')).toBeInTheDocument();
+      expect(screen.getByText('Documents')).toBeInTheDocument();
+      expect(screen.getByText('Sign')).toBeInTheDocument();
+      expect(screen.getByText('Forms')).toBeInTheDocument();
+      expect(screen.getByText('Fulfillment')).toBeInTheDocument();
+    });
+
     it('When all enabled / Then all modules show "Active" badge', () => {
       render(<ModuleCoveragePanel />);
       const activeBadges = screen.getAllByText('Active');
-      expect(activeBadges.length).toBe(10);
+      expect(activeBadges.length).toBe(15);
     });
   });
 
@@ -46,7 +55,7 @@ describe('ModuleCoveragePanel', () => {
       mockIsModuleEnabled.mockImplementation((id: string) => id !== 'crm');
       render(<ModuleCoveragePanel />);
       expect(screen.getByText('Inactive')).toBeInTheDocument();
-      expect(screen.getByText(/9 of 10 modules active/)).toBeInTheDocument();
+      expect(screen.getByText(/14 of 15 modules active/)).toBeInTheDocument();
     });
   });
 });
