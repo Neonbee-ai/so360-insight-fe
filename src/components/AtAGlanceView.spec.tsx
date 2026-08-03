@@ -7,7 +7,7 @@ let mockShell: any = { effectiveFlagsLoaded: true, isFeatureEnabled: () => true 
 vi.mock('@so360/shell-context', () => ({
   useShellBridge: () => mockShell,
   useModules: () => ({ isModuleEnabled: () => true }),
-  useFeatureFlags: () => ({ isFeatureEnabled: () => true }),
+  useFeatureFlags: () => ({ isFeatureEnabled: (key: string) => mockShell.isFeatureEnabled(key) }),
   useShell: () => ({ currentOrg: { id: 'mock-org-id', tenant_id: 'mock-tenant-id', name: 'Mock Org' } }),
 }));
 
@@ -18,6 +18,7 @@ vi.mock('../services/insightApi', () => ({
     resolveAlert: vi.fn(),
     getAiSummary: vi.fn(),
     regenerateAiSummary: vi.fn(),
+    getCorrelations: vi.fn(),
   },
 }));
 
@@ -69,6 +70,7 @@ describe('AtAGlanceView', () => {
       kpis: [{ kpi_code: 'r1', kpi_name: 'Total Revenue', value: 50000, unit: 'USD', trend: 'up', category: 'critical', module_code: 'module:crm' }],
     });
     mockApi.getAiSummary.mockResolvedValue({ summary: 'AI text', sections: null, generated_at: '2024-01-01', cached: false });
+    mockApi.getCorrelations.mockResolvedValue([]);
     (globalThis.fetch as any).mockResolvedValue({
       ok: true,
       json: () => Promise.resolve({ mo_in_progress: 5, mo_planned: 3, wo_open: 2, scrap_pct: 1 }),
@@ -160,6 +162,47 @@ describe('AtAGlanceView', () => {
       await waitFor(() => {
         expect(screen.getByText('AI Executive Summary')).toBeInTheDocument();
       });
+    });
+  });
+
+  describe('Given correlations are available and analytics is enabled', () => {
+    it('When rendered / Then shows the Related Movements panel with resolved KPI names', async () => {
+      mockApi.getCorrelations.mockResolvedValue([
+        { kpi_code_a: 'r1', kpi_code_b: 'inv_turnover', correlation: 0.72, direction: 'inverse' },
+      ]);
+      render(<AtAGlanceView segments={mockSegments} onSegmentClick={vi.fn()} />);
+      await waitFor(() => {
+        expect(screen.getByText('Related Movements')).toBeInTheDocument();
+      });
+      // 'Total Revenue' is resolved from the loaded KPI map (kpi_code r1);
+      // 'inv_turnover' has no matching KPI in the loaded map so falls back to its code.
+      expect(screen.getByText(/Total Revenue.*moved with inv_turnover.*r=0\.72, inverse/)).toBeInTheDocument();
+    });
+  });
+
+  describe('Given correlations are empty', () => {
+    it('When rendered / Then does not show the Related Movements panel', async () => {
+      mockApi.getCorrelations.mockResolvedValue([]);
+      render(<AtAGlanceView segments={mockSegments} onSegmentClick={vi.fn()} />);
+      await waitFor(() => {
+        expect(screen.getByText('Business Segments')).toBeInTheDocument();
+      });
+      expect(screen.queryByText('Related Movements')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('Given analytics feature flag is disabled', () => {
+    it('When flags are resolved and feature is off / Then does not fetch or show correlations', async () => {
+      mockShell = { effectiveFlagsLoaded: true, isFeatureEnabled: (key: string) => key !== 'submodule:insight:analytics' };
+      mockApi.getCorrelations.mockResolvedValue([
+        { kpi_code_a: 'r1', kpi_code_b: 'inv_turnover', correlation: 0.72, direction: 'inverse' },
+      ]);
+      render(<AtAGlanceView segments={mockSegments} onSegmentClick={vi.fn()} />);
+      await waitFor(() => {
+        expect(screen.getByText('Business Segments')).toBeInTheDocument();
+      });
+      expect(screen.queryByText('Related Movements')).not.toBeInTheDocument();
+      expect(mockApi.getCorrelations).not.toHaveBeenCalled();
     });
   });
 });

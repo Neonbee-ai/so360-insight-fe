@@ -60,3 +60,5 @@ export const CheckCircle2 = createIcon('CheckCircle2');
 export const Copy = createIcon('Copy');
 export const Plus = createIcon('Plus');
 export const LayoutDashboard = createIcon('LayoutDashboard');
+export const Pencil = createIcon('Pencil');
+export const Check = createIcon('Check');

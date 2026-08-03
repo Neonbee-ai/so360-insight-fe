@@ -18,6 +18,25 @@ export interface KPI {
         date: string;
         value: number;
     }>;
+    target_value?: number;
+    target_variance_percentage?: number | null;
+}
+
+export interface KpiTarget {
+    id: string;
+    tenant_id: string;
+    org_id: string;
+    kpi_code: string;
+    target_value: number;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface CorrelationPair {
+    kpi_code_a: string;
+    kpi_code_b: string;
+    correlation: number;
+    direction: 'same' | 'inverse';
 }
 
 export interface RecommendedAction {

@@ -8,6 +8,8 @@ import type {
     SegmentSummary,
     SegmentDetail,
     TrendData,
+    KpiTarget,
+    CorrelationPair,
 } from '../types/insight';
 
 // Bounded TTL cache for API responses — prevents re-fetches on tab switches and
@@ -175,6 +177,37 @@ class InsightApiClient {
     async getDataFreshness(): Promise<any> {
         return cachedGet('freshness', async () => {
             const response = await this.client.get('/data-freshness');
+            return response.data;
+        });
+    }
+
+    // ===== KPI TARGETS =====
+
+    async getTargets(): Promise<KpiTarget[]> {
+        return cachedGet('targets', async () => {
+            const response = await this.client.get<KpiTarget[]>('/targets');
+            return response.data;
+        });
+    }
+
+    async setTarget(kpiCode: string, targetValue: number): Promise<KpiTarget> {
+        const response = await this.client.put<KpiTarget>(`/targets/${kpiCode}`, {
+            target_value: targetValue,
+        });
+        // Dashboard/segment KPI payloads embed target/variance fields, so any
+        // cached copies are now stale — clear them alongside the targets cache.
+        invalidateCache('targets');
+        invalidateCache('dashboard');
+        invalidateCache('segment:');
+        invalidateCache('module:');
+        return response.data;
+    }
+
+    // ===== CORRELATIONS =====
+
+    async getCorrelations(): Promise<CorrelationPair[]> {
+        return cachedGet('correlations', async () => {
+            const response = await this.client.get<CorrelationPair[]>('/correlations');
             return response.data;
         });
     }

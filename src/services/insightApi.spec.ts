@@ -1,8 +1,9 @@
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 
-const { mockGet, mockPost } = vi.hoisted(() => ({
+const { mockGet, mockPost, mockPut } = vi.hoisted(() => ({
   mockGet: vi.fn(),
   mockPost: vi.fn(),
+  mockPut: vi.fn(),
 }));
 
 vi.mock('axios', () => ({
@@ -10,6 +11,7 @@ vi.mock('axios', () => ({
     create: () => ({
       get: mockGet,
       post: mockPost,
+      put: mockPut,
       interceptors: { request: { use: vi.fn() }, response: { use: vi.fn() } },
     }),
   },
@@ -21,6 +23,7 @@ describe('insightApi', () => {
   beforeEach(() => {
     mockGet.mockReset();
     mockPost.mockReset();
+    mockPut.mockReset();
   });
 
   describe('Given setTenantId', () => {
@@ -141,6 +144,44 @@ describe('insightApi', () => {
       mockPost.mockResolvedValue({ data: { summary: 'New AI text', cached: false } });
       const result = await insightApi.regenerateAiSummary('revenue');
       expect(result.cached).toBe(false);
+    });
+  });
+
+  describe('Given getTargets', () => {
+    it('When called / Then returns target rows', async () => {
+      mockGet.mockResolvedValue({ data: [{ id: 't1', kpi_code: 'revenue', target_value: 100000 }] });
+      const result = await insightApi.getTargets();
+      expect(result[0].kpi_code).toBe('revenue');
+    });
+  });
+
+  describe('Given setTarget', () => {
+    it('When called / Then sends PUT with target_value body', async () => {
+      mockPut.mockResolvedValue({ data: { id: 't1', kpi_code: 'revenue', target_value: 120000 } });
+      const result = await insightApi.setTarget('revenue', 120000);
+      expect(mockPut).toHaveBeenCalledWith('/targets/revenue', { target_value: 120000 });
+      expect(result.target_value).toBe(120000);
+    });
+
+    it('When called / Then invalidates cached dashboard data so the next fetch refetches', async () => {
+      mockGet.mockResolvedValue({ data: { kpis: [] } });
+      await insightApi.getDashboard();
+
+      mockPut.mockResolvedValue({ data: { id: 't1', kpi_code: 'revenue', target_value: 120000 } });
+      await insightApi.setTarget('revenue', 120000);
+
+      mockGet.mockReset();
+      mockGet.mockResolvedValue({ data: { kpis: [{ kpi_code: 'revenue' }] } });
+      await insightApi.getDashboard();
+      expect(mockGet).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('Given getCorrelations', () => {
+    it('When called / Then returns correlation pairs', async () => {
+      mockGet.mockResolvedValue({ data: [{ kpi_code_a: 'a', kpi_code_b: 'b', correlation: 0.8, direction: 'same' }] });
+      const result = await insightApi.getCorrelations();
+      expect(result[0].direction).toBe('same');
     });
   });
 

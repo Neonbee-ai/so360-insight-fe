@@ -6,7 +6,7 @@ import { AlertCard } from './AlertCard';
 import { NeuraSummaryCard } from './NeuraSummaryCard';
 import { ModuleCoveragePanel } from './ModuleCoveragePanel';
 import { insightApi } from '../services/insightApi';
-import type { SegmentSummary, KPI, Alert, AiSummarySections } from '../types/insight';
+import type { SegmentSummary, KPI, Alert, AiSummarySections, CorrelationPair } from '../types/insight';
 import { useModules, useFeatureFlags, useShellBridge, useShell } from '@so360/shell-context';
 import { SEGMENT_MODULE_DEPS } from '../constants/moduleMapping';
 import { Factory } from 'lucide-react';
@@ -94,9 +94,12 @@ export const AtAGlanceView: React.FC<AtAGlanceViewProps> = ({ segments, onSegmen
     const flagsLoaded = shell?.effectiveFlagsLoaded;
     const canShowAiSummary = flagsLoaded && (isFeatureEnabled('action:insight:ai_summary') ?? true);
     const canRegenerate = flagsLoaded && (isFeatureEnabled('action:insight:ai_summary_regenerate') ?? true);
+    const canShowCorrelations = flagsLoaded && (isFeatureEnabled('submodule:insight:analytics') ?? true);
     const stripPrefix = (code: string) => code.replace('module:', '');
     const [topKPIs, setTopKPIs] = useState<KPI[]>([]);
+    const [kpiNameMap, setKpiNameMap] = useState<Map<string, string>>(new Map());
     const [criticalAlerts, setCriticalAlerts] = useState<Alert[]>([]);
+    const [correlations, setCorrelations] = useState<CorrelationPair[]>([]);
     const [loading, setLoading] = useState(true);
 
     // Determine which summary cards to show based on enabled modules
@@ -151,6 +154,13 @@ export const AtAGlanceView: React.FC<AtAGlanceViewProps> = ({ segments, onSegmen
         }
     }, [canShowAiSummary]);
 
+    useEffect(() => {
+        if (!canShowCorrelations) return;
+        insightApi.getCorrelations()
+            .then(setCorrelations)
+            .catch((err) => console.error('Failed to fetch correlations:', err));
+    }, [canShowCorrelations]);
+
     const fetchAtAGlanceData = async () => {
         try {
             setLoading(true);
@@ -181,6 +191,11 @@ export const AtAGlanceView: React.FC<AtAGlanceViewProps> = ({ segments, onSegmen
             const allKPIs = segmentDetails
                 .flatMap((segment) => segment.kpis)
                 .filter((kpi: any) => isModuleEnabled(stripPrefix(kpi.module_code || '')));
+
+            // Build kpi_code -> kpi_name lookup for the correlations panel (Related
+            // Movements), reusing the KPI list already loaded here rather than
+            // fetching names separately.
+            setKpiNameMap(new Map(allKPIs.map((kpi) => [kpi.kpi_code, kpi.kpi_name])));
 
             // Filter to important KPIs (critical trends or high priority)
             const importantKPIs = allKPIs
@@ -493,6 +508,25 @@ export const AtAGlanceView: React.FC<AtAGlanceViewProps> = ({ segments, onSegmen
                         {topKPIs.map((kpi) => (
                             <KPICard key={kpi.kpi_code} kpi={kpi} />
                         ))}
+                    </div>
+                </div>
+            )}
+
+            {/* Section 3b: Related Movements (cross-KPI correlations) — bonus insight, no empty state */}
+            {canShowCorrelations && correlations.length > 0 && (
+                <div>
+                    <h2 className="text-xl font-semibold text-slate-100 mb-4">Related Movements</h2>
+                    <div className="bg-slate-900/50 border border-slate-800 rounded-lg p-4 space-y-2">
+                        {correlations.map((pair) => {
+                            const nameA = kpiNameMap.get(pair.kpi_code_a) || pair.kpi_code_a;
+                            const nameB = kpiNameMap.get(pair.kpi_code_b) || pair.kpi_code_b;
+                            const arrow = pair.direction === 'same' ? '↑↑' : '↕';
+                            return (
+                                <p key={`${pair.kpi_code_a}:${pair.kpi_code_b}`} className="text-sm text-slate-400">
+                                    {nameA} {arrow} moved with {nameB} (r={pair.correlation.toFixed(2)}, {pair.direction})
+                                </p>
+                            );
+                        })}
                     </div>
                 </div>
             )}

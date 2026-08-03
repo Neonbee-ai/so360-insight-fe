@@ -1,11 +1,24 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { KPICard } from './KPICard';
 import type { KPI } from '../types/insight';
 
 vi.mock('./charts/SparklineChart', () => ({
   SparklineChart: ({ data }: any) => <div data-testid="sparkline">{data.length} points</div>,
+}));
+
+const mockSetTarget = vi.fn();
+vi.mock('../services/insightApi', () => ({
+  insightApi: {
+    setTarget: (...args: any[]) => mockSetTarget(...args),
+  },
+}));
+
+vi.mock('@so360/shell-context', () => ({
+  useShell: () => ({ businessSettings: undefined }),
+  useFeatureFlags: () => ({ isFeatureEnabled: () => true }),
+  useShellBridge: () => ({ effectiveFlagsLoaded: true, isFeatureEnabled: () => true }),
 }));
 
 const baseKPI: KPI = {
@@ -120,6 +133,79 @@ describe('KPICard', () => {
       render(<KPICard kpi={{ ...baseKPI, value: 1248, unit: 'orders' }} />);
       expect(screen.getByText('1,248')).toBeInTheDocument();
       expect(screen.getByText('orders')).toBeInTheDocument();
+    });
+  });
+
+  describe('Given a KPI with a target and positive variance', () => {
+    it('When rendered / Then shows the target line in green', () => {
+      render(<KPICard kpi={{ ...baseKPI, target_value: 45000, target_variance_percentage: 11.1 }} />);
+      expect(screen.getByText(/Target: \$45,000\.00/)).toBeInTheDocument();
+      const line = screen.getByText(/vs target/);
+      expect(line.className).toContain('text-green-500');
+      expect(line).toHaveTextContent('+11.1% vs target');
+    });
+  });
+
+  describe('Given a KPI with a target and negative variance', () => {
+    it('When rendered / Then shows the target line in red', () => {
+      render(<KPICard kpi={{ ...baseKPI, target_value: 60000, target_variance_percentage: -16.7 }} />);
+      const line = screen.getByText(/vs target/);
+      expect(line.className).toContain('text-red-500');
+      expect(line).toHaveTextContent('-16.7% vs target');
+    });
+  });
+
+  describe('Given a KPI with a target of 0 (null variance)', () => {
+    it('When rendered / Then shows the target with neutral slate color and no variance text', () => {
+      render(<KPICard kpi={{ ...baseKPI, target_value: 0, target_variance_percentage: null }} />);
+      const line = screen.getByText(/Target:/);
+      expect(line.className).toContain('text-slate-400');
+      expect(line).not.toHaveTextContent('vs target');
+    });
+  });
+
+  describe('Given a KPI with no target set', () => {
+    it('When rendered / Then does not render any target UI', () => {
+      render(<KPICard kpi={baseKPI} />);
+      expect(screen.queryByText(/Target:/)).not.toBeInTheDocument();
+    });
+  });
+
+  describe('Given the target-editing feature is enabled', () => {
+    beforeEach(() => {
+      mockSetTarget.mockReset();
+    });
+
+    it('When rendered / Then the edit (pencil) icon is shown', () => {
+      render(<KPICard kpi={baseKPI} />);
+      expect(screen.getByLabelText('Set target')).toBeInTheDocument();
+    });
+
+    it('When the pencil icon is clicked / Then an inline input is revealed', () => {
+      render(<KPICard kpi={baseKPI} />);
+      fireEvent.click(screen.getByLabelText('Set target'));
+      expect(screen.getByTestId('target-editor')).toBeInTheDocument();
+    });
+
+    it('When a value is entered and saved / Then insightApi.setTarget is called with the kpi_code and parsed value', async () => {
+      mockSetTarget.mockResolvedValue({ kpi_code: 'revenue', target_value: 55000 });
+      render(<KPICard kpi={baseKPI} />);
+      fireEvent.click(screen.getByLabelText('Set target'));
+      const input = screen.getByPlaceholderText('Target value');
+      fireEvent.change(input, { target: { value: '55000' } });
+      fireEvent.click(screen.getByLabelText('Save target'));
+      await waitFor(() => {
+        expect(mockSetTarget).toHaveBeenCalledWith('revenue', 55000);
+      });
+    });
+
+    it('When cancel is clicked / Then the input is discarded and setTarget is not called', () => {
+      render(<KPICard kpi={baseKPI} />);
+      fireEvent.click(screen.getByLabelText('Set target'));
+      fireEvent.change(screen.getByPlaceholderText('Target value'), { target: { value: '99999' } });
+      fireEvent.click(screen.getByLabelText('Cancel'));
+      expect(screen.queryByTestId('target-editor')).not.toBeInTheDocument();
+      expect(mockSetTarget).not.toHaveBeenCalled();
     });
   });
 
