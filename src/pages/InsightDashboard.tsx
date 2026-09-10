@@ -179,19 +179,23 @@ export const InsightDashboard: React.FC<InsightDashboardProps> = ({ initialTab }
         { id: 'finance',       label: 'Finance',       icon: 'DollarSign' },
     ];
 
-    const hasPermCheck = typeof (shell as any)?.hasPermission === 'function' || typeof (shell as any)?.hasAnyPermission === 'function' || (shell as any)?.isAdmin !== undefined;
+    // Fail CLOSED. The `!hasPermCheck ? true : …` lead-in meant that whenever the
+    // shell bridge could not be resolved — this MFE mounted standalone, or the
+    // host context was still undefined — the ABSENCE of a permission system was
+    // read as full clearance, and the finance and workforce segment tabs rendered
+    // org-wide revenue and headcount for anyone. Unknown must mean denied.
+    //
+    // The sibling MFE dashboards (projects-fe, people-connect-fe, timesheet-fe)
+    // already use this shape; Insight was the outlier.
+    const canViewFinancials =
+        ((shell as any)?.isAdmin === true) ||
+        Boolean((shell as any)?.hasAnyPermission && (shell as any).hasAnyPermission('dashboard.financial_kpis', 'reports.view', 'invoices.read', 'journal.read')) ||
+        Boolean((shell as any)?.hasPermission && ((shell as any).hasPermission('dashboard.financial_kpis') || (shell as any).hasPermission('reports.view') || (shell as any).hasPermission('invoices.read')));
 
-    const canViewFinancials = !hasPermCheck
-        ? true
-        : ((shell as any)?.isAdmin === true) ||
-          Boolean((shell as any)?.hasAnyPermission && (shell as any).hasAnyPermission('dashboard.financial_kpis', 'reports.view', 'invoices.read', 'journal.read')) ||
-          Boolean((shell as any)?.hasPermission && ((shell as any).hasPermission('dashboard.financial_kpis') || (shell as any).hasPermission('reports.view') || (shell as any).hasPermission('invoices.read')));
-
-    const canViewWorkforce = !hasPermCheck
-        ? true
-        : ((shell as any)?.isAdmin === true) ||
-          Boolean((shell as any)?.hasAnyPermission && (shell as any).hasAnyPermission('dashboard.workforce_kpis', 'employees.read', 'users.read')) ||
-          Boolean((shell as any)?.hasPermission && ((shell as any).hasPermission('dashboard.workforce_kpis') || (shell as any).hasPermission('employees.read')));
+    const canViewWorkforce =
+        ((shell as any)?.isAdmin === true) ||
+        Boolean((shell as any)?.hasAnyPermission && (shell as any).hasAnyPermission('dashboard.workforce_kpis', 'employees.read', 'users.read')) ||
+        Boolean((shell as any)?.hasPermission && ((shell as any).hasPermission('dashboard.workforce_kpis') || (shell as any).hasPermission('employees.read')));
 
     // Filter segment tabs: show only if at least one required module is enabled AND user has permission
     const visibleSegmentTabs = allSegmentTabs.filter(tab => {
