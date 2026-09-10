@@ -4,7 +4,20 @@ import userEvent from '@testing-library/user-event';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { MemoryRouter } from 'react-router-dom';
 
-let mockShell: any = { effectiveFlagsLoaded: true, isFeatureEnabled: () => true };
+/**
+ * Default shell for tests that are not about permissions.
+ *
+ * This MUST represent an AUTHORIZED user. InsightDashboard now fails CLOSED on
+ * the finance/workforce KPI gates: an unresolvable permission bridge means
+ * denied, not allowed. A bare `{ effectiveFlagsLoaded, isFeatureEnabled }` mock
+ * therefore hides the revenue/finance segment tabs, which used to render only
+ * because the old `!hasPermCheck ? true : …` fallback treated "no permission
+ * system" as full clearance. The dedicated permission suites below override
+ * this with explicitly restricted shells.
+ */
+const authorizedShell = () => ({ effectiveFlagsLoaded: true, isFeatureEnabled: () => true, isAdmin: true });
+
+let mockShell: any = authorizedShell();
 
 vi.mock('@so360/shell-context', () => ({
   useShellBridge: () => mockShell,
@@ -63,7 +76,7 @@ describe('InsightDashboard', () => {
   beforeEach(() => {
     vi.resetAllMocks();
     atAGlanceRenderCount.current = 0;
-    mockShell = { effectiveFlagsLoaded: true, isFeatureEnabled: () => true };
+    mockShell = authorizedShell();
   });
 
   describe('Given loading state', () => {
@@ -127,7 +140,7 @@ describe('InsightDashboard', () => {
 
   describe('Given effectiveFlagsLoaded is true and refresh_on_demand is enabled', () => {
     it('When flags are resolved and feature is on / Then refresh button is present', async () => {
-      mockShell = { effectiveFlagsLoaded: true, isFeatureEnabled: () => true };
+      mockShell = authorizedShell();
       mockApi.getSegments.mockResolvedValue([]);
       wrap(<InsightDashboard />);
       await waitFor(() => {
@@ -260,7 +273,7 @@ describe('InsightDashboard', () => {
       expect(screen.queryByTestId('tab-finance')).not.toBeInTheDocument();
 
       // Reset mockShell
-      mockShell = { effectiveFlagsLoaded: true, isFeatureEnabled: () => true };
+      mockShell = authorizedShell();
     });
 
     it('When user has financial permissions / Then shows revenue and finance tabs', async () => {
@@ -282,7 +295,42 @@ describe('InsightDashboard', () => {
       expect(screen.getByTestId('tab-finance')).toBeInTheDocument();
 
       // Reset mockShell
+      mockShell = authorizedShell();
+    });
+
+    // Regression guard. The gates used to lead with `!hasPermCheck ? true : …`,
+    // where hasPermCheck was false whenever the shell bridge could not be
+    // resolved — MFE mounted standalone, or host context still undefined. The
+    // ABSENCE of a permission system was read as full clearance, so org-wide
+    // revenue and headcount rendered for anyone. Unknown must mean denied.
+    it('When the shell bridge exposes NO permission API at all / Then financial tabs stay hidden', async () => {
       mockShell = { effectiveFlagsLoaded: true, isFeatureEnabled: () => true };
+      mockApi.getSegments.mockResolvedValue([]);
+
+      wrap(<InsightDashboard />);
+      await waitFor(() => {
+        expect(screen.getByText('Insight Dashboard')).toBeInTheDocument();
+      });
+
+      expect(screen.queryByTestId('tab-revenue')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('tab-finance')).not.toBeInTheDocument();
+
+      mockShell = authorizedShell();
+    });
+
+    it('When the shell reports isAdmin / Then financial tabs are shown without explicit codes', async () => {
+      mockShell = { effectiveFlagsLoaded: true, isFeatureEnabled: () => true, isAdmin: true };
+      mockApi.getSegments.mockResolvedValue([]);
+
+      wrap(<InsightDashboard />);
+      await waitFor(() => {
+        expect(screen.getByText('Insight Dashboard')).toBeInTheDocument();
+      });
+
+      expect(screen.getByTestId('tab-revenue')).toBeInTheDocument();
+      expect(screen.getByTestId('tab-finance')).toBeInTheDocument();
+
+      mockShell = authorizedShell();
     });
   });
 });
