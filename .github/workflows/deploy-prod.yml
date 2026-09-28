@@ -1,6 +1,7 @@
 name: Deploy Insight Frontend to Production
 
 on:
+  workflow_dispatch:
   push:
     branches: [main]
 
