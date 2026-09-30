@@ -24,6 +24,7 @@ jobs:
       vite_env_dev: |
         VITE_SO360_CORE_API=https://dev-api.skyoffice360.com/core
         VITE_SO360_INSIGHT_API=https://dev-api.skyoffice360.com/insight
+        VITE_SO360_MANUFACTURING_API=https://dev-api.skyoffice360.com/manufacturing
       vite_env_staging: |
         VITE_SO360_CORE_API=https://staging.api.skyoffice360.com/core
         VITE_SO360_INSIGHT_API=https://staging.api.skyoffice360.com/insight
@@ -43,6 +44,7 @@ jobs:
       vite_env: |
         VITE_SO360_CORE_API=https://dev-api.skyoffice360.com/core
         VITE_SO360_INSIGHT_API=https://dev-api.skyoffice360.com/insight
+        VITE_SO360_MANUFACTURING_API=https://dev-api.skyoffice360.com/manufacturing
     secrets: inherit
 
   preview-teardown:
