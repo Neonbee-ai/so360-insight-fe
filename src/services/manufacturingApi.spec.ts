@@ -62,6 +62,12 @@ describe('manufacturingApi', () => {
             );
         });
 
+        it('When running on a feature-branch preview host / Then it targets the preview /api, never prod', () => {
+            expect(resolveManufacturingBaseUrl('pr-feat-x.skyoffice360.com')).toBe(
+                'https://pr-feat-x.skyoffice360.com/api/manufacturing',
+            );
+        });
+
         it('When running on staging / Then it targets the staging gateway', () => {
             expect(resolveManufacturingBaseUrl('staging.dashboard.neonbee.app')).toBe(
                 'https://staging.api.neonbee.app/manufacturing',
