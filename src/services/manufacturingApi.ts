@@ -47,6 +47,8 @@ function isLocalHostname(hostname: string): boolean {
 
 function cloudBaseForHostname(hostname: string): string | undefined {
     if (isLocalHostname(hostname)) return undefined;
+    // Feature-branch preview: dev data, served through the preview's own /api.
+    if (/^pr-[a-z0-9-]+\.skyoffice360\.com$/.test(hostname)) return `https://${hostname}/api/manufacturing`;
     if (hostname.startsWith('dev.')) return 'https://dev.api.neonbee.app/manufacturing';
     if (hostname.startsWith('staging.')) return 'https://staging.api.neonbee.app/manufacturing';
     if (hostname.endsWith('.neonbee.app') || hostname.endsWith('.skyoffice360.com')) {
