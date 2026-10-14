@@ -42,11 +42,11 @@ export const SegmentOverview: React.FC = () => {
     const getTrendIcon = (trend: 'up' | 'down' | 'stable') => {
         switch (trend) {
             case 'up':
-                return <TrendingUp className="w-5 h-5 text-green-400" />;
+                return <TrendingUp className="w-5 h-5 text-success" />;
             case 'down':
-                return <TrendingDown className="w-5 h-5 text-red-400" />;
+                return <TrendingDown className="w-5 h-5 text-danger" />;
             default:
-                return <Minus className="w-5 h-5 text-slate-400" />;
+                return <Minus className="w-5 h-5 text-fg-muted" />;
         }
     };
 
@@ -58,35 +58,35 @@ export const SegmentOverview: React.FC = () => {
 
     const getColorClass = (colorScheme: { primary: string }) => {
         const colorMap: Record<string, string> = {
-            blue: 'border-blue-500/30 hover:border-blue-500',
+            blue: 'border-primary/30 hover:border-primary',
             purple: 'border-purple-500/30 hover:border-purple-500',
-            green: 'border-green-500/30 hover:border-green-500',
+            green: 'border-success/30 hover:border-success',
             orange: 'border-orange-500/30 hover:border-orange-500',
-            red: 'border-red-500/30 hover:border-red-500',
+            red: 'border-danger/30 hover:border-danger',
         };
-        return colorMap[colorScheme.primary] || 'border-slate-700 hover:border-slate-600';
+        return colorMap[colorScheme.primary] || 'border-line hover:border-line-strong';
     };
 
     const getIconColorClass = (colorScheme: { primary: string }) => {
         const colorMap: Record<string, string> = {
-            blue: 'text-blue-400',
+            blue: 'text-primary',
             purple: 'text-purple-400',
-            green: 'text-green-400',
+            green: 'text-success',
             orange: 'text-orange-400',
-            red: 'text-red-400',
+            red: 'text-danger',
         };
-        return colorMap[colorScheme.primary] || 'text-slate-400';
+        return colorMap[colorScheme.primary] || 'text-fg-muted';
     };
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-slate-950 p-8">
+            <div className="min-h-screen bg-bg p-8">
                 <div>
                     <div className="animate-pulse">
-                        <div className="h-10 bg-slate-800 rounded w-64 mb-8"></div>
+                        <div className="h-10 bg-surface-raised rounded w-64 mb-8"></div>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {[1, 2, 3, 4, 5].map((i) => (
-                                <div key={i} className="h-48 bg-slate-900 rounded-lg"></div>
+                                <div key={i} className="h-48 bg-surface rounded-lg"></div>
                             ))}
                         </div>
                     </div>
@@ -97,16 +97,16 @@ export const SegmentOverview: React.FC = () => {
 
     if (error) {
         return (
-            <div className="min-h-screen bg-slate-950 p-8">
+            <div className="min-h-screen bg-bg p-8">
                 <div>
-                    <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-6 flex items-start gap-4">
-                        <AlertCircle className="w-6 h-6 text-red-400 flex-shrink-0 mt-0.5" />
+                    <div className="bg-danger/20 border border-danger/30 rounded-lg p-6 flex items-start gap-4">
+                        <AlertCircle className="w-6 h-6 text-danger flex-shrink-0 mt-0.5" />
                         <div>
-                            <h3 className="text-lg font-semibold text-red-400 mb-2">Failed to Load Segments</h3>
-                            <p className="text-sm text-red-300">{error}</p>
+                            <h3 className="text-lg font-semibold text-danger mb-2">Failed to Load Segments</h3>
+                            <p className="text-sm text-danger">{error}</p>
                             <button
                                 onClick={fetchSegments}
-                                className="mt-4 px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg text-sm font-medium transition-colors"
+                                className="mt-4 px-4 py-2 bg-danger/20 hover:bg-danger/30 text-danger rounded-lg text-sm font-medium transition-colors"
                             >
                                 Retry
                             </button>
@@ -118,12 +118,12 @@ export const SegmentOverview: React.FC = () => {
     }
 
     return (
-        <div className="min-h-screen bg-slate-950 p-8">
+        <div className="min-h-screen bg-bg p-8">
             <div>
                 {/* Header */}
                 <div className="mb-8">
-                    <h1 className="text-3xl font-bold text-slate-100 mb-2">Business Intelligence</h1>
-                    <p className="text-slate-400">
+                    <h1 className="text-3xl font-bold text-fg mb-2">Business Intelligence</h1>
+                    <p className="text-fg-muted">
                         Monitor key performance indicators across 5 business segments
                     </p>
                 </div>
@@ -134,7 +134,7 @@ export const SegmentOverview: React.FC = () => {
                         <button
                             key={segment.segment_code}
                             onClick={() => navigate(`/${segment.segment_code}`)}
-                            className={`bg-slate-900/50 rounded-lg border ${getColorClass(
+                            className={`bg-surface/50 rounded-lg border ${getColorClass(
                                 segment.color_scheme
                             )} p-6 text-left transition-all hover:shadow-lg hover:shadow-${
                                 segment.color_scheme.primary
@@ -150,33 +150,33 @@ export const SegmentOverview: React.FC = () => {
                                 </div>
                             </div>
 
-                            <h3 className="text-xl font-semibold text-slate-100 mb-2 group-hover:text-slate-50 transition-colors">
+                            <h3 className="text-xl font-semibold text-fg mb-2 group-hover:text-fg transition-colors">
                                 {segment.segment_name}
                             </h3>
-                            <p className="text-sm text-slate-400 mb-4 line-clamp-2">{segment.description}</p>
+                            <p className="text-sm text-fg-muted mb-4 line-clamp-2">{segment.description}</p>
 
                             {/* Primary KPI */}
                             {segment.primary_kpi && (
-                                <div className="bg-slate-800/50 rounded-lg p-3 mb-4">
-                                    <div className="text-xs text-slate-500 mb-1">{segment.primary_kpi.kpi_name}</div>
+                                <div className="bg-surface-raised/50 rounded-lg p-3 mb-4">
+                                    <div className="text-xs text-fg-subtle mb-1">{segment.primary_kpi.kpi_name}</div>
                                     <div className="flex items-baseline gap-2">
-                                        <span className="text-2xl font-bold text-slate-100">
+                                        <span className="text-2xl font-bold text-fg">
                                             {isCurrencyUnit(segment.primary_kpi.unit)
                                                 ? formatters.formatCurrency(segment.primary_kpi.value)
                                                 : segment.primary_kpi.value.toFixed(1)}
                                         </span>
                                         {!isCurrencyUnit(segment.primary_kpi.unit) && (
-                                            <span className="text-sm text-slate-400">{segment.primary_kpi.unit}</span>
+                                            <span className="text-sm text-fg-muted">{segment.primary_kpi.unit}</span>
                                         )}
                                     </div>
                                     {segment.primary_kpi.trend_percentage !== undefined && (
                                         <div
                                             className={`text-xs font-medium mt-1 ${
                                                 segment.primary_kpi.trend === 'up'
-                                                    ? 'text-green-400'
+                                                    ? 'text-success'
                                                     : segment.primary_kpi.trend === 'down'
-                                                    ? 'text-red-400'
-                                                    : 'text-slate-400'
+                                                    ? 'text-danger'
+                                                    : 'text-fg-muted'
                                             }`}
                                         >
                                             {segment.primary_kpi.trend === 'up' ? '+' : ''}
@@ -189,10 +189,10 @@ export const SegmentOverview: React.FC = () => {
                             {/* Stats */}
                             <div className="flex items-center justify-between text-sm">
                                 <div>
-                                    <span className="text-slate-400">{segment.kpi_count} KPIs</span>
+                                    <span className="text-fg-muted">{segment.kpi_count} KPIs</span>
                                 </div>
                                 {segment.signal_count > 0 && (
-                                    <div className="flex items-center gap-1.5 text-amber-400">
+                                    <div className="flex items-center gap-1.5 text-warning">
                                         <AlertCircle className="w-4 h-4" />
                                         <span>{segment.signal_count} alerts</span>
                                     </div>
@@ -205,9 +205,9 @@ export const SegmentOverview: React.FC = () => {
                 {/* Empty State */}
                 {segments.length === 0 && (
                     <div className="text-center py-16">
-                        <AlertCircle className="w-16 h-16 text-slate-600 mx-auto mb-4" />
-                        <h3 className="text-lg font-semibold text-slate-400 mb-2">No Segments Available</h3>
-                        <p className="text-sm text-slate-500">Segment data will appear here once configured.</p>
+                        <AlertCircle className="w-16 h-16 text-fg-subtle mx-auto mb-4" />
+                        <h3 className="text-lg font-semibold text-fg-muted mb-2">No Segments Available</h3>
+                        <p className="text-sm text-fg-subtle">Segment data will appear here once configured.</p>
                     </div>
                 )}
             </div>

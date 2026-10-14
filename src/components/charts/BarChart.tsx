@@ -83,10 +83,10 @@ const BarChartInner: React.FC<BarChartProps> = ({
     if (!data || data.length === 0) {
         return (
             <div
-                className="flex items-center justify-center bg-slate-900/30 rounded-lg border border-slate-800"
+                className="flex items-center justify-center bg-surface/30 rounded-lg border border-line"
                 style={{ height: `${height}px` }}
             >
-                <p className="text-slate-500 text-sm">No data available</p>
+                <p className="text-fg-subtle text-sm">No data available</p>
             </div>
         );
     }

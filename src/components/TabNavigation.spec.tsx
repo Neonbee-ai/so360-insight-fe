@@ -34,13 +34,13 @@ describe('TabNavigation', () => {
     it('When "overview" is active / Then it has the active styling', () => {
       render(<TabNavigation tabs={tabs} activeTab="overview" onChange={vi.fn()} />);
       const btn = screen.getByText('Overview').closest('button');
-      expect(btn?.className).toContain('text-blue-500');
+      expect(btn?.className).toContain('text-primary');
     });
 
     it('When "workforce" is not active / Then it has inactive styling', () => {
       render(<TabNavigation tabs={tabs} activeTab="overview" onChange={vi.fn()} />);
       const btn = screen.getByText('Workforce').closest('button');
-      expect(btn?.className).toContain('text-slate-400');
+      expect(btn?.className).toContain('text-fg-muted');
     });
   });
 

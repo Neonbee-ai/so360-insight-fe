@@ -85,25 +85,25 @@ const KPICardInner: React.FC<KPICardProps> = ({ kpi }) => {
     const isCounter = kpi.kpi_type === 'counter';
 
     const getTrendIcon = () => {
-        if (kpi.trend === 'up') return <TrendingUp className="w-5 h-5 text-green-500" />;
-        if (kpi.trend === 'down') return <TrendingDown className="w-5 h-5 text-red-500" />;
-        return <Minus className="w-5 h-5 text-slate-400" />;
+        if (kpi.trend === 'up') return <TrendingUp className="w-5 h-5 text-success" />;
+        if (kpi.trend === 'down') return <TrendingDown className="w-5 h-5 text-danger" />;
+        return <Minus className="w-5 h-5 text-fg-muted" />;
     };
 
     const getTrendColor = () => {
-        if (kpi.trend === 'up') return 'text-green-500';
-        if (kpi.trend === 'down') return 'text-red-500';
-        return 'text-slate-400';
+        if (kpi.trend === 'up') return 'text-success';
+        if (kpi.trend === 'down') return 'text-danger';
+        return 'text-fg-muted';
     };
 
     return (
-        <div className="relative bg-slate-900/50 border border-slate-800 rounded-lg p-6 hover:bg-slate-900/70 transition-all">
+        <div className="relative bg-surface/50 border border-line rounded-lg p-6 hover:bg-surface/70 transition-all">
             {!isCounter && canEditTargets && !isEditingTarget && (
                 <button
                     type="button"
                     aria-label="Set target"
                     onClick={startEditingTarget}
-                    className="absolute top-3 right-3 p-1 rounded text-slate-500 hover:text-slate-300 hover:bg-slate-800 transition-colors"
+                    className="absolute top-3 right-3 p-1 rounded text-fg-subtle hover:text-fg-muted hover:bg-surface-raised transition-colors"
                 >
                     <Pencil className="w-3.5 h-3.5" />
                 </button>
@@ -111,15 +111,15 @@ const KPICardInner: React.FC<KPICardProps> = ({ kpi }) => {
 
             <div className="flex items-start justify-between mb-3">
                 <div>
-                    <p className="text-sm text-slate-400 mb-1">{kpi.kpi_name}</p>
-                    <p className="text-xs text-slate-500">{kpi.category}</p>
+                    <p className="text-sm text-fg-muted mb-1">{kpi.kpi_name}</p>
+                    <p className="text-xs text-fg-subtle">{kpi.category}</p>
                 </div>
                 {!isCounter && getTrendIcon()}
             </div>
 
             <div className="flex items-baseline gap-2 mb-2">
-                <span className="text-3xl font-bold text-slate-100">{formatValue()}</span>
-                {displayUnit && <span className="text-sm text-slate-400">{displayUnit}</span>}
+                <span className="text-3xl font-bold text-fg">{formatValue()}</span>
+                {displayUnit && <span className="text-sm text-fg-muted">{displayUnit}</span>}
             </div>
 
             {!isCounter && kpi.trend_percentage !== undefined && (
@@ -134,10 +134,10 @@ const KPICardInner: React.FC<KPICardProps> = ({ kpi }) => {
                 <div
                     className={`text-xs mt-1 ${
                         effectiveVariance === null || effectiveVariance === undefined
-                            ? 'text-slate-400'
+                            ? 'text-fg-muted'
                             : effectiveVariance >= 0
-                                ? 'text-green-500'
-                                : 'text-red-500'
+                                ? 'text-success'
+                                : 'text-danger'
                     }`}
                 >
                     Target: {formatValueFor(effectiveTargetValue)}
@@ -155,7 +155,7 @@ const KPICardInner: React.FC<KPICardProps> = ({ kpi }) => {
                         value={targetInput}
                         onChange={(e) => setTargetInput(e.target.value)}
                         placeholder="Target value"
-                        className="w-24 text-xs bg-slate-800 border border-slate-700 rounded px-1.5 py-0.5 text-slate-100"
+                        className="w-24 text-xs bg-surface-raised border border-line rounded px-1.5 py-0.5 text-fg"
                         autoFocus
                     />
                     <button
@@ -163,7 +163,7 @@ const KPICardInner: React.FC<KPICardProps> = ({ kpi }) => {
                         aria-label="Save target"
                         onClick={saveTarget}
                         disabled={savingTarget}
-                        className="p-1 rounded text-green-500 hover:bg-slate-800 disabled:opacity-50"
+                        className="p-1 rounded text-success hover:bg-surface-raised disabled:opacity-50"
                     >
                         <Check className="w-3.5 h-3.5" />
                     </button>
@@ -172,7 +172,7 @@ const KPICardInner: React.FC<KPICardProps> = ({ kpi }) => {
                         aria-label="Cancel"
                         onClick={cancelEditingTarget}
                         disabled={savingTarget}
-                        className="p-1 rounded text-slate-500 hover:bg-slate-800 disabled:opacity-50"
+                        className="p-1 rounded text-fg-subtle hover:bg-surface-raised disabled:opacity-50"
                     >
                         <X className="w-3.5 h-3.5" />
                     </button>
@@ -181,8 +181,8 @@ const KPICardInner: React.FC<KPICardProps> = ({ kpi }) => {
 
             {/* 7-Day Sparkline */}
             {!isCounter && kpi.sparkline_data && kpi.sparkline_data.length > 0 && (
-                <div className="mt-3 pt-3 border-t border-slate-800">
-                    <p className="text-xs text-slate-500 mb-1">Last 7 days</p>
+                <div className="mt-3 pt-3 border-t border-line">
+                    <p className="text-xs text-fg-subtle mb-1">Last 7 days</p>
                     <SparklineChart
                         data={kpi.sparkline_data}
                         trend={kpi.trend}

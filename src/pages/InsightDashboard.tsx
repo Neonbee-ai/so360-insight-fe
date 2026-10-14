@@ -66,8 +66,8 @@ const RefreshButton: React.FC<RefreshButtonProps> = ({
             disabled={disabled}
             className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                 disabled
-                    ? 'bg-slate-800 text-slate-500 cursor-not-allowed'
-                    : 'bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-slate-100'
+                    ? 'bg-surface-raised text-fg-subtle cursor-not-allowed'
+                    : 'bg-surface-raised hover:bg-line-strong text-fg-muted hover:text-fg'
             }`}
         >
             <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
@@ -221,14 +221,14 @@ export const InsightDashboard: React.FC<InsightDashboardProps> = ({ initialTab }
 
     if (loading) {
         return (
-            <div className="min-h-full bg-slate-950 p-8">
+            <div className="min-h-full bg-bg p-8">
                 <div>
                     <div className="animate-pulse">
-                        <div className="h-10 bg-slate-800 rounded w-64 mb-8"></div>
-                        <div className="h-12 bg-slate-900 rounded mb-6"></div>
+                        <div className="h-10 bg-surface-raised rounded w-64 mb-8"></div>
+                        <div className="h-12 bg-surface rounded mb-6"></div>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                             {[1, 2, 3, 4, 5, 6].map((i) => (
-                                <div key={i} className="h-48 bg-slate-900 rounded-lg"></div>
+                                <div key={i} className="h-48 bg-surface rounded-lg"></div>
                             ))}
                         </div>
                     </div>
@@ -239,16 +239,16 @@ export const InsightDashboard: React.FC<InsightDashboardProps> = ({ initialTab }
 
     if (error) {
         return (
-            <div className="min-h-full bg-slate-950 p-8">
+            <div className="min-h-full bg-bg p-8">
                 <div>
-                    <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-6 flex items-start gap-4">
-                        <AlertCircle className="w-6 h-6 text-red-400 flex-shrink-0 mt-0.5" />
+                    <div className="bg-danger/20 border border-danger/30 rounded-lg p-6 flex items-start gap-4">
+                        <AlertCircle className="w-6 h-6 text-danger flex-shrink-0 mt-0.5" />
                         <div>
-                            <h3 className="text-lg font-semibold text-red-400 mb-2">Failed to Load Dashboard</h3>
-                            <p className="text-sm text-red-300">{error}</p>
+                            <h3 className="text-lg font-semibold text-danger mb-2">Failed to Load Dashboard</h3>
+                            <p className="text-sm text-danger">{error}</p>
                             <button
                                 onClick={fetchSegments}
-                                className="mt-4 px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg text-sm font-medium transition-colors"
+                                className="mt-4 px-4 py-2 bg-danger/20 hover:bg-danger/30 text-danger rounded-lg text-sm font-medium transition-colors"
                             >
                                 Retry
                             </button>
@@ -260,13 +260,13 @@ export const InsightDashboard: React.FC<InsightDashboardProps> = ({ initialTab }
     }
 
     return (
-        <div className="min-h-full bg-slate-950 p-8">
+        <div className="min-h-full bg-bg p-8">
             <div>
                 {/* Page Header */}
                 <header className="mb-6 flex items-start justify-between gap-4">
                     <div>
-                        <h1 className="text-3xl font-bold text-slate-100">Insight Dashboard</h1>
-                        <p className="text-slate-400 mt-1">
+                        <h1 className="text-3xl font-bold text-fg">Insight Dashboard</h1>
+                        <p className="text-fg-muted mt-1">
                             Monitor key metrics across all business segments
                         </p>
                     </div>
@@ -279,10 +279,10 @@ export const InsightDashboard: React.FC<InsightDashboardProps> = ({ initialTab }
                                 initialCooldownSeconds={initialCooldownSeconds}
                             />
                         ) : (
-                            <span className="text-xs text-slate-500 italic">Upgrade to refresh on demand</span>
+                            <span className="text-xs text-fg-subtle italic">Upgrade to refresh on demand</span>
                         )}
                         {refreshError && (
-                            <span className="text-xs text-red-400">{refreshError}</span>
+                            <span className="text-xs text-danger">{refreshError}</span>
                         )}
                     </div>
                 </header>

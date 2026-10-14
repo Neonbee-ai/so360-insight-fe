@@ -34,13 +34,13 @@ export const ChartContainer: React.FC<ChartContainerProps> = ({
     const canExport = (shell?.permissionsLoaded === true) && (shell?.hasPermission?.('analytics.export') ?? false) && flagsLoaded && (isFeatureEnabled('action:insight:chart_export') ?? true);
 
     return (
-        <div className={`bg-slate-900/50 border border-slate-800 rounded-lg p-6 ${className}`}>
+        <div className={`bg-surface/50 border border-line rounded-lg p-6 ${className}`}>
             {/* Header */}
             <div className="flex items-start justify-between mb-4">
                 <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-slate-100">{title}</h3>
+                    <h3 className="text-lg font-semibold text-fg">{title}</h3>
                     {description && (
-                        <p className="text-sm text-slate-400 mt-1">{description}</p>
+                        <p className="text-sm text-fg-muted mt-1">{description}</p>
                     )}
                 </div>
                 {canExport && exportData.length > 0 && (

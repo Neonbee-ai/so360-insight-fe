@@ -152,13 +152,13 @@ export const SegmentTabContent: React.FC<SegmentTabContentProps> = ({ segmentCod
 
     const getIconColorClass = (colorScheme: { primary: string }) => {
         const colorMap: Record<string, string> = {
-            blue: 'text-blue-400',
+            blue: 'text-primary',
             purple: 'text-purple-400',
-            green: 'text-green-400',
+            green: 'text-success',
             orange: 'text-orange-400',
-            red: 'text-red-400',
+            red: 'text-danger',
         };
-        return colorMap[colorScheme.primary] || 'text-slate-400';
+        return colorMap[colorScheme.primary] || 'text-fg-muted';
     };
 
     const handleResolveAlert = async (alertId: string) => {
@@ -201,8 +201,8 @@ export const SegmentTabContent: React.FC<SegmentTabContentProps> = ({ segmentCod
         return (
             <div className="flex items-center justify-center py-12">
                 <div className="flex flex-col items-center gap-4">
-                    <Loader2 className="w-12 h-12 text-blue-500 animate-spin" />
-                    <p className="text-slate-400">Loading segment details...</p>
+                    <Loader2 className="w-12 h-12 text-primary animate-spin" />
+                    <p className="text-fg-muted">Loading segment details...</p>
                 </div>
             </div>
         );
@@ -210,14 +210,14 @@ export const SegmentTabContent: React.FC<SegmentTabContentProps> = ({ segmentCod
 
     if (error || !segment) {
         return (
-            <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-6 flex items-start gap-4">
-                <AlertCircle className="w-6 h-6 text-red-400 flex-shrink-0 mt-0.5" />
+            <div className="bg-danger/20 border border-danger/30 rounded-lg p-6 flex items-start gap-4">
+                <AlertCircle className="w-6 h-6 text-danger flex-shrink-0 mt-0.5" />
                 <div>
-                    <h3 className="text-lg font-semibold text-red-400 mb-2">Failed to Load Segment</h3>
-                    <p className="text-sm text-red-300">{error || 'Segment not found'}</p>
+                    <h3 className="text-lg font-semibold text-danger mb-2">Failed to Load Segment</h3>
+                    <p className="text-sm text-danger">{error || 'Segment not found'}</p>
                     <button
                         onClick={fetchSegmentDetail}
-                        className="mt-4 px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg text-sm font-medium transition-colors"
+                        className="mt-4 px-4 py-2 bg-danger/20 hover:bg-danger/30 text-danger rounded-lg text-sm font-medium transition-colors"
                     >
                         Retry
                     </button>
@@ -237,12 +237,12 @@ export const SegmentTabContent: React.FC<SegmentTabContentProps> = ({ segmentCod
                         {getSegmentIcon(segment.icon_name)}
                     </div>
                     <div className="flex-1">
-                        <h1 className="text-2xl font-bold text-slate-100 mb-2">{segment.segment_name}</h1>
-                        <p className="text-slate-400 max-w-3xl">{segment.description}</p>
+                        <h1 className="text-2xl font-bold text-fg mb-2">{segment.segment_name}</h1>
+                        <p className="text-fg-muted max-w-3xl">{segment.description}</p>
                         <div className="flex items-center gap-4 mt-3 text-sm">
-                            <span className="text-slate-500">{segment.kpis.length} KPIs</span>
-                            <span className="text-slate-600">•</span>
-                            <span className="text-slate-500">{unresolvedAlerts.length} Active Alerts</span>
+                            <span className="text-fg-subtle">{segment.kpis.length} KPIs</span>
+                            <span className="text-fg-subtle">•</span>
+                            <span className="text-fg-subtle">{unresolvedAlerts.length} Active Alerts</span>
                         </div>
                     </div>
                 </div>
@@ -282,7 +282,7 @@ export const SegmentTabContent: React.FC<SegmentTabContentProps> = ({ segmentCod
             {/* Section 2: KPIs Grid */}
             {segment.kpis.length > 0 && (
                 <div>
-                    <h2 className="text-xl font-semibold text-slate-100 mb-4">Key Performance Indicators</h2>
+                    <h2 className="text-xl font-semibold text-fg mb-4">Key Performance Indicators</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {segment.kpis.map((kpi) => (
                             <KPICard key={kpi.kpi_code} kpi={kpi} />
@@ -296,7 +296,7 @@ export const SegmentTabContent: React.FC<SegmentTabContentProps> = ({ segmentCod
                 const charts = renderSegmentCharts();
                 return charts ? (
                     <div>
-                        <h2 className="text-xl font-semibold text-slate-100 mb-4">Analytics Dashboard</h2>
+                        <h2 className="text-xl font-semibold text-fg mb-4">Analytics Dashboard</h2>
                         {charts}
                     </div>
                 ) : null;
@@ -306,12 +306,12 @@ export const SegmentTabContent: React.FC<SegmentTabContentProps> = ({ segmentCod
             {segment.trends && segment.trends.length > 0 && (
                 <div>
                     <div className="flex items-center justify-between mb-4">
-                        <h2 className="text-xl font-semibold text-slate-100">Historical Trends</h2>
+                        <h2 className="text-xl font-semibold text-fg">Historical Trends</h2>
                         <TimeRangeSelector selected={timeRange} onChange={setTimeRange} />
                     </div>
                     {loadingTrends ? (
                         <div className="flex items-center justify-center py-12">
-                            <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+                            <Loader2 className="w-8 h-8 text-primary animate-spin" />
                         </div>
                     ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -330,7 +330,7 @@ export const SegmentTabContent: React.FC<SegmentTabContentProps> = ({ segmentCod
             {/* Section 4: Active Alerts */}
             {unresolvedAlerts.length > 0 && (
                 <div>
-                    <h2 className="text-xl font-semibold text-slate-100 mb-4">
+                    <h2 className="text-xl font-semibold text-fg mb-4">
                         Active Alerts ({unresolvedAlerts.length})
                     </h2>
                     <div className="space-y-3">
@@ -341,7 +341,7 @@ export const SegmentTabContent: React.FC<SegmentTabContentProps> = ({ segmentCod
 
                     {unresolvedAlerts.length > 10 && (
                         <div className="mt-4 text-center">
-                            <p className="text-sm text-slate-400">
+                            <p className="text-sm text-fg-muted">
                                 Showing first 10 of {unresolvedAlerts.length} alerts
                             </p>
                         </div>
@@ -351,15 +351,15 @@ export const SegmentTabContent: React.FC<SegmentTabContentProps> = ({ segmentCod
 
             {/* Empty States */}
             {segment.kpis.length === 0 && (
-                <div className="text-center py-12 bg-slate-900/30 rounded-lg border border-slate-800">
-                    <p className="text-slate-500">No KPIs available for this segment</p>
+                <div className="text-center py-12 bg-surface/30 rounded-lg border border-line">
+                    <p className="text-fg-subtle">No KPIs available for this segment</p>
                 </div>
             )}
 
             {unresolvedAlerts.length === 0 && segment.kpis.length > 0 && (
-                <div className="text-center py-8 bg-slate-900/30 rounded-lg border border-slate-800">
-                    <AlertCircle className="w-12 h-12 text-slate-600 mx-auto mb-3" />
-                    <p className="text-slate-400">No active alerts for this segment</p>
+                <div className="text-center py-8 bg-surface/30 rounded-lg border border-line">
+                    <AlertCircle className="w-12 h-12 text-fg-subtle mx-auto mb-3" />
+                    <p className="text-fg-muted">No active alerts for this segment</p>
                 </div>
             )}
         </div>

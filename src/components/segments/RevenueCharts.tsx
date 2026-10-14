@@ -58,18 +58,18 @@ export const RevenueCharts: React.FC<RevenueChartsProps> = ({ tenantId, orgId })
     if (loading) {
         return (
             <div className="flex items-center justify-center py-12">
-                <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+                <Loader2 className="w-8 h-8 text-primary animate-spin" />
             </div>
         );
     }
 
     if (error) {
         return (
-            <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-6 flex items-start gap-4">
-                <AlertCircle className="w-6 h-6 text-red-400 flex-shrink-0 mt-0.5" />
+            <div className="bg-danger/20 border border-danger/30 rounded-lg p-6 flex items-start gap-4">
+                <AlertCircle className="w-6 h-6 text-danger flex-shrink-0 mt-0.5" />
                 <div>
-                    <h3 className="text-lg font-semibold text-red-400 mb-2">Failed to Load Charts</h3>
-                    <p className="text-sm text-red-300">{error}</p>
+                    <h3 className="text-lg font-semibold text-danger mb-2">Failed to Load Charts</h3>
+                    <p className="text-sm text-danger">{error}</p>
                 </div>
             </div>
         );

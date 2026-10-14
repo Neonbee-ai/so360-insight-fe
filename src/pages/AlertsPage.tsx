@@ -69,14 +69,14 @@ export const AlertsPage: React.FC = () => {
 
     if (!canAccessAlerts) {
         return (
-            <div className="min-h-screen bg-slate-950 p-6">
+            <div className="min-h-screen bg-bg p-6">
                 <div className="max-w-2xl mx-auto mt-16 text-center">
-                    <AlertCircle className="w-16 h-16 text-slate-600 mx-auto mb-4" />
-                    <h2 className="text-2xl font-bold text-slate-100 mb-2">AI Alerts</h2>
-                    <p className="text-slate-400 mb-6">
+                    <AlertCircle className="w-16 h-16 text-fg-subtle mx-auto mb-4" />
+                    <h2 className="text-2xl font-bold text-fg mb-2">AI Alerts</h2>
+                    <p className="text-fg-muted mb-6">
                         Intelligent anomaly detection and automated alerts are available on Growth plans and above.
                     </p>
-                    <div className="inline-block px-4 py-2 bg-blue-600/20 border border-blue-500/30 rounded-lg text-blue-400 text-sm font-medium">
+                    <div className="inline-block px-4 py-2 bg-primary/20 border border-primary/30 rounded-lg text-primary text-sm font-medium">
                         Upgrade to Growth to unlock Alerts
                     </div>
                 </div>
@@ -85,30 +85,30 @@ export const AlertsPage: React.FC = () => {
     }
 
     return (
-        <div className="min-h-screen bg-slate-950 p-6">
+        <div className="min-h-screen bg-bg p-6">
             <div>
                 {/* Header */}
                 <div className="mb-8">
                     <div className="flex items-center gap-3 mb-2">
-                        <AlertCircle className="w-8 h-8 text-yellow-500" />
-                        <h1 className="text-3xl font-bold text-slate-100">Alerts</h1>
+                        <AlertCircle className="w-8 h-8 text-warning" />
+                        <h1 className="text-3xl font-bold text-fg">Alerts</h1>
                     </div>
-                    <p className="text-slate-400">Manage and resolve intelligent alerts</p>
+                    <p className="text-fg-muted">Manage and resolve intelligent alerts</p>
                 </div>
 
                 {/* Filters */}
-                <div className="bg-slate-900/50 border border-slate-800 rounded-lg p-4 mb-6">
+                <div className="bg-surface/50 border border-line rounded-lg p-4 mb-6">
                     <div className="flex items-center gap-2 mb-3">
-                        <Filter className="w-4 h-4 text-slate-400" />
-                        <span className="text-sm text-slate-400">Filters</span>
+                        <Filter className="w-4 h-4 text-fg-muted" />
+                        <span className="text-sm text-fg-muted">Filters</span>
                     </div>
                     <div className="flex flex-wrap gap-4">
                         <div>
-                            <label className="text-sm text-slate-400 block mb-2">Severity</label>
+                            <label className="text-sm text-fg-muted block mb-2">Severity</label>
                             <select
                                 value={severityFilter}
                                 onChange={(e) => setSeverityFilter(e.target.value)}
-                                className="bg-slate-800 border border-slate-700 rounded px-3 py-2 text-slate-100 text-sm"
+                                className="bg-surface-raised border border-line rounded px-3 py-2 text-fg text-sm"
                             >
                                 <option value="all">All</option>
                                 <option value="critical">Critical</option>
@@ -117,14 +117,14 @@ export const AlertsPage: React.FC = () => {
                             </select>
                         </div>
                         <div>
-                            <label className="text-sm text-slate-400 block mb-2">Status</label>
+                            <label className="text-sm text-fg-muted block mb-2">Status</label>
                             <div className="flex gap-2">
                                 <button
                                     onClick={() => setUnresolvedOnly(true)}
                                     className={`px-3 py-2 text-sm rounded transition-colors ${
                                         unresolvedOnly
-                                            ? 'bg-blue-600 text-white'
-                                            : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
+                                            ? 'bg-primary text-primary-fg'
+                                            : 'bg-surface-raised text-fg-muted hover:bg-line-strong'
                                     }`}
                                 >
                                     Unresolved
@@ -133,8 +133,8 @@ export const AlertsPage: React.FC = () => {
                                     onClick={() => setUnresolvedOnly(false)}
                                     className={`px-3 py-2 text-sm rounded transition-colors ${
                                         !unresolvedOnly
-                                            ? 'bg-blue-600 text-white'
-                                            : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
+                                            ? 'bg-primary text-primary-fg'
+                                            : 'bg-surface-raised text-fg-muted hover:bg-line-strong'
                                     }`}
                                 >
                                     All
@@ -146,7 +146,7 @@ export const AlertsPage: React.FC = () => {
 
                 {/* Alerts List */}
                 {loading ? (
-                    <div className="text-center text-slate-400 py-12">Loading alerts...</div>
+                    <div className="text-center text-fg-muted py-12">Loading alerts...</div>
                 ) : visibleAlerts.length > 0 ? (
                     <div className="space-y-4">
                         {visibleAlerts.map((alert) => (
@@ -154,10 +154,10 @@ export const AlertsPage: React.FC = () => {
                         ))}
                     </div>
                 ) : (
-                    <div className="bg-slate-900/50 border border-slate-800 rounded-lg p-12 text-center">
-                        <AlertCircle className="w-12 h-12 text-slate-600 mx-auto mb-4" />
-                        <p className="text-slate-400 text-lg mb-2">No alerts found</p>
-                        <p className="text-slate-500 text-sm">
+                    <div className="bg-surface/50 border border-line rounded-lg p-12 text-center">
+                        <AlertCircle className="w-12 h-12 text-fg-subtle mx-auto mb-4" />
+                        <p className="text-fg-muted text-lg mb-2">No alerts found</p>
+                        <p className="text-fg-subtle text-sm">
                             {unresolvedOnly ? 'All alerts have been resolved!' : 'No alerts match the current filters.'}
                         </p>
                     </div>

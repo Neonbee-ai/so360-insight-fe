@@ -29,8 +29,8 @@ const TIME_RANGES: TimeRangeOption[] = [
 
 export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({ selected, onChange }) => {
     return (
-        <div className="flex items-center gap-2 bg-slate-900/50 rounded-lg border border-slate-800 p-1">
-            <Calendar className="w-4 h-4 text-slate-400 ml-2" />
+        <div className="flex items-center gap-2 bg-surface/50 rounded-lg border border-line p-1">
+            <Calendar className="w-4 h-4 text-fg-muted ml-2" />
             {TIME_RANGES.map((option) => (
                 <button
                     key={option.value}
@@ -39,8 +39,8 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({ selected, 
                         px-3 py-1.5 rounded-md text-sm font-medium transition-all
                         ${
                             selected === option.value
-                                ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/25'
-                                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+                                ? 'bg-primary text-primary-fg shadow-lg shadow-primary/25'
+                                : 'text-fg-muted hover:text-fg hover:bg-surface-raised/50'
                         }
                     `}
                 >

@@ -24,7 +24,7 @@ describe('TimeRangeSelector', () => {
     it('When "Last 30 days" is active / Then it has the active styling class', () => {
       render(<TimeRangeSelector selected="30d" onChange={vi.fn()} />);
       const btn = screen.getByText('Last 30 days');
-      expect(btn.className).toContain('bg-blue-500');
+      expect(btn.className).toContain('bg-primary');
     });
   });
 

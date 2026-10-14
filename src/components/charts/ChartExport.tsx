@@ -81,7 +81,7 @@ export const ChartExport: React.FC<ChartExportProps> = ({
         <div className="relative">
             <button
                 onClick={() => setShowMenu(!showMenu)}
-                className="p-2 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-slate-200 transition-colors"
+                className="p-2 rounded-lg hover:bg-surface-raised text-fg-muted hover:text-fg transition-colors"
                 title="Export chart"
             >
                 <Download className="w-4 h-4" />
@@ -96,18 +96,18 @@ export const ChartExport: React.FC<ChartExportProps> = ({
                     />
 
                     {/* Menu */}
-                    <div className="absolute right-0 top-full mt-2 w-48 bg-slate-900 border border-slate-700 rounded-lg shadow-xl z-20">
+                    <div className="absolute right-0 top-full mt-2 w-48 bg-surface border border-line rounded-lg shadow-xl z-20">
                         <div className="py-1">
                             <button
                                 onClick={handleExportPNG}
-                                className="w-full px-4 py-2 text-left text-sm text-slate-300 hover:bg-slate-800 hover:text-slate-100 flex items-center gap-2"
+                                className="w-full px-4 py-2 text-left text-sm text-fg-muted hover:bg-surface-raised hover:text-fg flex items-center gap-2"
                             >
                                 <FileImage className="w-4 h-4" />
                                 Export as PNG
                             </button>
                             <button
                                 onClick={handleExportCSV}
-                                className="w-full px-4 py-2 text-left text-sm text-slate-300 hover:bg-slate-800 hover:text-slate-100 flex items-center gap-2"
+                                className="w-full px-4 py-2 text-left text-sm text-fg-muted hover:bg-surface-raised hover:text-fg flex items-center gap-2"
                             >
                                 <FileSpreadsheet className="w-4 h-4" />
                                 Export as CSV

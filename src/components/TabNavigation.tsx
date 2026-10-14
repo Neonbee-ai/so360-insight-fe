@@ -23,7 +23,7 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({ tabs, activeTab, o
     };
 
     return (
-        <div className="bg-slate-900/50 border-b border-slate-800 overflow-x-auto">
+        <div className="bg-surface/50 border-b border-line overflow-x-auto">
             <div className="flex min-w-max">
                 {tabs.map((tab) => {
                     const isActive = activeTab === tab.id;
@@ -36,8 +36,8 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({ tabs, activeTab, o
                                 flex items-center gap-2 whitespace-nowrap
                                 ${
                                     isActive
-                                        ? 'text-blue-500 bg-slate-900/70'
-                                        : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/30'
+                                        ? 'text-primary bg-surface/70'
+                                        : 'text-fg-muted hover:text-fg hover:bg-surface/30'
                                 }
                             `}
                         >
@@ -47,7 +47,7 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({ tabs, activeTab, o
                             {isActive && (
                                 <motion.div
                                     layoutId="activeTab"
-                                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600"
+                                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"
                                     transition={{ type: 'spring', stiffness: 300, damping: 30 }}
                                 />
                             )}

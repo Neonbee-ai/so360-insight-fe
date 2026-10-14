@@ -68,10 +68,10 @@ const WaterfallChartInner: React.FC<WaterfallChartProps> = ({
     if (!data || data.length === 0) {
         return (
             <div
-                className="flex items-center justify-center bg-slate-900/30 rounded-lg border border-slate-800"
+                className="flex items-center justify-center bg-surface/30 rounded-lg border border-line"
                 style={{ height: `${height}px` }}
             >
-                <p className="text-slate-500 text-sm">No data available</p>
+                <p className="text-fg-subtle text-sm">No data available</p>
             </div>
         );
     }
@@ -93,7 +93,7 @@ const WaterfallChartInner: React.FC<WaterfallChartProps> = ({
 
     return (
         <div className="w-full">
-            {title && <h3 className="text-sm font-medium text-slate-300 mb-2 px-4">{title}</h3>}
+            {title && <h3 className="text-sm font-medium text-fg-muted mb-2 px-4">{title}</h3>}
             <ResponsiveContainer width="100%" height={height}>
                 <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
                     <CartesianGrid {...getGridStyle()} />

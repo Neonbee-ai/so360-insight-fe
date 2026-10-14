@@ -29,30 +29,30 @@ const ManufacturingAtAGlanceCard: React.FC<{ onClick: () => void }> = ({ onClick
     }, [currentOrg?.id, currentOrg?.tenant_id, accessToken]);
     return (
         <button onClick={onClick}
-            className="bg-slate-900/50 rounded-lg border border-emerald-500/20 p-4 text-left transition-all hover:shadow-lg hover:border-emerald-500/40 group">
+            className="bg-surface/50 rounded-lg border border-success/20 p-4 text-left transition-all hover:shadow-lg hover:border-success/40 group">
             <div className="flex items-start justify-between mb-3">
-                <Factory className="w-5 h-5 text-emerald-400" />
+                <Factory className="w-5 h-5 text-success" />
             </div>
-            <h3 className="text-sm font-semibold text-slate-100 mb-1 group-hover:text-slate-50 transition-colors">
+            <h3 className="text-sm font-semibold text-fg mb-1 group-hover:text-fg transition-colors">
                 Manufacturing
             </h3>
             {data ? (
                 <>
                     <div className="mb-2">
-                        <div className="text-lg font-bold text-slate-100">
+                        <div className="text-lg font-bold text-fg">
                             {data.mo_in_progress + data.mo_planned}
-                            <span className="text-xs text-slate-400 ml-1">open MOs</span>
+                            <span className="text-xs text-fg-muted ml-1">open MOs</span>
                         </div>
                     </div>
                     <div className="flex items-center justify-between text-xs">
-                        <span className="text-slate-400">{data.wo_open} WOs open</span>
+                        <span className="text-fg-muted">{data.wo_open} WOs open</span>
                         {data.scrap_pct > 3 && (
-                            <span className="text-amber-400">scrap {data.scrap_pct.toFixed(1)}%</span>
+                            <span className="text-warning">scrap {data.scrap_pct.toFixed(1)}%</span>
                         )}
                     </div>
                 </>
             ) : (
-                <div className="text-xs text-slate-500">Connecting…</div>
+                <div className="text-xs text-fg-subtle">Connecting…</div>
             )}
         </button>
     );
@@ -329,34 +329,34 @@ export const AtAGlanceView: React.FC<AtAGlanceViewProps> = ({ segments, onSegmen
 
     const getIconColorClass = (colorScheme: { primary: string }) => {
         const colorMap: Record<string, string> = {
-            blue: 'text-blue-400',
+            blue: 'text-primary',
             purple: 'text-purple-400',
-            green: 'text-green-400',
+            green: 'text-success',
             orange: 'text-orange-400',
-            red: 'text-red-400',
+            red: 'text-danger',
         };
-        return colorMap[colorScheme.primary] || 'text-slate-400';
+        return colorMap[colorScheme.primary] || 'text-fg-muted';
     };
 
     const getBorderColorClass = (colorScheme: { primary: string }) => {
         const colorMap: Record<string, string> = {
-            blue: 'border-blue-500/30 hover:border-blue-500',
+            blue: 'border-primary/30 hover:border-primary',
             purple: 'border-purple-500/30 hover:border-purple-500',
-            green: 'border-green-500/30 hover:border-green-500',
+            green: 'border-success/30 hover:border-success',
             orange: 'border-orange-500/30 hover:border-orange-500',
-            red: 'border-red-500/30 hover:border-red-500',
+            red: 'border-danger/30 hover:border-danger',
         };
-        return colorMap[colorScheme.primary] || 'border-slate-700 hover:border-slate-600';
+        return colorMap[colorScheme.primary] || 'border-line hover:border-line-strong';
     };
 
     const getTrendIcon = (trend: 'up' | 'down' | 'stable') => {
         switch (trend) {
             case 'up':
-                return <TrendingUp className="w-4 h-4 text-green-400" />;
+                return <TrendingUp className="w-4 h-4 text-success" />;
             case 'down':
-                return <TrendingDown className="w-4 h-4 text-red-400" />;
+                return <TrendingDown className="w-4 h-4 text-danger" />;
             default:
-                return <Minus className="w-4 h-4 text-slate-400" />;
+                return <Minus className="w-4 h-4 text-fg-muted" />;
         }
     };
 
@@ -377,19 +377,19 @@ export const AtAGlanceView: React.FC<AtAGlanceViewProps> = ({ segments, onSegmen
                     {/* AI Summary skeletons */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
                         {Array.from({ length: visibleCardConfigs.length || 4 }, (_, i) => (
-                            <div key={i} className="h-48 bg-slate-900 rounded-lg"></div>
+                            <div key={i} className="h-48 bg-surface rounded-lg"></div>
                         ))}
                     </div>
                     {/* Segment skeletons */}
                     <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
                         {[1, 2, 3, 4, 5].map((i) => (
-                            <div key={i} className="h-32 bg-slate-900 rounded-lg"></div>
+                            <div key={i} className="h-32 bg-surface rounded-lg"></div>
                         ))}
                     </div>
                     {/* KPI skeletons */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                         {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-                            <div key={i} className="h-40 bg-slate-900 rounded-lg"></div>
+                            <div key={i} className="h-40 bg-surface rounded-lg"></div>
                         ))}
                     </div>
                 </div>
@@ -402,7 +402,7 @@ export const AtAGlanceView: React.FC<AtAGlanceViewProps> = ({ segments, onSegmen
             {/* Section 1: AI Executive Summary — hidden until flags resolve */}
             {flagsLoaded !== false && (canShowAiSummary ? (
                 <div>
-                    <h2 className="text-xl font-semibold text-slate-100 mb-4">AI Executive Summary</h2>
+                    <h2 className="text-xl font-semibold text-fg mb-4">AI Executive Summary</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {neuraSummaries.map((summary, index) => {
                             const cfg = visibleCardConfigs[index];
@@ -436,10 +436,10 @@ export const AtAGlanceView: React.FC<AtAGlanceViewProps> = ({ segments, onSegmen
                     </div>
                 </div>
             ) : (
-                <div className="bg-slate-900/30 border border-slate-800 rounded-lg p-6 text-center">
-                    <h2 className="text-xl font-semibold text-slate-100 mb-2">AI Executive Summary</h2>
-                    <p className="text-slate-400 text-sm mb-3">AI-powered executive summaries are available on Growth plans and above.</p>
-                    <span className="inline-block px-3 py-1.5 bg-blue-600/20 border border-blue-500/30 rounded-lg text-blue-400 text-xs font-medium">
+                <div className="bg-surface/30 border border-line rounded-lg p-6 text-center">
+                    <h2 className="text-xl font-semibold text-fg mb-2">AI Executive Summary</h2>
+                    <p className="text-fg-muted text-sm mb-3">AI-powered executive summaries are available on Growth plans and above.</p>
+                    <span className="inline-block px-3 py-1.5 bg-primary/20 border border-primary/30 rounded-lg text-primary text-xs font-medium">
                         Upgrade to Growth to unlock AI Summaries
                     </span>
                 </div>
@@ -447,7 +447,7 @@ export const AtAGlanceView: React.FC<AtAGlanceViewProps> = ({ segments, onSegmen
 
             {/* Section 2: Segment Summary Cards */}
             <div>
-                <h2 className="text-xl font-semibold text-slate-100 mb-4">Business Segments</h2>
+                <h2 className="text-xl font-semibold text-fg mb-4">Business Segments</h2>
                 <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
                     {segments.filter(s => {
                         const deps = SEGMENT_MODULE_DEPS[s.segment_code];
@@ -458,7 +458,7 @@ export const AtAGlanceView: React.FC<AtAGlanceViewProps> = ({ segments, onSegmen
                             key={segment.segment_code}
                             onClick={() => onSegmentClick(segment.segment_code)}
                             className={`
-                                bg-slate-900/50 rounded-lg border ${getBorderColorClass(segment.color_scheme)}
+                                bg-surface/50 rounded-lg border ${getBorderColorClass(segment.color_scheme)}
                                 p-4 text-left transition-all hover:shadow-lg group
                             `}
                         >
@@ -471,16 +471,16 @@ export const AtAGlanceView: React.FC<AtAGlanceViewProps> = ({ segments, onSegmen
                             </div>
 
                             {/* Segment Name */}
-                            <h3 className="text-sm font-semibold text-slate-100 mb-1 group-hover:text-slate-50 transition-colors">
+                            <h3 className="text-sm font-semibold text-fg mb-1 group-hover:text-fg transition-colors">
                                 {segment.segment_name}
                             </h3>
 
                             {/* Primary KPI */}
                             {segment.primary_kpi && (
                                 <div className="mb-2">
-                                    <div className="text-lg font-bold text-slate-100">
+                                    <div className="text-lg font-bold text-fg">
                                         {segment.primary_kpi.value.toFixed(1)}
-                                        <span className="text-xs text-slate-400 ml-1">
+                                        <span className="text-xs text-fg-muted ml-1">
                                             {segment.primary_kpi.unit}
                                         </span>
                                     </div>
@@ -489,9 +489,9 @@ export const AtAGlanceView: React.FC<AtAGlanceViewProps> = ({ segments, onSegmen
 
                             {/* Stats */}
                             <div className="flex items-center justify-between text-xs">
-                                <span className="text-slate-400">{segment.kpi_count} KPIs</span>
+                                <span className="text-fg-muted">{segment.kpi_count} KPIs</span>
                                 {segment.signal_count > 0 && (
-                                    <span className="text-amber-400">{segment.signal_count} alerts</span>
+                                    <span className="text-warning">{segment.signal_count} alerts</span>
                                 )}
                             </div>
                         </button>
@@ -504,7 +504,7 @@ export const AtAGlanceView: React.FC<AtAGlanceViewProps> = ({ segments, onSegmen
             {/* Section 3: Important KPIs Across All Segments */}
             {topKPIs.length > 0 && (
                 <div>
-                    <h2 className="text-xl font-semibold text-slate-100 mb-4">
+                    <h2 className="text-xl font-semibold text-fg mb-4">
                         Important KPIs Across All Segments
                     </h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -518,14 +518,14 @@ export const AtAGlanceView: React.FC<AtAGlanceViewProps> = ({ segments, onSegmen
             {/* Section 3b: Related Movements (cross-KPI correlations) — bonus insight, no empty state */}
             {canShowCorrelations && correlations.length > 0 && (
                 <div>
-                    <h2 className="text-xl font-semibold text-slate-100 mb-4">Related Movements</h2>
-                    <div className="bg-slate-900/50 border border-slate-800 rounded-lg p-4 space-y-2">
+                    <h2 className="text-xl font-semibold text-fg mb-4">Related Movements</h2>
+                    <div className="bg-surface/50 border border-line rounded-lg p-4 space-y-2">
                         {correlations.map((pair) => {
                             const nameA = kpiNameMap.get(pair.kpi_code_a) || pair.kpi_code_a;
                             const nameB = kpiNameMap.get(pair.kpi_code_b) || pair.kpi_code_b;
                             const arrow = pair.direction === 'same' ? '↑↑' : '↕';
                             return (
-                                <p key={`${pair.kpi_code_a}:${pair.kpi_code_b}`} className="text-sm text-slate-400">
+                                <p key={`${pair.kpi_code_a}:${pair.kpi_code_b}`} className="text-sm text-fg-muted">
                                     {nameA} {arrow} moved with {nameB} (r={pair.correlation.toFixed(2)}, {pair.direction})
                                 </p>
                             );
@@ -537,7 +537,7 @@ export const AtAGlanceView: React.FC<AtAGlanceViewProps> = ({ segments, onSegmen
             {/* Section 4: Critical Alerts */}
             {criticalAlerts.length > 0 && (
                 <div>
-                    <h2 className="text-xl font-semibold text-slate-100 mb-4">
+                    <h2 className="text-xl font-semibold text-fg mb-4">
                         Critical Alerts ({criticalAlerts.length})
                     </h2>
                     <div className="space-y-3 max-h-96 overflow-y-auto">
@@ -550,9 +550,9 @@ export const AtAGlanceView: React.FC<AtAGlanceViewProps> = ({ segments, onSegmen
 
             {/* Empty state for alerts */}
             {criticalAlerts.length === 0 && (
-                <div className="text-center py-8 bg-slate-900/30 rounded-lg border border-slate-800">
-                    <AlertCircle className="w-12 h-12 text-slate-600 mx-auto mb-3" />
-                    <p className="text-slate-400">No critical alerts at this time</p>
+                <div className="text-center py-8 bg-surface/30 rounded-lg border border-line">
+                    <AlertCircle className="w-12 h-12 text-fg-subtle mx-auto mb-3" />
+                    <p className="text-fg-muted">No critical alerts at this time</p>
                 </div>
             )}
 

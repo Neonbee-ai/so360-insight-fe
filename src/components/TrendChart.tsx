@@ -10,8 +10,8 @@ interface TrendChartProps {
 export const TrendChart: React.FC<TrendChartProps> = ({ trendData, color = 'blue' }) => {
     if (!trendData || trendData.data.length === 0) {
         return (
-            <div className="bg-slate-900/50 rounded-lg border border-slate-800 p-6">
-                <p className="text-sm text-slate-400">No trend data available</p>
+            <div className="bg-surface/50 rounded-lg border border-line p-6">
+                <p className="text-sm text-fg-muted">No trend data available</p>
             </div>
         );
     }
@@ -54,7 +54,7 @@ export const TrendChart: React.FC<TrendChartProps> = ({ trendData, color = 'blue
         blue: {
             gradient: 'from-blue-500/20 to-blue-500/0',
             stroke: 'stroke-blue-500',
-            text: 'text-blue-400',
+            text: 'text-primary',
         },
         purple: {
             gradient: 'from-purple-500/20 to-purple-500/0',
@@ -64,7 +64,7 @@ export const TrendChart: React.FC<TrendChartProps> = ({ trendData, color = 'blue
         green: {
             gradient: 'from-green-500/20 to-green-500/0',
             stroke: 'stroke-green-500',
-            text: 'text-green-400',
+            text: 'text-success',
         },
         orange: {
             gradient: 'from-orange-500/20 to-orange-500/0',
@@ -74,27 +74,27 @@ export const TrendChart: React.FC<TrendChartProps> = ({ trendData, color = 'blue
         red: {
             gradient: 'from-red-500/20 to-red-500/0',
             stroke: 'stroke-red-500',
-            text: 'text-red-400',
+            text: 'text-danger',
         },
     };
 
     const colors = colorClasses[color as keyof typeof colorClasses] || colorClasses.blue;
 
     return (
-        <div className="bg-slate-900/50 rounded-lg border border-slate-800 p-6 hover:border-slate-700 transition-colors">
+        <div className="bg-surface/50 rounded-lg border border-line p-6 hover:border-line transition-colors">
             {/* Header */}
             <div className="flex items-start justify-between mb-4">
                 <div>
-                    <h4 className="text-sm font-medium text-slate-100">{kpi_name}</h4>
-                    <p className="text-xs text-slate-500 mt-1">
+                    <h4 className="text-sm font-medium text-fg">{kpi_name}</h4>
+                    <p className="text-xs text-fg-subtle mt-1">
                         {firstDate} - {lastDate}
                     </p>
                 </div>
                 <div className="text-right">
-                    <div className="text-xl font-semibold text-slate-100">{lastValue.toFixed(1)}</div>
+                    <div className="text-xl font-semibold text-fg">{lastValue.toFixed(1)}</div>
                     <div
                         className={`text-xs font-medium ${
-                            isPositive ? 'text-green-400' : 'text-red-400'
+                            isPositive ? 'text-success' : 'text-danger'
                         }`}
                     >
                         {isPositive ? '+' : ''}

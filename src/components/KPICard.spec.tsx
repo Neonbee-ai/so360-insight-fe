@@ -141,7 +141,7 @@ describe('KPICard', () => {
       render(<KPICard kpi={{ ...baseKPI, target_value: 45000, target_variance_percentage: 11.1 }} />);
       expect(screen.getByText(/Target: \$45,000\.00/)).toBeInTheDocument();
       const line = screen.getByText(/vs target/);
-      expect(line.className).toContain('text-green-500');
+      expect(line.className).toContain('text-success');
       expect(line).toHaveTextContent('+11.1% vs target');
     });
   });
@@ -150,7 +150,7 @@ describe('KPICard', () => {
     it('When rendered / Then shows the target line in red', () => {
       render(<KPICard kpi={{ ...baseKPI, target_value: 60000, target_variance_percentage: -16.7 }} />);
       const line = screen.getByText(/vs target/);
-      expect(line.className).toContain('text-red-500');
+      expect(line.className).toContain('text-danger');
       expect(line).toHaveTextContent('-16.7% vs target');
     });
   });
@@ -159,7 +159,7 @@ describe('KPICard', () => {
     it('When rendered / Then shows the target with neutral slate color and no variance text', () => {
       render(<KPICard kpi={{ ...baseKPI, target_value: 0, target_variance_percentage: null }} />);
       const line = screen.getByText(/Target:/);
-      expect(line.className).toContain('text-slate-400');
+      expect(line.className).toContain('text-fg-muted');
       expect(line).not.toHaveTextContent('vs target');
     });
   });

@@ -55,18 +55,18 @@ export const FinanceCharts: React.FC<FinanceChartsProps> = ({ tenantId, orgId })
     if (loading) {
         return (
             <div className="flex items-center justify-center py-12">
-                <Loader2 className="w-8 h-8 text-red-500 animate-spin" />
+                <Loader2 className="w-8 h-8 text-danger animate-spin" />
             </div>
         );
     }
 
     if (error) {
         return (
-            <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-6 flex items-start gap-4">
-                <AlertCircle className="w-6 h-6 text-red-400 flex-shrink-0 mt-0.5" />
+            <div className="bg-danger/20 border border-danger/30 rounded-lg p-6 flex items-start gap-4">
+                <AlertCircle className="w-6 h-6 text-danger flex-shrink-0 mt-0.5" />
                 <div>
-                    <h3 className="text-lg font-semibold text-red-400 mb-2">Failed to Load Charts</h3>
-                    <p className="text-sm text-red-300">{error}</p>
+                    <h3 className="text-lg font-semibold text-danger mb-2">Failed to Load Charts</h3>
+                    <p className="text-sm text-danger">{error}</p>
                 </div>
             </div>
         );
@@ -76,10 +76,10 @@ export const FinanceCharts: React.FC<FinanceChartsProps> = ({ tenantId, orgId })
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Cash Flow Waterfall */}
             {isModuleEnabled('accounting') && cashFlowData && (
-                <div className="bg-slate-900/50 border border-slate-800 rounded-lg p-6 lg:col-span-2">
+                <div className="bg-surface/50 border border-line rounded-lg p-6 lg:col-span-2">
                     <div className="mb-4">
-                        <h3 className="text-lg font-semibold text-slate-100">Cash Flow Waterfall</h3>
-                        <p className="text-sm text-slate-400 mt-1">Receivables, payables, and net position</p>
+                        <h3 className="text-lg font-semibold text-fg">Cash Flow Waterfall</h3>
+                        <p className="text-sm text-fg-muted mt-1">Receivables, payables, and net position</p>
                     </div>
                     <WaterfallChartComponent
                         data={cashFlowData}
@@ -91,10 +91,10 @@ export const FinanceCharts: React.FC<FinanceChartsProps> = ({ tenantId, orgId })
 
             {/* Burn Rate with Projection */}
             {isModuleEnabled('accounting') && burnRateData && (
-                <div className="bg-slate-900/50 border border-slate-800 rounded-lg p-6">
+                <div className="bg-surface/50 border border-line rounded-lg p-6">
                     <div className="mb-4">
-                        <h3 className="text-lg font-semibold text-slate-100">Burn Rate & Projection</h3>
-                        <p className="text-sm text-slate-400 mt-1">Historical and forecasted burn</p>
+                        <h3 className="text-lg font-semibold text-fg">Burn Rate & Projection</h3>
+                        <p className="text-sm text-fg-muted mt-1">Historical and forecasted burn</p>
                     </div>
                     <LineChartComponent
                         data={burnRateData}
@@ -112,10 +112,10 @@ export const FinanceCharts: React.FC<FinanceChartsProps> = ({ tenantId, orgId })
 
             {/* Expense Variance */}
             {isModuleEnabled('accounting') && expenseData && (
-                <div className="bg-slate-900/50 border border-slate-800 rounded-lg p-6">
+                <div className="bg-surface/50 border border-line rounded-lg p-6">
                     <div className="mb-4">
-                        <h3 className="text-lg font-semibold text-slate-100">Expense Variance</h3>
-                        <p className="text-sm text-slate-400 mt-1">Budget vs actual by category</p>
+                        <h3 className="text-lg font-semibold text-fg">Expense Variance</h3>
+                        <p className="text-sm text-fg-muted mt-1">Budget vs actual by category</p>
                     </div>
                     <BarChartComponent
                         data={expenseData}

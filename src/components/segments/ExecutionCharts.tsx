@@ -64,11 +64,11 @@ export const ExecutionCharts: React.FC<ExecutionChartsProps> = ({ tenantId, orgI
 
     if (error) {
         return (
-            <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-6 flex items-start gap-4">
-                <AlertCircle className="w-6 h-6 text-red-400 flex-shrink-0 mt-0.5" />
+            <div className="bg-danger/20 border border-danger/30 rounded-lg p-6 flex items-start gap-4">
+                <AlertCircle className="w-6 h-6 text-danger flex-shrink-0 mt-0.5" />
                 <div>
-                    <h3 className="text-lg font-semibold text-red-400 mb-2">Failed to Load Charts</h3>
-                    <p className="text-sm text-red-300">{error}</p>
+                    <h3 className="text-lg font-semibold text-danger mb-2">Failed to Load Charts</h3>
+                    <p className="text-sm text-danger">{error}</p>
                 </div>
             </div>
         );
@@ -78,10 +78,10 @@ export const ExecutionCharts: React.FC<ExecutionChartsProps> = ({ tenantId, orgI
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Task Completion (Stacked Bar) */}
             {isModuleEnabled('projects') && taskCompletionData && (
-                <div className="bg-slate-900/50 border border-slate-800 rounded-lg p-6">
+                <div className="bg-surface/50 border border-line rounded-lg p-6">
                     <div className="mb-4">
-                        <h3 className="text-lg font-semibold text-slate-100">Task Completion Status</h3>
-                        <p className="text-sm text-slate-400 mt-1">On-time vs delayed tasks by month</p>
+                        <h3 className="text-lg font-semibold text-fg">Task Completion Status</h3>
+                        <p className="text-sm text-fg-muted mt-1">On-time vs delayed tasks by month</p>
                     </div>
                     <BarChartComponent
                         data={taskCompletionData}
@@ -99,10 +99,10 @@ export const ExecutionCharts: React.FC<ExecutionChartsProps> = ({ tenantId, orgI
 
             {/* PR to PO Cycle Time */}
             {isModuleEnabled('procurement') && cycleTimeData && (
-                <div className="bg-slate-900/50 border border-slate-800 rounded-lg p-6">
+                <div className="bg-surface/50 border border-line rounded-lg p-6">
                     <div className="mb-4">
-                        <h3 className="text-lg font-semibold text-slate-100">PR → PO Cycle Time</h3>
-                        <p className="text-sm text-slate-400 mt-1">Average days with 5-day target</p>
+                        <h3 className="text-lg font-semibold text-fg">PR → PO Cycle Time</h3>
+                        <p className="text-sm text-fg-muted mt-1">Average days with 5-day target</p>
                     </div>
                     <LineChartComponent
                         data={cycleTimeData}
@@ -120,10 +120,10 @@ export const ExecutionCharts: React.FC<ExecutionChartsProps> = ({ tenantId, orgI
 
             {/* Workflow Status Distribution */}
             {isModuleEnabled('flow') && workflowStatusData && (
-                <div className="bg-slate-900/50 border border-slate-800 rounded-lg p-6 lg:col-span-2">
+                <div className="bg-surface/50 border border-line rounded-lg p-6 lg:col-span-2">
                     <div className="mb-4">
-                        <h3 className="text-lg font-semibold text-slate-100">Workflow Status Distribution</h3>
-                        <p className="text-sm text-slate-400 mt-1">Current workflow state breakdown</p>
+                        <h3 className="text-lg font-semibold text-fg">Workflow Status Distribution</h3>
+                        <p className="text-sm text-fg-muted mt-1">Current workflow state breakdown</p>
                     </div>
                     <PieChartComponent
                         data={workflowStatusData || []}

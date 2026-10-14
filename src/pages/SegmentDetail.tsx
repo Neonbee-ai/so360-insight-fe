@@ -54,43 +54,43 @@ export const SegmentDetailPage: React.FC = () => {
 
     const getIconColorClass = (colorScheme: { primary: string }) => {
         const colorMap: Record<string, string> = {
-            blue: 'text-blue-400',
+            blue: 'text-primary',
             purple: 'text-purple-400',
-            green: 'text-green-400',
+            green: 'text-success',
             orange: 'text-orange-400',
-            red: 'text-red-400',
+            red: 'text-danger',
         };
-        return colorMap[colorScheme.primary] || 'text-slate-400';
+        return colorMap[colorScheme.primary] || 'text-fg-muted';
     };
 
     const getTrendIcon = (trend: 'up' | 'down' | 'stable') => {
         switch (trend) {
             case 'up':
-                return <TrendingUp className="w-4 h-4 text-green-400" />;
+                return <TrendingUp className="w-4 h-4 text-success" />;
             case 'down':
-                return <TrendingDown className="w-4 h-4 text-red-400" />;
+                return <TrendingDown className="w-4 h-4 text-danger" />;
             default:
-                return <Minus className="w-4 h-4 text-slate-400" />;
+                return <Minus className="w-4 h-4 text-fg-muted" />;
         }
     };
 
     const getSeverityColor = (severity: string) => {
         switch (severity) {
             case 'critical':
-                return 'bg-red-900/20 border-red-500/30 text-red-400';
+                return 'bg-danger/20 border-danger/30 text-danger';
             case 'warning':
-                return 'bg-amber-900/20 border-amber-500/30 text-amber-400';
+                return 'bg-warning/20 border-warning/30 text-warning';
             default:
-                return 'bg-blue-900/20 border-blue-500/30 text-blue-400';
+                return 'bg-blue-900/20 border-primary/30 text-primary';
         }
     };
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+            <div className="min-h-screen bg-bg flex items-center justify-center">
                 <div className="flex flex-col items-center gap-4">
-                    <Loader2 className="w-12 h-12 text-blue-500 animate-spin" />
-                    <p className="text-slate-400">Loading segment details...</p>
+                    <Loader2 className="w-12 h-12 text-primary animate-spin" />
+                    <p className="text-fg-muted">Loading segment details...</p>
                 </div>
             </div>
         );
@@ -98,24 +98,24 @@ export const SegmentDetailPage: React.FC = () => {
 
     if (error || !segment) {
         return (
-            <div className="min-h-screen bg-slate-950 p-8">
+            <div className="min-h-screen bg-bg p-8">
                 <div>
                     <button
                         onClick={() => navigate('/')}
-                        className="mb-6 flex items-center gap-2 text-slate-400 hover:text-slate-300 transition-colors"
+                        className="mb-6 flex items-center gap-2 text-fg-muted hover:text-fg-muted transition-colors"
                     >
                         <ArrowLeft className="w-4 h-4" />
                         Back to Overview
                     </button>
 
-                    <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-6 flex items-start gap-4">
-                        <AlertCircle className="w-6 h-6 text-red-400 flex-shrink-0 mt-0.5" />
+                    <div className="bg-danger/20 border border-danger/30 rounded-lg p-6 flex items-start gap-4">
+                        <AlertCircle className="w-6 h-6 text-danger flex-shrink-0 mt-0.5" />
                         <div>
-                            <h3 className="text-lg font-semibold text-red-400 mb-2">Failed to Load Segment</h3>
-                            <p className="text-sm text-red-300">{error || 'Segment not found'}</p>
+                            <h3 className="text-lg font-semibold text-danger mb-2">Failed to Load Segment</h3>
+                            <p className="text-sm text-danger">{error || 'Segment not found'}</p>
                             <button
                                 onClick={fetchSegmentDetail}
-                                className="mt-4 px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg text-sm font-medium transition-colors"
+                                className="mt-4 px-4 py-2 bg-danger/20 hover:bg-danger/30 text-danger rounded-lg text-sm font-medium transition-colors"
                             >
                                 Retry
                             </button>
@@ -127,13 +127,13 @@ export const SegmentDetailPage: React.FC = () => {
     }
 
     return (
-        <div className="min-h-screen bg-slate-950 p-8">
+        <div className="min-h-screen bg-bg p-8">
             <div>
                 {/* Header */}
                 <div className="mb-8">
                     <button
                         onClick={() => navigate('/')}
-                        className="mb-4 flex items-center gap-2 text-slate-400 hover:text-slate-300 transition-colors"
+                        className="mb-4 flex items-center gap-2 text-fg-muted hover:text-fg-muted transition-colors"
                     >
                         <ArrowLeft className="w-4 h-4" />
                         Back to Overview
@@ -144,59 +144,59 @@ export const SegmentDetailPage: React.FC = () => {
                             {getSegmentIcon(segment.icon_name)}
                         </div>
                         <div className="flex-1">
-                            <h1 className="text-3xl font-bold text-slate-100 mb-2">{segment.segment_name}</h1>
-                            <p className="text-slate-400 max-w-3xl">{segment.description}</p>
+                            <h1 className="text-3xl font-bold text-fg mb-2">{segment.segment_name}</h1>
+                            <p className="text-fg-muted max-w-3xl">{segment.description}</p>
                         </div>
                     </div>
                 </div>
 
                 {/* KPI Grid */}
                 <div className="mb-8">
-                    <h2 className="text-xl font-semibold text-slate-100 mb-4">Key Performance Indicators</h2>
+                    <h2 className="text-xl font-semibold text-fg mb-4">Key Performance Indicators</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {segment.kpis.map((kpi) => (
                             <div
                                 key={kpi.kpi_code}
-                                className="bg-slate-900/50 rounded-lg border border-slate-800 p-6 hover:border-slate-700 transition-colors"
+                                className="bg-surface/50 rounded-lg border border-line p-6 hover:border-line transition-colors"
                             >
                                 <div className="flex items-start justify-between mb-3">
-                                    <h3 className="text-sm font-medium text-slate-400">{kpi.kpi_name}</h3>
+                                    <h3 className="text-sm font-medium text-fg-muted">{kpi.kpi_name}</h3>
                                     {getTrendIcon(kpi.trend)}
                                 </div>
 
                                 <div className="flex items-baseline gap-2 mb-2">
-                                    <span className="text-3xl font-bold text-slate-100">
+                                    <span className="text-3xl font-bold text-fg">
                                         {isCurrencyUnit(kpi.unit) ? formatters.formatCurrency(kpi.value) : kpi.value.toFixed(1)}
                                     </span>
-                                    {!isCurrencyUnit(kpi.unit) && <span className="text-sm text-slate-400">{kpi.unit}</span>}
+                                    {!isCurrencyUnit(kpi.unit) && <span className="text-sm text-fg-muted">{kpi.unit}</span>}
                                 </div>
 
                                 {kpi.trend_percentage !== undefined && (
                                     <div
                                         className={`text-sm font-medium ${
                                             kpi.trend === 'up'
-                                                ? 'text-green-400'
+                                                ? 'text-success'
                                                 : kpi.trend === 'down'
-                                                ? 'text-red-400'
-                                                : 'text-slate-400'
+                                                ? 'text-danger'
+                                                : 'text-fg-muted'
                                         }`}
                                     >
                                         {kpi.trend === 'up' ? '+' : ''}
                                         {kpi.trend_percentage}%
-                                        <span className="text-slate-500 ml-1">from last period</span>
+                                        <span className="text-fg-subtle ml-1">from last period</span>
                                     </div>
                                 )}
 
-                                <div className="mt-3 pt-3 border-t border-slate-800">
-                                    <div className="text-xs text-slate-500">{kpi.category}</div>
+                                <div className="mt-3 pt-3 border-t border-line">
+                                    <div className="text-xs text-fg-subtle">{kpi.category}</div>
                                 </div>
                             </div>
                         ))}
                     </div>
 
                     {segment.kpis.length === 0 && (
-                        <div className="text-center py-12 bg-slate-900/30 rounded-lg border border-slate-800">
-                            <p className="text-slate-500">No KPIs available for this segment</p>
+                        <div className="text-center py-12 bg-surface/30 rounded-lg border border-line">
+                            <p className="text-fg-subtle">No KPIs available for this segment</p>
                         </div>
                     )}
                 </div>
@@ -204,7 +204,7 @@ export const SegmentDetailPage: React.FC = () => {
                 {/* Trend Charts */}
                 {segment.trends && segment.trends.length > 0 && (
                     <div className="mb-8">
-                        <h2 className="text-xl font-semibold text-slate-100 mb-4">30-Day Trends</h2>
+                        <h2 className="text-xl font-semibold text-fg mb-4">30-Day Trends</h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {segment.trends.map((trend) => (
                                 <TrendChart
@@ -220,7 +220,7 @@ export const SegmentDetailPage: React.FC = () => {
                 {/* Active Alerts */}
                 {segment.signals && segment.signals.length > 0 && (
                     <div>
-                        <h2 className="text-xl font-semibold text-slate-100 mb-4">Active Alerts</h2>
+                        <h2 className="text-xl font-semibold text-fg mb-4">Active Alerts</h2>
                         <div className="space-y-4">
                             {segment.signals.slice(0, 5).map((alert) => (
                                 <div
@@ -229,7 +229,7 @@ export const SegmentDetailPage: React.FC = () => {
                                 >
                                     <div className="flex items-start justify-between mb-2">
                                         <h3 className="font-semibold">{alert.title}</h3>
-                                        <span className="text-xs uppercase font-medium px-2 py-1 bg-slate-900/50 rounded">
+                                        <span className="text-xs uppercase font-medium px-2 py-1 bg-surface/50 rounded">
                                             {alert.severity}
                                         </span>
                                     </div>
@@ -244,7 +244,7 @@ export const SegmentDetailPage: React.FC = () => {
                             {segment.signals.length > 5 && (
                                 <button
                                     onClick={() => navigate('/alerts')}
-                                    className="w-full py-3 bg-slate-800/50 hover:bg-slate-800 text-slate-300 rounded-lg transition-colors text-sm font-medium"
+                                    className="w-full py-3 bg-surface-raised/50 hover:bg-surface-raised text-fg-muted rounded-lg transition-colors text-sm font-medium"
                                 >
                                     View all {segment.signals.length} alerts →
                                 </button>
@@ -254,8 +254,8 @@ export const SegmentDetailPage: React.FC = () => {
                 )}
 
                 {(!segment.signals || segment.signals.length === 0) && (
-                    <div className="text-center py-12 bg-slate-900/30 rounded-lg border border-slate-800">
-                        <p className="text-slate-500">No active alerts for this segment</p>
+                    <div className="text-center py-12 bg-surface/30 rounded-lg border border-line">
+                        <p className="text-fg-subtle">No active alerts for this segment</p>
                     </div>
                 )}
             </div>
