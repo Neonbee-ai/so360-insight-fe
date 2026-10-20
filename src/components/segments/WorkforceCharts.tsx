@@ -4,7 +4,8 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { Loader2, AlertCircle } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
+import { Alert, Card, Grid, GridItem } from '@so360/design-system';
 import {
     LineChartComponent,
     GaugeChartComponent,
@@ -64,71 +65,62 @@ export const WorkforceCharts: React.FC<WorkforceChartsProps> = ({ tenantId, orgI
 
     if (error) {
         return (
-            <div className="bg-danger/20 border border-danger/30 rounded-lg p-6 flex items-start gap-4">
-                <AlertCircle className="w-6 h-6 text-danger flex-shrink-0 mt-0.5" />
-                <div>
-                    <h3 className="text-lg font-semibold text-danger mb-2">Failed to Load Charts</h3>
-                    <p className="text-sm text-danger">{error}</p>
-                </div>
-            </div>
+            <Alert variant="error" title="Failed to load charts">{error}</Alert>
         );
     }
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Grid columns={12} gap="lg">
             {/* Utilization Rate Trend */}
             {isModuleEnabled('people') && utilizationData && (
-                <div className="bg-surface/50 border border-line rounded-lg p-6">
-                    <div className="mb-4">
-                        <h3 className="text-lg font-semibold text-fg">Team Utilization Rate</h3>
-                        <p className="text-sm text-fg-muted mt-1">Average team capacity usage</p>
-                    </div>
-                    <LineChartComponent
-                        data={utilizationData}
-                        xAxisKey="month"
-                        series={[{ key: 'utilization', name: 'Utilization %', color: '#f97316' }]}
-                        height={280}
-                        segmentColor="workforce"
-                        formatValue={(value) => formatPercentage(value)}
-                        formatXAxis={(value) => formatDate(value)}
-                    />
-                </div>
+                <GridItem span={6}>
+                    <Card title="Team Utilization Rate">
+                        <p className="text-sm text-fg-muted">Average team capacity usage</p>
+                        <LineChartComponent
+                            data={utilizationData}
+                            xAxisKey="month"
+                            series={[{ key: 'utilization', name: 'Utilization %', color: '#f97316' }]}
+                            height={280}
+                            segmentColor="workforce"
+                            formatValue={(value) => formatPercentage(value)}
+                            formatXAxis={(value) => formatDate(value)}
+                        />
+                    </Card>
+                </GridItem>
             )}
 
             {/* Timesheet Compliance Gauge */}
             {isModuleEnabled('timesheet') && complianceData && (
-                <div className="bg-surface/50 border border-line rounded-lg p-6">
-                    <div className="mb-4">
-                        <h3 className="text-lg font-semibold text-fg">Timesheet Compliance</h3>
-                        <p className="text-sm text-fg-muted mt-1">Current compliance rate</p>
-                    </div>
-                    <GaugeChartComponent
-                        value={complianceData.overall_score || 0}
-                        title="Compliance"
-                        height={250}
-                        segmentColor="workforce"
-                        thresholds={{ low: 70, medium: 85, high: 100 }}
-                    />
-                </div>
+                <GridItem span={6}>
+                    <Card title="Timesheet Compliance">
+                        <p className="text-sm text-fg-muted">Current compliance rate</p>
+                        <GaugeChartComponent
+                            value={complianceData.overall_score || 0}
+                            title="Compliance"
+                            height={250}
+                            segmentColor="workforce"
+                            thresholds={{ low: 70, medium: 85, high: 100 }}
+                        />
+                    </Card>
+                </GridItem>
             )}
 
             {/* Overtime Distribution */}
             {isModuleEnabled('timesheet') && overtimeData && (
-                <div className="bg-surface/50 border border-line rounded-lg p-6 lg:col-span-2">
-                    <div className="mb-4">
-                        <h3 className="text-lg font-semibold text-fg">Overtime Distribution</h3>
-                        <p className="text-sm text-fg-muted mt-1">Employee count by weekly hours</p>
-                    </div>
-                    <BarChartComponent
-                        data={overtimeData}
-                        xAxisKey="name"
-                        series={[{ key: 'overtime_hours', name: 'Employees', color: '#f97316' }]}
-                        height={280}
-                        segmentColor="workforce"
-                        formatValue={(value) => formatNumber(value)}
-                    />
-                </div>
+                <GridItem span={12}>
+                    <Card title="Overtime Distribution">
+                        <p className="text-sm text-fg-muted">Employee count by weekly hours</p>
+                        <BarChartComponent
+                            data={overtimeData}
+                            xAxisKey="name"
+                            series={[{ key: 'overtime_hours', name: 'Employees', color: '#f97316' }]}
+                            height={280}
+                            segmentColor="workforce"
+                            formatValue={(value) => formatNumber(value)}
+                        />
+                    </Card>
+                </GridItem>
             )}
-        </div>
+        </Grid>
     );
 };

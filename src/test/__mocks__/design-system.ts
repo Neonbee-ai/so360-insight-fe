@@ -167,3 +167,6 @@ export const DetailPageTemplate = pageShell('detail-page-template');
 export const ListPageTemplate = pageShell('list-page-template');
 export const Skeleton = ({ className = '', ...props }: any) =>
   React.createElement('div', { 'data-testid': props['data-testid'] ?? 'skeleton', className: `animate-pulse ${className}` });
+export const Alert = ({ title, children, variant: _v, action }: any) =>
+  React.createElement('div', { role: 'alert' }, title ? React.createElement('strong', null, title) : null, children,
+    action ? React.createElement('button', { type: 'button', onClick: action.onClick }, action.label) : null);

@@ -4,7 +4,8 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { Loader2, AlertCircle } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
+import { Alert, Card, Grid, GridItem } from '@so360/design-system';
 import {
     WaterfallChartComponent,
     LineChartComponent,
@@ -62,74 +63,65 @@ export const FinanceCharts: React.FC<FinanceChartsProps> = ({ tenantId, orgId })
 
     if (error) {
         return (
-            <div className="bg-danger/20 border border-danger/30 rounded-lg p-6 flex items-start gap-4">
-                <AlertCircle className="w-6 h-6 text-danger flex-shrink-0 mt-0.5" />
-                <div>
-                    <h3 className="text-lg font-semibold text-danger mb-2">Failed to Load Charts</h3>
-                    <p className="text-sm text-danger">{error}</p>
-                </div>
-            </div>
+            <Alert variant="error" title="Failed to load charts">{error}</Alert>
         );
     }
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Grid columns={12} gap="lg">
             {/* Cash Flow Waterfall */}
             {isModuleEnabled('accounting') && cashFlowData && (
-                <div className="bg-surface/50 border border-line rounded-lg p-6 lg:col-span-2">
-                    <div className="mb-4">
-                        <h3 className="text-lg font-semibold text-fg">Cash Flow Waterfall</h3>
-                        <p className="text-sm text-fg-muted mt-1">Receivables, payables, and net position</p>
-                    </div>
-                    <WaterfallChartComponent
-                        data={cashFlowData}
-                        height={320}
-                        formatValue={(value) => formatCurrency(value)}
-                    />
-                </div>
+                <GridItem span={12}>
+                    <Card title="Cash Flow Waterfall">
+                        <p className="text-sm text-fg-muted">Receivables, payables, and net position</p>
+                        <WaterfallChartComponent
+                            data={cashFlowData}
+                            height={320}
+                            formatValue={(value) => formatCurrency(value)}
+                        />
+                    </Card>
+                </GridItem>
             )}
 
             {/* Burn Rate with Projection */}
             {isModuleEnabled('accounting') && burnRateData && (
-                <div className="bg-surface/50 border border-line rounded-lg p-6">
-                    <div className="mb-4">
-                        <h3 className="text-lg font-semibold text-fg">Burn Rate & Projection</h3>
-                        <p className="text-sm text-fg-muted mt-1">Historical and forecasted burn</p>
-                    </div>
-                    <LineChartComponent
-                        data={burnRateData}
-                        xAxisKey="month"
-                        series={[
-                            { key: 'actual', name: 'Actual Burn', color: '#ef4444' },
-                            { key: 'projected', name: 'Projected', color: '#f87171' },
-                        ]}
-                        height={280}
-                        segmentColor="finance"
-                        formatValue={(value) => formatCurrency(value)}
-                    />
-                </div>
+                <GridItem span={6}>
+                    <Card title="Burn Rate & Projection">
+                        <p className="text-sm text-fg-muted">Historical and forecasted burn</p>
+                        <LineChartComponent
+                            data={burnRateData}
+                            xAxisKey="month"
+                            series={[
+                                { key: 'actual', name: 'Actual Burn', color: '#ef4444' },
+                                { key: 'projected', name: 'Projected', color: '#f87171' },
+                            ]}
+                            height={280}
+                            segmentColor="finance"
+                            formatValue={(value) => formatCurrency(value)}
+                        />
+                    </Card>
+                </GridItem>
             )}
 
             {/* Expense Variance */}
             {isModuleEnabled('accounting') && expenseData && (
-                <div className="bg-surface/50 border border-line rounded-lg p-6">
-                    <div className="mb-4">
-                        <h3 className="text-lg font-semibold text-fg">Expense Variance</h3>
-                        <p className="text-sm text-fg-muted mt-1">Budget vs actual by category</p>
-                    </div>
-                    <BarChartComponent
-                        data={expenseData}
-                        xAxisKey="category"
-                        series={[
-                            { key: 'budgeted', name: 'Budget', color: '#94a3b8' },
-                            { key: 'actual', name: 'Actual', color: '#ef4444' },
-                        ]}
-                        height={280}
-                        segmentColor="finance"
-                        formatValue={(value) => formatCurrency(value)}
-                    />
-                </div>
+                <GridItem span={6}>
+                    <Card title="Expense Variance">
+                        <p className="text-sm text-fg-muted">Budget vs actual by category</p>
+                        <BarChartComponent
+                            data={expenseData}
+                            xAxisKey="category"
+                            series={[
+                                { key: 'budgeted', name: 'Budget', color: '#94a3b8' },
+                                { key: 'actual', name: 'Actual', color: '#ef4444' },
+                            ]}
+                            height={280}
+                            segmentColor="finance"
+                            formatValue={(value) => formatCurrency(value)}
+                        />
+                    </Card>
+                </GridItem>
             )}
-        </div>
+        </Grid>
     );
 };

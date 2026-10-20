@@ -2,7 +2,7 @@ import React from 'react';
 import { Sparkles, AlertCircle, RefreshCw, Activity, AlertTriangle, Lightbulb, Zap } from 'lucide-react';
 import { getInsightIcon } from '../constants/iconMap';
 import type { AiSummarySections, Alert } from '../types/insight';
-import { Button, IconButton } from '@so360/design-system';
+import { Button, Card, IconButton } from '@so360/design-system';
 import { parseUtcDate } from '../utils/datetime';
 
 interface NeuraSummaryCardProps {
@@ -43,29 +43,21 @@ export const NeuraSummaryCard: React.FC<NeuraSummaryCardProps> = ({
     // Color mappings
     const colorClasses = {
         blue: {
-            gradient: 'from-primary/20 to-primary/10',
-            border: 'border-primary/30',
             icon: 'text-primary',
             badge: 'bg-primary/20 text-primary',
             regenerate: 'text-primary hover:text-primary hover:bg-primary/10',
         },
         green: {
-            gradient: 'from-success/20 to-success/10',
-            border: 'border-success/30',
             icon: 'text-success',
             badge: 'bg-success/20 text-success',
             regenerate: 'text-success hover:text-success hover:bg-success/10',
         },
         purple: {
-            gradient: 'from-accent/20 to-accent/10',
-            border: 'border-accent/30',
             icon: 'text-accent',
             badge: 'bg-accent/20 text-accent',
             regenerate: 'text-accent hover:text-accent hover:bg-accent/10',
         },
         orange: {
-            gradient: 'from-warning/20 to-warning/10',
-            border: 'border-warning/30',
             icon: 'text-warning',
             badge: 'bg-warning/20 text-warning',
             regenerate: 'text-warning hover:text-warning hover:bg-warning/10',
@@ -77,13 +69,7 @@ export const NeuraSummaryCard: React.FC<NeuraSummaryCardProps> = ({
     // Loading state
     if (loading) {
         return (
-            <div
-                className={`
-                    bg-gradient-to-br ${colors.gradient}
-                    border ${colors.border}
-                    rounded-lg p-6 animate-pulse
-                `}
-            >
+            <Card className="animate-pulse">
                 <div className="flex items-center justify-between mb-4">
                     <div className="h-8 w-8 bg-line-strong rounded"></div>
                     <div className="h-6 w-12 bg-line-strong rounded-full"></div>
@@ -91,20 +77,14 @@ export const NeuraSummaryCard: React.FC<NeuraSummaryCardProps> = ({
                 <div className="h-4 bg-line-strong rounded w-3/4 mb-3"></div>
                 <div className="h-4 bg-line-strong rounded w-full mb-2"></div>
                 <div className="h-4 bg-line-strong rounded w-5/6"></div>
-            </div>
+            </Card>
         );
     }
 
     // Error state
     if (error) {
         return (
-            <div
-                className={`
-                    bg-gradient-to-br ${colors.gradient}
-                    border ${colors.border}
-                    rounded-lg p-6
-                `}
-            >
+            <Card>
                 <div className="flex items-center justify-between mb-4">
                     {IconComponent && <IconComponent className={`w-8 h-8 ${colors.icon}`} />}
                     <span className={`${colors.badge} px-2 py-1 text-xs rounded-full flex items-center gap-1`}>
@@ -122,7 +102,7 @@ export const NeuraSummaryCard: React.FC<NeuraSummaryCardProps> = ({
                         Retry
                     </Button>
                 )}
-            </div>
+            </Card>
         );
     }
 
@@ -146,13 +126,7 @@ export const NeuraSummaryCard: React.FC<NeuraSummaryCardProps> = ({
 
     // Main content state
     return (
-        <div
-            className={`
-                bg-gradient-to-br ${colors.gradient}
-                border ${colors.border}
-                rounded-lg p-6 transition-all hover:shadow-lg
-            `}
-        >
+        <Card>
             {/* Header */}
             <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
@@ -261,7 +235,7 @@ export const NeuraSummaryCard: React.FC<NeuraSummaryCardProps> = ({
                     {cached ? 'Cached' : 'Generated'} {formatRelativeTime(generatedAt)}
                 </p>
             )}
-        </div>
+        </Card>
     );
 };
 
