@@ -98,7 +98,7 @@ export const ChartExport: React.FC<ChartExportProps> = ({
                         <div className="py-1">
                             <Button
                                 variant="ghost"
-                                className="w-full justify-start"
+                                className="w-full !justify-start"
                                 onClick={handleExportPNG}
                             >
                                 <FileImage className="w-4 h-4" />
@@ -106,7 +106,7 @@ export const ChartExport: React.FC<ChartExportProps> = ({
                             </Button>
                             <Button
                                 variant="ghost"
-                                className="w-full justify-start"
+                                className="w-full !justify-start"
                                 onClick={handleExportCSV}
                             >
                                 <FileSpreadsheet className="w-4 h-4" />
