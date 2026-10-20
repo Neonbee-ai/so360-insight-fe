@@ -102,7 +102,7 @@ export const Dashboard: React.FC = () => {
             kpis={kpiTiles}
         >
             <Stack gap="region">
-                <Card title="Key Performance Indicators">
+                <Card title="Key performance indicators">
                     <Grid>
                         {dashboard?.kpis.map((kpi) => (
                             <Grid.Item key={kpi.kpi_code} span={4}>
@@ -112,7 +112,7 @@ export const Dashboard: React.FC = () => {
                     </Grid>
                 </Card>
 
-                <Card title="Active Alerts">
+                <Card title="Active alerts">
                     {recentAlerts.length > 0 ? (
                         <Stack gap="tight">
                             {recentAlerts.map((alert) => (

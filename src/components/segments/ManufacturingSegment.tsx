@@ -90,7 +90,7 @@ export const ManufacturingSegment: React.FC = () => {
 
     if (loading && !summary) {
         return (
-            <div className="flex items-center justify-center py-24">
+            <div className="flex items-center justify-center py-10">
                 <Loader2 className="w-8 h-8 text-success animate-spin" />
             </div>
         );

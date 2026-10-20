@@ -278,7 +278,7 @@ export const SegmentTabContent: React.FC<SegmentTabContentProps> = ({ segmentCod
 
             {/* Section 2: KPIs Grid */}
             {segment.kpis.length > 0 && (
-                <Card title="Key Performance Indicators">
+                <Card title="Key performance indicators">
                     <Grid>
                         {segment.kpis.map((kpi) => (
                             <Grid.Item key={kpi.kpi_code} span={4}>
@@ -293,7 +293,7 @@ export const SegmentTabContent: React.FC<SegmentTabContentProps> = ({ segmentCod
             {(() => {
                 const charts = renderSegmentCharts();
                 return charts ? (
-                    <Card title="Analytics Dashboard">{charts}</Card>
+                    <Card title="Analytics dashboard">{charts}</Card>
                 ) : null;
             })()}
 

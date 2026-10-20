@@ -98,7 +98,7 @@ export const AlertsPage: React.FC = () => {
             toolbarEnd={
                 <Select
                     name="severity"
-                    label="Severity"
+                    aria-label="Severity"
                     value={severityFilter}
                     onChange={(e) => setSeverityFilter(e.target.value)}
                     options={[

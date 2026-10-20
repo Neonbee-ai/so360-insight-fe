@@ -67,7 +67,7 @@ describe('SegmentDetailPage', () => {
       await waitFor(() => {
         expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Revenue');
       });
-      expect(screen.getByText('Key Performance Indicators')).toBeInTheDocument();
+      expect(screen.getByText('Key performance indicators')).toBeInTheDocument();
     });
 
     it('When trends exist / Then shows trend charts', async () => {
@@ -82,7 +82,7 @@ describe('SegmentDetailPage', () => {
       mockApi.getSegmentDetail.mockResolvedValue(segmentDetail);
       wrap('/revenue');
       await waitFor(() => {
-        expect(screen.getByText('Active Alerts')).toBeInTheDocument();
+        expect(screen.getByText('Active alerts')).toBeInTheDocument();
       });
     });
 

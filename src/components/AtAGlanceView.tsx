@@ -444,7 +444,7 @@ export const AtAGlanceView: React.FC<AtAGlanceViewProps> = ({ segments, onSegmen
             ))}
 
             {/* Section 2: Segment Summary Cards */}
-            <Card title="Business Segments">
+            <Card title="Business segments">
                 <Grid>
                     {segments.filter(s => {
                         const deps = SEGMENT_MODULE_DEPS[s.segment_code];
@@ -506,7 +506,7 @@ export const AtAGlanceView: React.FC<AtAGlanceViewProps> = ({ segments, onSegmen
 
             {/* Section 3b: Related Movements (cross-KPI correlations) — bonus insight, no empty state */}
             {canShowCorrelations && correlations.length > 0 && (
-                <Card title="Related Movements">
+                <Card title="Related movements">
                     <Stack gap="tight">
                         {correlations.map((pair) => {
                             const nameA = kpiNameMap.get(pair.kpi_code_a) || pair.kpi_code_a;
@@ -525,7 +525,7 @@ export const AtAGlanceView: React.FC<AtAGlanceViewProps> = ({ segments, onSegmen
             {/* Section 4: Critical Alerts */}
             {criticalAlerts.length > 0 ? (
                 <Card title={`Critical Alerts (${criticalAlerts.length})`}>
-                    <Stack gap="tight" className="max-h-96 overflow-y-auto">
+                    <Stack gap="tight">
                         {criticalAlerts.map((alert) => (
                             <AlertCard key={alert.id} alert={alert} onResolve={handleResolveAlert} />
                         ))}

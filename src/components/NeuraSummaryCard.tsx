@@ -138,7 +138,7 @@ export const NeuraSummaryCard: React.FC<NeuraSummaryCardProps> = ({
         <div className={`border-l-2 ${borderColor} pl-3 py-2 ${bgColor} rounded-r-md mb-2`}>
             <div className="flex items-center gap-1.5 mb-1">
                 <LabelIcon className={`w-3.5 h-3.5 ${textColor}`} />
-                <span className={`text-xs font-semibold uppercase tracking-wide ${textColor}`}>{label}</span>
+                <span className={`text-xs font-semibold ${textColor}`}>{label}</span>
             </div>
             {content}
         </div>

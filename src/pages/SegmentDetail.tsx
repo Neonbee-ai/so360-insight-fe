@@ -128,7 +128,7 @@ export const SegmentDetailPage: React.FC = () => {
             }
         >
             <Stack gap="region">
-                <Card title="Key Performance Indicators">
+                <Card title="Key performance indicators">
                     {segment.kpis.length === 0 ? (
                         <EmptyState title="No KPIs available for this segment" />
                     ) : (
@@ -190,7 +190,7 @@ export const SegmentDetailPage: React.FC = () => {
                 )}
 
                 {segment.signals && segment.signals.length > 0 ? (
-                    <Card title="Active Alerts">
+                    <Card title="Active alerts">
                         <Stack gap="tight">
                             {segment.signals.slice(0, 5).map((alert) => (
                                 <div
@@ -199,7 +199,7 @@ export const SegmentDetailPage: React.FC = () => {
                                 >
                                     <div className="flex items-start justify-between mb-2">
                                         <h3 className="font-semibold">{alert.title}</h3>
-                                        <span className="text-xs uppercase font-medium px-2 py-1 bg-surface/50 rounded">
+                                        <span className="text-xs font-medium px-2 py-1 bg-surface/50 rounded">
                                             {alert.severity}
                                         </span>
                                     </div>
