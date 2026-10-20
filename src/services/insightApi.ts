@@ -2,6 +2,7 @@ import axios, { AxiosInstance } from 'axios';
 import { attachToastErrorHandler } from '@so360/design-system';
 import { createTtlCache } from './ttlCache';
 import type {
+    MyPipeline,
     Dashboard,
     ModuleInsights,
     AlertsResponse,
@@ -105,6 +106,12 @@ class InsightApiClient {
             const response = await this.client.get<Dashboard>('/dashboard');
             return response.data;
         });
+    }
+
+    async getMyPipeline(): Promise<MyPipeline> {
+        // Not cached long-term: a rep expects their own pipeline to be current.
+        const response = await this.client.get<MyPipeline>('/my-pipeline');
+        return response.data;
     }
 
     async getModuleInsights(moduleCode: string): Promise<ModuleInsights> {

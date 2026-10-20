@@ -170,3 +170,8 @@ export const Skeleton = ({ className = '', ...props }: any) =>
 export const Alert = ({ title, children, variant: _v, action }: any) =>
   React.createElement('div', { role: 'alert' }, title ? React.createElement('strong', null, title) : null, children,
     action ? React.createElement('button', { type: 'button', onClick: action.onClick }, action.label) : null);
+export const DataTable = ({ columns = [], rows = [], rowKey, ...props }: any) =>
+  React.createElement('div', { 'data-testid': props['data-testid'] ?? 'data-table' },
+    rows.map((r: any, i: number) =>
+      React.createElement('div', { key: rowKey ? rowKey(r) : i, role: 'row' },
+        columns.map((c: any) => React.createElement('span', { key: c.key, 'data-col': c.key }, c.render ? c.render(r) : r[c.key])))));
