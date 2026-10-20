@@ -84,7 +84,7 @@ export const SegmentOverview: React.FC = () => {
 
     if (loading) {
         return (
-            <DashboardPageTemplate title={title} description={description}>
+            <DashboardPageTemplate trail={[]} title={title} description={description}>
                 <Grid>
                     {[1, 2, 3, 4, 5].map((i) => (
                         <Grid.Item key={i} span={4}>
@@ -98,7 +98,7 @@ export const SegmentOverview: React.FC = () => {
 
     if (error) {
         return (
-            <DashboardPageTemplate title={title} description={description}>
+            <DashboardPageTemplate trail={[]} title={title} description={description}>
                 <div className="bg-danger/20 border border-danger/30 rounded-lg p-6 flex items-start gap-4">
                     <AlertCircle className="w-6 h-6 text-danger flex-shrink-0 mt-0.5" />
                     <div>
@@ -114,7 +114,7 @@ export const SegmentOverview: React.FC = () => {
     }
 
     return (
-        <DashboardPageTemplate title={title} description={description}>
+        <DashboardPageTemplate trail={[]} title={title} description={description}>
             {segments.length === 0 ? (
                 <EmptyState
                     icon={AlertCircle}

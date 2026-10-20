@@ -69,7 +69,7 @@ export const AlertsPage: React.FC = () => {
 
     if (!canAccessAlerts) {
         return (
-            <ListPageTemplate title="AI Alerts">
+            <ListPageTemplate trail={[]} title="AI Alerts">
                 <EmptyState
                     icon={AlertCircle}
                     title="AI Alerts"
@@ -80,7 +80,7 @@ export const AlertsPage: React.FC = () => {
     }
 
     return (
-        <ListPageTemplate
+        <ListPageTemplate trail={[]}
             title="Alerts"
             description="Manage and resolve intelligent alerts"
             views={

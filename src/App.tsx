@@ -1,7 +1,7 @@
 import React, { Suspense, lazy } from 'react';
 import { Routes, Route, Navigate, useParams, useNavigate } from 'react-router-dom';
 import { useShellBridge } from '@so360/shell-context';
-import { Button, FeatureRoute } from '@so360/design-system';
+import { Button, CombScope, FeatureRoute } from '@so360/design-system';
 import { MfeShellInitializer } from './components/MfeShellInitializer';
 
 // Route components are lazy-loaded so recharts (~150KB gz, pulled in transitively
@@ -104,7 +104,9 @@ const SegmentRoute: React.FC = () => {
 };
 
 function App() {
+    const navigate = useNavigate();
     return (
+        <CombScope module="insight" root={{ label: 'Insight', to: '/insight' }} navigate={(to) => navigate(to)}>
         <MfeShellInitializer>
             <Suspense fallback={<RouteFallback />}>
                 <Routes>
@@ -116,6 +118,7 @@ function App() {
                 </Routes>
             </Suspense>
         </MfeShellInitializer>
+        </CombScope>
     );
 }
 
