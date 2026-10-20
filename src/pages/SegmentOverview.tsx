@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { TrendingUp, TrendingDown, Minus, AlertCircle } from 'lucide-react';
-import { Button, Card, DashboardPageTemplate, EmptyState, Grid, Skeleton, Stack } from '@so360/design-system';
+import { Button, Card, DashboardPageTemplate, EmptyState, Grid, Skeleton } from '@so360/design-system';
 import { insightApi } from '../services/insightApi';
 import type { SegmentSummary } from '../types/insight';
 import { getInsightIcon } from '../constants/iconMap';
