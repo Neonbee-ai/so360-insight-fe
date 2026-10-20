@@ -5,6 +5,7 @@
 
 import React from 'react';
 import { Calendar } from 'lucide-react';
+import { SegmentedControl } from '@so360/design-system';
 
 export type TimeRange = '7d' | '30d' | '90d' | '6m' | '1y';
 
@@ -29,24 +30,15 @@ const TIME_RANGES: TimeRangeOption[] = [
 
 export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({ selected, onChange }) => {
     return (
-        <div className="flex items-center gap-2 bg-surface/50 rounded-lg border border-line p-1">
-            <Calendar className="w-4 h-4 text-fg-muted ml-2" />
-            {TIME_RANGES.map((option) => (
-                <button
-                    key={option.value}
-                    onClick={() => onChange(option.value)}
-                    className={`
-                        px-3 py-1.5 rounded-md text-sm font-medium transition-all
-                        ${
-                            selected === option.value
-                                ? 'bg-primary text-primary-fg shadow-lg shadow-primary/25'
-                                : 'text-fg-muted hover:text-fg hover:bg-surface-raised/50'
-                        }
-                    `}
-                >
-                    {option.label}
-                </button>
-            ))}
+        <div className="flex items-center gap-2">
+            <Calendar className="w-4 h-4 text-fg-muted" />
+            <SegmentedControl
+                name="insight-time-range"
+                aria-label="Time range"
+                options={TIME_RANGES.map(({ value, label }) => ({ value, label }))}
+                value={selected}
+                onChange={(v) => onChange(v as TimeRange)}
+            />
         </div>
     );
 };

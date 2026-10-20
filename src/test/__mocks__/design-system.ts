@@ -1,7 +1,44 @@
 import React from 'react';
 export const Button = ({ children, ...props }: any) => React.createElement('button', props, children);
 export const Input = ({ ...props }: any) => React.createElement('input', props);
-export const Select = ({ children, ...props }: any) => React.createElement('select', props, children);
+export const Select = ({ children, options, onValueChange, onChange, placeholder, label, ...props }: any) =>
+  React.createElement(
+    'select',
+    { ...props, 'aria-label': props['aria-label'] ?? label, onChange: (e: any) => { onChange?.(e); onValueChange?.(e.target.value); } },
+    options
+      ? [
+          placeholder ? React.createElement('option', { key: '__ph', value: '' }, placeholder) : null,
+          ...options.map((o: any) => React.createElement('option', { key: o.value, value: o.value }, o.label)),
+        ]
+      : children,
+  );
+export const IconButton = ({ label, icon, variant: _v, size: _s, ...props }: any) =>
+  React.createElement('button', { type: 'button', 'aria-label': label, title: label, ...props }, icon);
+export const TextField = ({ label: _l, size: _s, ...props }: any) => React.createElement('input', props);
+export const Tabs = ({ items = [], value, onChange, name, variant: _v, ...props }: any) =>
+  React.createElement(
+    'div',
+    { role: 'tablist', 'data-name': name, ...props },
+    items.map((it: any) =>
+      React.createElement(
+        'button',
+        { key: it.id, role: 'tab', type: 'button', 'aria-selected': it.id === value, disabled: it.disabled, onClick: () => onChange?.(it.id) },
+        it.icon, it.label,
+      ),
+    ),
+  );
+export const SegmentedControl = ({ options = [], value, onChange, name, ...props }: any) =>
+  React.createElement(
+    'div',
+    { role: 'radiogroup', 'aria-label': props['aria-label'] },
+    options.map((o: any) =>
+      React.createElement(
+        'button',
+        { key: o.value, role: 'radio', type: 'button', 'aria-checked': o.value === value, onClick: () => onChange?.(o.value) },
+        o.label,
+      ),
+    ),
+  );
 export const Modal = ({ children, ...props }: any) => React.createElement('div', props, children);
 export const Card = ({ children, ...props }: any) => React.createElement('div', props, children);
 export const Badge = ({ children, ...props }: any) => React.createElement('span', props, children);

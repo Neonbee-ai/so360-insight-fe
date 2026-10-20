@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { AlertCircle, Filter } from 'lucide-react';
-import { toast } from '@so360/design-system';
+import { SegmentedControl, Select, toast } from '@so360/design-system';
 import { insightApi } from '../services/insightApi';
 import { AlertCard } from '../components/AlertCard';
 import type { Alert } from '../types/insight';
@@ -103,43 +103,30 @@ export const AlertsPage: React.FC = () => {
                         <span className="text-sm text-fg-muted">Filters</span>
                     </div>
                     <div className="flex flex-wrap gap-4">
+                        <Select
+                            name="severity"
+                            label="Severity"
+                            value={severityFilter}
+                            onChange={(e) => setSeverityFilter(e.target.value)}
+                            options={[
+                                { value: 'all', label: 'All' },
+                                { value: 'critical', label: 'Critical' },
+                                { value: 'warning', label: 'Warning' },
+                                { value: 'info', label: 'Info' },
+                            ]}
+                        />
                         <div>
-                            <label className="text-sm text-fg-muted block mb-2">Severity</label>
-                            <select
-                                value={severityFilter}
-                                onChange={(e) => setSeverityFilter(e.target.value)}
-                                className="bg-surface-raised border border-line rounded px-3 py-2 text-fg text-sm"
-                            >
-                                <option value="all">All</option>
-                                <option value="critical">Critical</option>
-                                <option value="warning">Warning</option>
-                                <option value="info">Info</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label className="text-sm text-fg-muted block mb-2">Status</label>
-                            <div className="flex gap-2">
-                                <button
-                                    onClick={() => setUnresolvedOnly(true)}
-                                    className={`px-3 py-2 text-sm rounded transition-colors ${
-                                        unresolvedOnly
-                                            ? 'bg-primary text-primary-fg'
-                                            : 'bg-surface-raised text-fg-muted hover:bg-line-strong'
-                                    }`}
-                                >
-                                    Unresolved
-                                </button>
-                                <button
-                                    onClick={() => setUnresolvedOnly(false)}
-                                    className={`px-3 py-2 text-sm rounded transition-colors ${
-                                        !unresolvedOnly
-                                            ? 'bg-primary text-primary-fg'
-                                            : 'bg-surface-raised text-fg-muted hover:bg-line-strong'
-                                    }`}
-                                >
-                                    All
-                                </button>
-                            </div>
+                            <span className="text-sm text-fg-muted block mb-2">Status</span>
+                            <SegmentedControl
+                                name="alert-status"
+                                aria-label="Alert status"
+                                value={unresolvedOnly ? 'unresolved' : 'all'}
+                                onChange={(v) => setUnresolvedOnly(v === 'unresolved')}
+                                options={[
+                                    { value: 'unresolved', label: 'Unresolved' },
+                                    { value: 'all', label: 'All' },
+                                ]}
+                            />
                         </div>
                     </div>
                 </div>

@@ -3,6 +3,7 @@ import { AlertCircle, AlertTriangle, Info, CheckCircle, ArrowRight } from 'lucid
 import type { Alert } from '../types/insight';
 import { useFormatters } from '@so360/formatters';
 import { useShell } from '@so360/shell-context';
+import { Button } from '@so360/design-system';
 
 interface AlertCardProps {
     alert: Alert;
@@ -75,15 +76,16 @@ export const AlertCard: React.FC<AlertCardProps> = ({ alert, onResolve }) => {
             {hasActions && !alert.resolved_at && (
                 <div className="mt-3 flex flex-wrap gap-2">
                     {alert.recommended_actions!.map((action, idx) => (
-                        <button
+                        <Button
                             key={idx}
+                            variant="secondary"
+                            size="sm"
                             onClick={() => handleNavigate(action.path)}
                             title={action.description}
-                            className="flex items-center gap-1.5 px-2.5 py-1 border border-line-strong hover:border-line-strong text-fg-muted hover:text-fg text-xs rounded transition-colors bg-surface-raised/50 hover:bg-line-strong/50"
                         >
                             {action.label}
                             <ArrowRight className="w-3 h-3" />
-                        </button>
+                        </Button>
                     ))}
                 </div>
             )}
@@ -94,12 +96,9 @@ export const AlertCard: React.FC<AlertCardProps> = ({ alert, onResolve }) => {
                 </div>
 
                 {!alert.resolved_at ? (
-                    <button
-                        onClick={() => onResolve(alert.id)}
-                        className="px-3 py-1 bg-primary hover:bg-primary-hover text-primary-fg text-sm rounded transition-colors"
-                    >
+                    <Button size="sm" onClick={() => onResolve(alert.id)}>
                         Resolve
-                    </button>
+                    </Button>
                 ) : (
                     <div className="flex items-center gap-1 text-success text-sm">
                         <CheckCircle className="w-4 h-4" />

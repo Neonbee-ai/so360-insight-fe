@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Loader2, AlertCircle } from 'lucide-react';
-import { toast } from '@so360/design-system';
+import { toast, Button } from '@so360/design-system';
 import { getInsightIcon } from '../constants/iconMap';
 import { KPICard } from './KPICard';
 import { AlertCard } from './AlertCard';
@@ -153,9 +153,9 @@ export const SegmentTabContent: React.FC<SegmentTabContentProps> = ({ segmentCod
     const getIconColorClass = (colorScheme: { primary: string }) => {
         const colorMap: Record<string, string> = {
             blue: 'text-primary',
-            purple: 'text-purple-400',
+            purple: 'text-accent',
             green: 'text-success',
-            orange: 'text-orange-400',
+            orange: 'text-warning',
             red: 'text-danger',
         };
         return colorMap[colorScheme.primary] || 'text-fg-muted';
@@ -215,12 +215,9 @@ export const SegmentTabContent: React.FC<SegmentTabContentProps> = ({ segmentCod
                 <div>
                     <h3 className="text-lg font-semibold text-danger mb-2">Failed to Load Segment</h3>
                     <p className="text-sm text-danger">{error || 'Segment not found'}</p>
-                    <button
-                        onClick={fetchSegmentDetail}
-                        className="mt-4 px-4 py-2 bg-danger/20 hover:bg-danger/30 text-danger rounded-lg text-sm font-medium transition-colors"
-                    >
+                    <Button variant="secondary" size="sm" className="mt-4" onClick={fetchSegmentDetail}>
                         Retry
-                    </button>
+                    </Button>
                 </div>
             </div>
         );

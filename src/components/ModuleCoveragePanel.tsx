@@ -51,7 +51,7 @@ export const ModuleCoveragePanel: React.FC = () => {
                                 {Icon && <Icon className={`w-4 h-4 ${enabled ? 'text-fg-muted' : 'text-fg-subtle'}`} />}
                                 <span className={`text-xs font-medium px-1.5 py-0.5 rounded-full ${
                                     enabled
-                                        ? 'bg-emerald-500/20 text-success'
+                                        ? 'bg-success/20 text-success'
                                         : 'bg-surface-raised text-fg-subtle'
                                 }`}>
                                     {enabled ? 'Active' : 'Inactive'}

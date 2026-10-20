@@ -5,7 +5,7 @@ import { KPICard } from './KPICard';
 import { AlertCard } from './AlertCard';
 import { NeuraSummaryCard } from './NeuraSummaryCard';
 import { ModuleCoveragePanel } from './ModuleCoveragePanel';
-import { toast } from '@so360/design-system';
+import { toast, Button } from '@so360/design-system';
 import { insightApi } from '../services/insightApi';
 import { manufacturingApi, buildManufacturingHeaders } from '../services/manufacturingApi';
 import type { SegmentSummary, KPI, Alert, AiSummarySections, CorrelationPair } from '../types/insight';
@@ -28,8 +28,8 @@ const ManufacturingAtAGlanceCard: React.FC<{ onClick: () => void }> = ({ onClick
             .catch(() => setData(null));
     }, [currentOrg?.id, currentOrg?.tenant_id, accessToken]);
     return (
-        <button onClick={onClick}
-            className="bg-surface/50 rounded-lg border border-success/20 p-4 text-left transition-all hover:shadow-lg hover:border-success/40 group">
+        <Button variant="ghost" onClick={onClick}
+            className="h-auto w-full !flex-col !items-stretch !justify-start whitespace-normal text-left bg-surface/50 border border-success/20 p-4 hover:shadow-lg hover:border-success/40 group">
             <div className="flex items-start justify-between mb-3">
                 <Factory className="w-5 h-5 text-success" />
             </div>
@@ -54,7 +54,7 @@ const ManufacturingAtAGlanceCard: React.FC<{ onClick: () => void }> = ({ onClick
             ) : (
                 <div className="text-xs text-fg-subtle">Connecting…</div>
             )}
-        </button>
+        </Button>
     );
 };
 
@@ -330,9 +330,9 @@ export const AtAGlanceView: React.FC<AtAGlanceViewProps> = ({ segments, onSegmen
     const getIconColorClass = (colorScheme: { primary: string }) => {
         const colorMap: Record<string, string> = {
             blue: 'text-primary',
-            purple: 'text-purple-400',
+            purple: 'text-accent',
             green: 'text-success',
-            orange: 'text-orange-400',
+            orange: 'text-warning',
             red: 'text-danger',
         };
         return colorMap[colorScheme.primary] || 'text-fg-muted';
@@ -341,9 +341,9 @@ export const AtAGlanceView: React.FC<AtAGlanceViewProps> = ({ segments, onSegmen
     const getBorderColorClass = (colorScheme: { primary: string }) => {
         const colorMap: Record<string, string> = {
             blue: 'border-primary/30 hover:border-primary',
-            purple: 'border-purple-500/30 hover:border-purple-500',
+            purple: 'border-accent/30 hover:border-accent',
             green: 'border-success/30 hover:border-success',
-            orange: 'border-orange-500/30 hover:border-orange-500',
+            orange: 'border-warning/30 hover:border-warning',
             red: 'border-danger/30 hover:border-danger',
         };
         return colorMap[colorScheme.primary] || 'border-line hover:border-line-strong';
@@ -454,12 +454,13 @@ export const AtAGlanceView: React.FC<AtAGlanceViewProps> = ({ segments, onSegmen
                         if (!deps) return true;
                         return deps.some(mod => isModuleEnabled(mod));
                     }).map((segment) => (
-                        <button
+                        <Button
+                            variant="ghost"
                             key={segment.segment_code}
                             onClick={() => onSegmentClick(segment.segment_code)}
                             className={`
-                                bg-surface/50 rounded-lg border ${getBorderColorClass(segment.color_scheme)}
-                                p-4 text-left transition-all hover:shadow-lg group
+                                h-auto w-full !flex-col !items-stretch !justify-start whitespace-normal text-left bg-surface/50 border ${getBorderColorClass(segment.color_scheme)}
+                                p-4 hover:shadow-lg group
                             `}
                         >
                             {/* Icon & Trend */}
@@ -494,7 +495,7 @@ export const AtAGlanceView: React.FC<AtAGlanceViewProps> = ({ segments, onSegmen
                                     <span className="text-warning">{segment.signal_count} alerts</span>
                                 )}
                             </div>
-                        </button>
+                        </Button>
                     ))}
                     {/* Manufacturing — composed locally; not yet served by insight-be */}
                     <ManufacturingAtAGlanceCard onClick={() => onSegmentClick('manufacturing')} />

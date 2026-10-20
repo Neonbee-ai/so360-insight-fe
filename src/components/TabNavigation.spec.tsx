@@ -31,16 +31,14 @@ describe('TabNavigation', () => {
   });
 
   describe('Given an active tab', () => {
-    it('When "overview" is active / Then it has the active styling', () => {
+    it('When "overview" is active / Then it is marked selected', () => {
       render(<TabNavigation tabs={tabs} activeTab="overview" onChange={vi.fn()} />);
-      const btn = screen.getByText('Overview').closest('button');
-      expect(btn?.className).toContain('text-primary');
+      expect(screen.getByRole('tab', { name: /Overview/ })).toHaveAttribute('aria-selected', 'true');
     });
 
-    it('When "workforce" is not active / Then it has inactive styling', () => {
+    it('When "workforce" is not active / Then it is not marked selected', () => {
       render(<TabNavigation tabs={tabs} activeTab="overview" onChange={vi.fn()} />);
-      const btn = screen.getByText('Workforce').closest('button');
-      expect(btn?.className).toContain('text-fg-muted');
+      expect(screen.getByRole('tab', { name: /Workforce/ })).toHaveAttribute('aria-selected', 'false');
     });
   });
 

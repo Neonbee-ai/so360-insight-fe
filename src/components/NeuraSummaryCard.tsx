@@ -2,6 +2,7 @@ import React from 'react';
 import { Sparkles, AlertCircle, RefreshCw, Activity, AlertTriangle, Lightbulb, Zap } from 'lucide-react';
 import { getInsightIcon } from '../constants/iconMap';
 import type { AiSummarySections, Alert } from '../types/insight';
+import { Button, IconButton } from '@so360/design-system';
 import { parseUtcDate } from '../utils/datetime';
 
 interface NeuraSummaryCardProps {
@@ -42,36 +43,32 @@ export const NeuraSummaryCard: React.FC<NeuraSummaryCardProps> = ({
     // Color mappings
     const colorClasses = {
         blue: {
-            gradient: 'from-blue-900/20 to-blue-800/10',
+            gradient: 'from-primary/20 to-primary/10',
             border: 'border-primary/30',
             icon: 'text-primary',
             badge: 'bg-primary/20 text-primary',
-            button: 'bg-primary hover:bg-primary-hover',
             regenerate: 'text-primary hover:text-primary hover:bg-primary/10',
         },
         green: {
-            gradient: 'from-green-900/20 to-green-800/10',
+            gradient: 'from-success/20 to-success/10',
             border: 'border-success/30',
             icon: 'text-success',
-            badge: 'bg-green-500/20 text-success',
-            button: 'bg-green-600 hover:bg-green-700',
-            regenerate: 'text-success hover:text-success hover:bg-green-500/10',
+            badge: 'bg-success/20 text-success',
+            regenerate: 'text-success hover:text-success hover:bg-success/10',
         },
         purple: {
-            gradient: 'from-purple-900/20 to-purple-800/10',
-            border: 'border-purple-500/30',
-            icon: 'text-purple-400',
-            badge: 'bg-purple-500/20 text-purple-400',
-            button: 'bg-purple-600 hover:bg-purple-700',
-            regenerate: 'text-purple-400 hover:text-purple-300 hover:bg-purple-500/10',
+            gradient: 'from-accent/20 to-accent/10',
+            border: 'border-accent/30',
+            icon: 'text-accent',
+            badge: 'bg-accent/20 text-accent',
+            regenerate: 'text-accent hover:text-accent hover:bg-accent/10',
         },
         orange: {
-            gradient: 'from-orange-900/20 to-orange-800/10',
-            border: 'border-orange-500/30',
-            icon: 'text-orange-400',
-            badge: 'bg-orange-500/20 text-orange-400',
-            button: 'bg-orange-600 hover:bg-orange-700',
-            regenerate: 'text-orange-400 hover:text-orange-300 hover:bg-orange-500/10',
+            gradient: 'from-warning/20 to-warning/10',
+            border: 'border-warning/30',
+            icon: 'text-warning',
+            badge: 'bg-warning/20 text-warning',
+            regenerate: 'text-warning hover:text-warning hover:bg-warning/10',
         },
     };
 
@@ -121,12 +118,9 @@ export const NeuraSummaryCard: React.FC<NeuraSummaryCardProps> = ({
                     <p>AI insights temporarily unavailable</p>
                 </div>
                 {onRetry && (
-                    <button
-                        onClick={onRetry}
-                        className={`${colors.button} text-fg px-3 py-1.5 rounded text-sm transition-colors`}
-                    >
+                    <Button size="sm" variant="secondary" onClick={onRetry}>
                         Retry
-                    </button>
+                    </Button>
                 )}
             </div>
         );
@@ -167,19 +161,18 @@ export const NeuraSummaryCard: React.FC<NeuraSummaryCardProps> = ({
                 <div className="flex items-center gap-2">
                     {/* Regenerate button */}
                     {onRegenerate && (
-                        <button
+                        <IconButton
+                            label="Regenerate AI summary"
+                            size="sm"
                             onClick={onRegenerate}
                             disabled={regenerating}
-                            title="Regenerate AI summary"
-                            className={`
-                                ${colors.regenerate}
-                                p-1.5 rounded transition-colors disabled:opacity-40
-                            `}
-                        >
-                            <RefreshCw
-                                className={`w-3.5 h-3.5 ${regenerating ? 'animate-spin' : ''}`}
-                            />
-                        </button>
+                            className={colors.regenerate}
+                            icon={
+                                <RefreshCw
+                                    className={`w-3.5 h-3.5 ${regenerating ? 'animate-spin' : ''}`}
+                                />
+                            }
+                        />
                     )}
                     <span className={`${colors.badge} px-2 py-1 text-xs rounded-full flex items-center gap-1`}>
                         <Sparkles className="w-3 h-3" />
@@ -195,7 +188,7 @@ export const NeuraSummaryCard: React.FC<NeuraSummaryCardProps> = ({
             {sections ? (
                 <div className="mb-4 space-y-1">
                     {renderSectionRow(
-                        'border-l-slate-400',
+                        'border-l-line',
                         'bg-line-strong/30',
                         'text-fg-muted',
                         Activity,
@@ -204,7 +197,7 @@ export const NeuraSummaryCard: React.FC<NeuraSummaryCardProps> = ({
                     )}
 
                     {renderSectionRow(
-                        'border-l-red-400',
+                        'border-l-danger',
                         'bg-danger/8',
                         'text-danger',
                         AlertTriangle,
@@ -213,8 +206,8 @@ export const NeuraSummaryCard: React.FC<NeuraSummaryCardProps> = ({
                     )}
 
                     {renderSectionRow(
-                        'border-l-emerald-400',
-                        'bg-emerald-500/8',
+                        'border-l-success',
+                        'bg-success/8',
                         'text-success',
                         Lightbulb,
                         'Suggested Solution',
@@ -222,7 +215,7 @@ export const NeuraSummaryCard: React.FC<NeuraSummaryCardProps> = ({
                     )}
 
                     {renderSectionRow(
-                        'border-l-amber-400',
+                        'border-l-warning',
                         'bg-warning/8',
                         'text-warning',
                         Zap,
@@ -287,17 +280,18 @@ const ActionAlertsContent: React.FC<{ signals?: Alert[] }> = ({ signals }) => {
                     {signal.recommended_actions && signal.recommended_actions.length > 0 && (
                         <div className="flex flex-wrap gap-1.5">
                             {signal.recommended_actions.slice(0, 2).map((action, i) => (
-                                <button
+                                <Button
                                     key={i}
+                                    size="sm"
+                                    variant="secondary"
                                     onClick={() => {
                                         if (action.type === 'navigate' && action.path) {
                                             window.location.assign(action.path);
                                         }
                                     }}
-                                    className="px-2 py-0.5 text-xs rounded bg-warning/15 text-warning hover:bg-warning/25 border border-warning/30 transition-colors"
                                 >
                                     {action.label}
-                                </button>
+                                </Button>
                             ))}
                         </div>
                     )}

@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Loader2, Factory, AlertCircle, RefreshCw } from 'lucide-react';
 import { formatNumber } from '../charts/chartUtils';
 import { useShell } from '@so360/shell-context';
+import { Button } from '@so360/design-system';
 import {
     manufacturingApi,
     buildManufacturingHeaders,
@@ -34,7 +35,7 @@ const fmtNum = (n: number) => formatNumber(n ?? 0);
 
 const Tile: React.FC<{ label: string; value: React.ReactNode; sub?: string; tone?: 'default' | 'pos' | 'neg' }> =
     ({ label, value, sub, tone = 'default' }) => {
-        const colour = tone === 'pos' ? 'text-success' : tone === 'neg' ? 'text-rose-300' : 'text-fg';
+        const colour = tone === 'pos' ? 'text-success' : tone === 'neg' ? 'text-danger' : 'text-fg';
         return (
             <div className="bg-surface/50 border border-line rounded-lg p-6 hover:bg-surface/70 transition-all">
                 <p className="text-sm text-fg-muted mb-3">{label}</p>
@@ -105,14 +106,10 @@ export const ManufacturingSegment: React.FC = () => {
                     <h3 className="text-lg font-semibold text-fg mb-1">Manufacturing metrics unavailable</h3>
                     <p className="text-sm text-fg-muted">{error}</p>
                     {!isNoOrg && (
-                        <button
-                            type="button"
-                            onClick={retry}
-                            className="mt-4 inline-flex items-center gap-2 px-3 py-1.5 text-sm rounded-md border border-line text-fg hover:bg-surface-raised transition-colors"
-                        >
-                            <RefreshCw className="w-4 h-4" />
-                            Retry
-                        </button>
+                        <Button variant="secondary" size="sm" onClick={retry}>
+                                <RefreshCw className="w-4 h-4" />
+                                Retry
+                        </Button>
                     )}
                 </div>
             </div>
@@ -124,7 +121,7 @@ export const ManufacturingSegment: React.FC = () => {
     return (
         <div className="space-y-6">
             <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-emerald-500/10 border border-success/20 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-lg bg-success/10 border border-success/20 flex items-center justify-center">
                     <Factory className="w-5 h-5 text-success" />
                 </div>
                 <div>
@@ -139,14 +136,10 @@ export const ManufacturingSegment: React.FC = () => {
                     <p className="text-sm text-fg-muted flex-1">
                         Showing the last available figures. {error}
                     </p>
-                    <button
-                        type="button"
-                        onClick={retry}
-                        className="inline-flex items-center gap-2 px-3 py-1.5 text-sm rounded-md border border-line text-fg hover:bg-surface-raised transition-colors"
-                    >
-                        <RefreshCw className="w-4 h-4" />
-                        Retry
-                    </button>
+                    <Button variant="secondary" size="sm" onClick={retry}>
+                            <RefreshCw className="w-4 h-4" />
+                            Retry
+                    </Button>
                 </div>
             )}
 
@@ -186,7 +179,7 @@ export const ManufacturingSegment: React.FC = () => {
                                         </div>
                                     </div>
                                     <div className="h-2 bg-surface-raised rounded-full overflow-hidden">
-                                        <div className={`h-full transition-all ${onTarget ? 'bg-emerald-500' : 'bg-warning'}`}
+                                        <div className={`h-full transition-all ${onTarget ? 'bg-success' : 'bg-warning'}`}
                                              style={{ width: `${Math.min(wc.oee_pct, 100)}%` }} />
                                     </div>
                                 </div>

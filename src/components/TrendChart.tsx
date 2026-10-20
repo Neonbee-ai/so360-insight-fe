@@ -52,28 +52,28 @@ export const TrendChart: React.FC<TrendChartProps> = ({ trendData, color = 'blue
     // Color scheme based on prop
     const colorClasses = {
         blue: {
-            gradient: 'from-blue-500/20 to-blue-500/0',
-            stroke: 'stroke-blue-500',
+            gradient: 'from-primary/20 to-primary/0',
+            stroke: 'stroke-primary',
             text: 'text-primary',
         },
         purple: {
-            gradient: 'from-purple-500/20 to-purple-500/0',
-            stroke: 'stroke-purple-500',
-            text: 'text-purple-400',
+            gradient: 'from-accent/20 to-accent/0',
+            stroke: 'stroke-accent',
+            text: 'text-accent',
         },
         green: {
-            gradient: 'from-green-500/20 to-green-500/0',
-            stroke: 'stroke-green-500',
+            gradient: 'from-success/20 to-success/0',
+            stroke: 'stroke-success',
             text: 'text-success',
         },
         orange: {
-            gradient: 'from-orange-500/20 to-orange-500/0',
-            stroke: 'stroke-orange-500',
-            text: 'text-orange-400',
+            gradient: 'from-warning/20 to-warning/0',
+            stroke: 'stroke-warning',
+            text: 'text-warning',
         },
         red: {
-            gradient: 'from-red-500/20 to-red-500/0',
-            stroke: 'stroke-red-500',
+            gradient: 'from-danger/20 to-danger/0',
+            stroke: 'stroke-danger',
             text: 'text-danger',
         },
     };

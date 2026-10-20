@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, TrendingUp, TrendingDown, Minus, AlertCircle, Loader2 } from 'lucide-react';
+import { Button } from '@so360/design-system';
 import { insightApi } from '../services/insightApi';
 import { TrendChart } from '../components/TrendChart';
 import type { SegmentDetail } from '../types/insight';
@@ -55,9 +56,9 @@ export const SegmentDetailPage: React.FC = () => {
     const getIconColorClass = (colorScheme: { primary: string }) => {
         const colorMap: Record<string, string> = {
             blue: 'text-primary',
-            purple: 'text-purple-400',
+            purple: 'text-accent',
             green: 'text-success',
-            orange: 'text-orange-400',
+            orange: 'text-warning',
             red: 'text-danger',
         };
         return colorMap[colorScheme.primary] || 'text-fg-muted';
@@ -81,7 +82,7 @@ export const SegmentDetailPage: React.FC = () => {
             case 'warning':
                 return 'bg-warning/20 border-warning/30 text-warning';
             default:
-                return 'bg-blue-900/20 border-primary/30 text-primary';
+                return 'bg-primary/20 border-primary/30 text-primary';
         }
     };
 
@@ -100,25 +101,19 @@ export const SegmentDetailPage: React.FC = () => {
         return (
             <div className="min-h-screen bg-bg p-8">
                 <div>
-                    <button
-                        onClick={() => navigate('/')}
-                        className="mb-6 flex items-center gap-2 text-fg-muted hover:text-fg-muted transition-colors"
-                    >
+                    <Button variant="ghost" className="mb-6" onClick={() => navigate('/')}>
                         <ArrowLeft className="w-4 h-4" />
                         Back to Overview
-                    </button>
+                    </Button>
 
                     <div className="bg-danger/20 border border-danger/30 rounded-lg p-6 flex items-start gap-4">
                         <AlertCircle className="w-6 h-6 text-danger flex-shrink-0 mt-0.5" />
                         <div>
                             <h3 className="text-lg font-semibold text-danger mb-2">Failed to Load Segment</h3>
                             <p className="text-sm text-danger">{error || 'Segment not found'}</p>
-                            <button
-                                onClick={fetchSegmentDetail}
-                                className="mt-4 px-4 py-2 bg-danger/20 hover:bg-danger/30 text-danger rounded-lg text-sm font-medium transition-colors"
-                            >
+                            <Button variant="secondary" size="sm" className="mt-4" onClick={fetchSegmentDetail}>
                                 Retry
-                            </button>
+                            </Button>
                         </div>
                     </div>
                 </div>
@@ -131,13 +126,10 @@ export const SegmentDetailPage: React.FC = () => {
             <div>
                 {/* Header */}
                 <div className="mb-8">
-                    <button
-                        onClick={() => navigate('/')}
-                        className="mb-4 flex items-center gap-2 text-fg-muted hover:text-fg-muted transition-colors"
-                    >
+                    <Button variant="ghost" className="mb-4" onClick={() => navigate('/')}>
                         <ArrowLeft className="w-4 h-4" />
                         Back to Overview
-                    </button>
+                    </Button>
 
                     <div className="flex items-start gap-6">
                         <div className={`${getIconColorClass(segment.color_scheme)}`}>
@@ -242,12 +234,9 @@ export const SegmentDetailPage: React.FC = () => {
                             ))}
 
                             {segment.signals.length > 5 && (
-                                <button
-                                    onClick={() => navigate('/alerts')}
-                                    className="w-full py-3 bg-surface-raised/50 hover:bg-surface-raised text-fg-muted rounded-lg transition-colors text-sm font-medium"
-                                >
+                                <Button variant="secondary" className="w-full" onClick={() => navigate(\'/alerts\')}>
                                     View all {segment.signals.length} alerts →
-                                </button>
+                                </Button>
                             )}
                         </div>
                     </div>

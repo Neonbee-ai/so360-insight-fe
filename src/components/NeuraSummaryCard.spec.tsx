@@ -68,7 +68,7 @@ describe('NeuraSummaryCard', () => {
       render(
         <NeuraSummaryCard title="Finance" icon="DollarSign" color="blue" summary="test" onRegenerate={vi.fn()} />
       );
-      expect(screen.getByTitle('Regenerate AI summary')).toBeInTheDocument();
+      expect(screen.getByLabelText('Regenerate AI summary')).toBeInTheDocument();
     });
   });
 

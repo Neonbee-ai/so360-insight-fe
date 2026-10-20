@@ -57,7 +57,7 @@ export const ExecutionCharts: React.FC<ExecutionChartsProps> = ({ tenantId, orgI
     if (loading) {
         return (
             <div className="flex items-center justify-center py-12">
-                <Loader2 className="w-8 h-8 text-purple-500 animate-spin" />
+                <Loader2 className="w-8 h-8 text-accent animate-spin" />
             </div>
         );
     }

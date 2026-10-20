@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AlertCircle, RefreshCw } from 'lucide-react';
+import { Button } from '@so360/design-system';
 import { TabNavigation, type Tab } from '../components/TabNavigation';
 import { AtAGlanceView } from '../components/AtAGlanceView';
 import { SegmentTabContent } from '../components/SegmentTabContent';
@@ -61,22 +62,14 @@ const RefreshButton: React.FC<RefreshButtonProps> = ({
     const disabled = isRefreshing || cooldownSeconds > 0;
 
     return (
-        <button
-            onClick={onRefresh}
-            disabled={disabled}
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                disabled
-                    ? 'bg-surface-raised text-fg-subtle cursor-not-allowed'
-                    : 'bg-surface-raised hover:bg-line-strong text-fg-muted hover:text-fg'
-            }`}
-        >
+        <Button variant="secondary" size="sm" onClick={onRefresh} disabled={disabled}>
             <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
             {isRefreshing
                 ? 'Refreshing...'
                 : cooldownSeconds > 0
                     ? `Refresh in ${formatCooldown(cooldownSeconds)}`
                     : 'Refresh'}
-        </button>
+        </Button>
     );
 };
 
@@ -246,12 +239,11 @@ export const InsightDashboard: React.FC<InsightDashboardProps> = ({ initialTab }
                         <div>
                             <h3 className="text-lg font-semibold text-danger mb-2">Failed to Load Dashboard</h3>
                             <p className="text-sm text-danger">{error}</p>
-                            <button
-                                onClick={fetchSegments}
-                                className="mt-4 px-4 py-2 bg-danger/20 hover:bg-danger/30 text-danger rounded-lg text-sm font-medium transition-colors"
-                            >
-                                Retry
-                            </button>
+                            <div className="mt-4">
+                                <Button variant="secondary" onClick={fetchSegments}>
+                                    Retry
+                                </Button>
+                            </div>
                         </div>
                     </div>
                 </div>

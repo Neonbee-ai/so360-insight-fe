@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { TrendingUp, TrendingDown, Minus, AlertCircle } from 'lucide-react';
+import { Button } from '@so360/design-system';
 import { insightApi } from '../services/insightApi';
 import type { SegmentSummary } from '../types/insight';
 import { getInsightIcon } from '../constants/iconMap';
@@ -59,9 +60,9 @@ export const SegmentOverview: React.FC = () => {
     const getColorClass = (colorScheme: { primary: string }) => {
         const colorMap: Record<string, string> = {
             blue: 'border-primary/30 hover:border-primary',
-            purple: 'border-purple-500/30 hover:border-purple-500',
+            purple: 'border-accent/30 hover:border-accent',
             green: 'border-success/30 hover:border-success',
-            orange: 'border-orange-500/30 hover:border-orange-500',
+            orange: 'border-warning/30 hover:border-warning',
             red: 'border-danger/30 hover:border-danger',
         };
         return colorMap[colorScheme.primary] || 'border-line hover:border-line-strong';
@@ -70,9 +71,9 @@ export const SegmentOverview: React.FC = () => {
     const getIconColorClass = (colorScheme: { primary: string }) => {
         const colorMap: Record<string, string> = {
             blue: 'text-primary',
-            purple: 'text-purple-400',
+            purple: 'text-accent',
             green: 'text-success',
-            orange: 'text-orange-400',
+            orange: 'text-warning',
             red: 'text-danger',
         };
         return colorMap[colorScheme.primary] || 'text-fg-muted';
@@ -104,12 +105,9 @@ export const SegmentOverview: React.FC = () => {
                         <div>
                             <h3 className="text-lg font-semibold text-danger mb-2">Failed to Load Segments</h3>
                             <p className="text-sm text-danger">{error}</p>
-                            <button
-                                onClick={fetchSegments}
-                                className="mt-4 px-4 py-2 bg-danger/20 hover:bg-danger/30 text-danger rounded-lg text-sm font-medium transition-colors"
-                            >
+                            <Button variant="secondary" size="sm" className="mt-4" onClick={fetchSegments}>
                                 Retry
-                            </button>
+                            </Button>
                         </div>
                     </div>
                 </div>
@@ -131,14 +129,13 @@ export const SegmentOverview: React.FC = () => {
                 {/* Segment Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {segments.map((segment) => (
-                        <button
+                        <Button
+                            variant="ghost"
                             key={segment.segment_code}
                             onClick={() => navigate(`/${segment.segment_code}`)}
-                            className={`bg-surface/50 rounded-lg border ${getColorClass(
+                            className={`h-auto w-full !flex-col !items-stretch !justify-start whitespace-normal text-left bg-surface/50 border ${getColorClass(
                                 segment.color_scheme
-                            )} p-6 text-left transition-all hover:shadow-lg hover:shadow-${
-                                segment.color_scheme.primary
-                            }-500/10 group`}
+                            )} p-6 hover:shadow-lg group`}
                         >
                             {/* Icon & Name */}
                             <div className="flex items-start justify-between mb-4">
@@ -198,7 +195,7 @@ export const SegmentOverview: React.FC = () => {
                                     </div>
                                 )}
                             </div>
-                        </button>
+                        </Button>
                     ))}
                 </div>
 

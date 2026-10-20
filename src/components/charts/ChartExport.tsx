@@ -5,7 +5,7 @@
 
 import React, { useState } from 'react';
 import { Download, FileImage, FileSpreadsheet } from 'lucide-react';
-import { toast } from '@so360/design-system';
+import { Button, IconButton, toast } from '@so360/design-system';
 
 interface ChartExportProps {
     chartId: string;
@@ -79,13 +79,11 @@ export const ChartExport: React.FC<ChartExportProps> = ({
 
     return (
         <div className="relative">
-            <button
+            <IconButton
+                label="Export chart"
                 onClick={() => setShowMenu(!showMenu)}
-                className="p-2 rounded-lg hover:bg-surface-raised text-fg-muted hover:text-fg transition-colors"
-                title="Export chart"
-            >
-                <Download className="w-4 h-4" />
-            </button>
+                icon={<Download className="w-4 h-4" />}
+            />
 
             {showMenu && (
                 <>
@@ -98,20 +96,22 @@ export const ChartExport: React.FC<ChartExportProps> = ({
                     {/* Menu */}
                     <div className="absolute right-0 top-full mt-2 w-48 bg-surface border border-line rounded-lg shadow-xl z-20">
                         <div className="py-1">
-                            <button
+                            <Button
+                                variant="ghost"
+                                className="w-full justify-start"
                                 onClick={handleExportPNG}
-                                className="w-full px-4 py-2 text-left text-sm text-fg-muted hover:bg-surface-raised hover:text-fg flex items-center gap-2"
                             >
                                 <FileImage className="w-4 h-4" />
                                 Export as PNG
-                            </button>
-                            <button
+                            </Button>
+                            <Button
+                                variant="ghost"
+                                className="w-full justify-start"
                                 onClick={handleExportCSV}
-                                className="w-full px-4 py-2 text-left text-sm text-fg-muted hover:bg-surface-raised hover:text-fg flex items-center gap-2"
                             >
                                 <FileSpreadsheet className="w-4 h-4" />
                                 Export as CSV
-                            </button>
+                            </Button>
                         </div>
                     </div>
                 </>

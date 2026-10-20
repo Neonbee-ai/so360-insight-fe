@@ -6,6 +6,7 @@ import { useFormatters } from '@so360/formatters';
 import { useShell, useFeatureFlags, useShellBridge } from '@so360/shell-context';
 import { classifyKpiUnit, formatNumber, formatPercentage } from './charts/chartUtils';
 import { insightApi } from '../services/insightApi';
+import { IconButton, TextField } from '@so360/design-system';
 
 interface KPICardProps {
     kpi: KPI;
@@ -99,14 +100,13 @@ const KPICardInner: React.FC<KPICardProps> = ({ kpi }) => {
     return (
         <div className="relative bg-surface/50 border border-line rounded-lg p-6 hover:bg-surface/70 transition-all">
             {!isCounter && canEditTargets && !isEditingTarget && (
-                <button
-                    type="button"
-                    aria-label="Set target"
+                <IconButton
+                    label="Set target"
+                    size="sm"
+                    className="absolute top-3 right-3"
                     onClick={startEditingTarget}
-                    className="absolute top-3 right-3 p-1 rounded text-fg-subtle hover:text-fg-muted hover:bg-surface-raised transition-colors"
-                >
-                    <Pencil className="w-3.5 h-3.5" />
-                </button>
+                    icon={<Pencil className="w-3.5 h-3.5" />}
+                />
             )}
 
             <div className="flex items-start justify-between mb-3">
@@ -150,32 +150,31 @@ const KPICardInner: React.FC<KPICardProps> = ({ kpi }) => {
             {/* Inline target editor */}
             {!isCounter && isEditingTarget && (
                 <div className="flex items-center gap-1 mt-1" data-testid="target-editor">
-                    <input
+                    <TextField
+                        name="kpi-target"
                         type="number"
+                        size="sm"
+                        aria-label="Target value"
                         value={targetInput}
                         onChange={(e) => setTargetInput(e.target.value)}
                         placeholder="Target value"
-                        className="w-24 text-xs bg-surface-raised border border-line rounded px-1.5 py-0.5 text-fg"
+                        className="w-24"
                         autoFocus
                     />
-                    <button
-                        type="button"
-                        aria-label="Save target"
+                    <IconButton
+                        label="Save target"
+                        size="sm"
                         onClick={saveTarget}
                         disabled={savingTarget}
-                        className="p-1 rounded text-success hover:bg-surface-raised disabled:opacity-50"
-                    >
-                        <Check className="w-3.5 h-3.5" />
-                    </button>
-                    <button
-                        type="button"
-                        aria-label="Cancel"
+                        icon={<Check className="w-3.5 h-3.5 text-success" />}
+                    />
+                    <IconButton
+                        label="Cancel"
+                        size="sm"
                         onClick={cancelEditingTarget}
                         disabled={savingTarget}
-                        className="p-1 rounded text-fg-subtle hover:bg-surface-raised disabled:opacity-50"
-                    >
-                        <X className="w-3.5 h-3.5" />
-                    </button>
+                        icon={<X className="w-3.5 h-3.5" />}
+                    />
                 </div>
             )}
 
