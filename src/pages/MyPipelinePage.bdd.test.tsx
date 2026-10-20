@@ -33,9 +33,8 @@ describe('MyPipelinePage', () => {
         render(<MyPipelinePage />);
         await waitFor(() => expect(screen.getByText('Acme rollout')).toBeInTheDocument());
         expect(screen.getByText('Globex renewal')).toBeInTheDocument();
-        expect(screen.getByText('Open pipeline')).toBeInTheDocument();
-        expect(screen.getByText('Weighted forecast')).toBeInTheDocument();
-        expect(screen.getByText('$860.00')).toBeInTheDocument();
+        expect(screen.getByText(/Open pipeline/)).toBeInTheDocument();
+        expect(screen.getByText(/Weighted forecast.*\$860\.00/)).toBeInTheDocument();
         expect(screen.getByText('Nov 2026')).toBeInTheDocument();
         expect(screen.getByText('Overdue')).toBeInTheDocument();
     });
