@@ -5,7 +5,7 @@ import { KPICard } from './KPICard';
 import { AlertCard } from './AlertCard';
 import { NeuraSummaryCard } from './NeuraSummaryCard';
 import { ModuleCoveragePanel } from './ModuleCoveragePanel';
-import { toast, Button } from '@so360/design-system';
+import { toast, Card, Grid, Stack, EmptyState, Skeleton } from '@so360/design-system';
 import { insightApi } from '../services/insightApi';
 import { manufacturingApi, buildManufacturingHeaders } from '../services/manufacturingApi';
 import type { SegmentSummary, KPI, Alert, AiSummarySections, CorrelationPair } from '../types/insight';
@@ -28,33 +28,33 @@ const ManufacturingAtAGlanceCard: React.FC<{ onClick: () => void }> = ({ onClick
             .catch(() => setData(null));
     }, [currentOrg?.id, currentOrg?.tenant_id, accessToken]);
     return (
-        <Button variant="ghost" onClick={onClick}
-            className="h-auto w-full !flex-col !items-stretch !justify-start whitespace-normal text-left bg-surface/50 border border-success/20 p-4 hover:shadow-lg hover:border-success/40 group">
-            <div className="flex items-start justify-between mb-3">
+        <Card
+            padding="sm"
+            onClick={onClick}
+            aria-label="Manufacturing"
+            className="border-success/20 hover:border-success/40"
+        >
+            <Stack gap="tight">
                 <Factory className="w-5 h-5 text-success" />
-            </div>
-            <h3 className="text-sm font-semibold text-fg mb-1 group-hover:text-fg transition-colors">
-                Manufacturing
-            </h3>
-            {data ? (
-                <>
-                    <div className="mb-2">
+                <h3 className="text-sm font-semibold text-fg">Manufacturing</h3>
+                {data ? (
+                    <>
                         <div className="text-lg font-bold text-fg">
                             {data.mo_in_progress + data.mo_planned}
                             <span className="text-xs text-fg-muted ml-1">open MOs</span>
                         </div>
-                    </div>
-                    <div className="flex items-center justify-between text-xs">
-                        <span className="text-fg-muted">{data.wo_open} WOs open</span>
-                        {data.scrap_pct > 3 && (
-                            <span className="text-warning">scrap {data.scrap_pct.toFixed(1)}%</span>
-                        )}
-                    </div>
-                </>
-            ) : (
-                <div className="text-xs text-fg-subtle">Connecting…</div>
-            )}
-        </Button>
+                        <div className="flex items-center justify-between text-xs">
+                            <span className="text-fg-muted">{data.wo_open} WOs open</span>
+                            {data.scrap_pct > 3 && (
+                                <span className="text-warning">scrap {data.scrap_pct.toFixed(1)}%</span>
+                            )}
+                        </div>
+                    </>
+                ) : (
+                    <div className="text-xs text-fg-subtle">Connecting…</div>
+                )}
+            </Stack>
+        </Card>
     );
 };
 
@@ -372,38 +372,38 @@ export const AtAGlanceView: React.FC<AtAGlanceViewProps> = ({ segments, onSegmen
 
     if (loading) {
         return (
-            <div className="space-y-8">
-                <div className="animate-pulse">
-                    {/* AI Summary skeletons */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-                        {Array.from({ length: visibleCardConfigs.length || 4 }, (_, i) => (
-                            <div key={i} className="h-48 bg-surface rounded-lg"></div>
-                        ))}
-                    </div>
-                    {/* Segment skeletons */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
-                        {[1, 2, 3, 4, 5].map((i) => (
-                            <div key={i} className="h-32 bg-surface rounded-lg"></div>
-                        ))}
-                    </div>
-                    {/* KPI skeletons */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                        {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-                            <div key={i} className="h-40 bg-surface rounded-lg"></div>
-                        ))}
-                    </div>
-                </div>
-            </div>
+            <Stack gap="region">
+                <Grid>
+                    {Array.from({ length: visibleCardConfigs.length || 4 }, (_, i) => (
+                        <Grid.Item key={i} span={6}>
+                            <Skeleton variant="rect" className="h-48" />
+                        </Grid.Item>
+                    ))}
+                </Grid>
+                <Grid>
+                    {[1, 2, 3, 4, 5].map((i) => (
+                        <Grid.Item key={i} span={4}>
+                            <Skeleton variant="rect" className="h-32" />
+                        </Grid.Item>
+                    ))}
+                </Grid>
+                <Grid>
+                    {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+                        <Grid.Item key={i} span={3}>
+                            <Skeleton variant="rect" className="h-40" />
+                        </Grid.Item>
+                    ))}
+                </Grid>
+            </Stack>
         );
     }
 
     return (
-        <div className="space-y-8">
+        <Stack gap="region">
             {/* Section 1: AI Executive Summary — hidden until flags resolve */}
             {flagsLoaded !== false && (canShowAiSummary ? (
-                <div>
-                    <h2 className="text-xl font-semibold text-fg mb-4">AI Executive Summary</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Card title="AI Executive Summary">
+                    <Grid>
                         {neuraSummaries.map((summary, index) => {
                             const cfg = visibleCardConfigs[index];
                             const segmentAlerts = cfg
@@ -414,113 +414,100 @@ export const AtAGlanceView: React.FC<AtAGlanceViewProps> = ({ segments, onSegmen
                                   ).slice(0, 3)
                                 : [];
                             return (
-                                <NeuraSummaryCard
-                                    key={summary.type}
-                                    title={summary.title}
-                                    icon={summary.icon}
-                                    color={summary.color}
-                                    summary={summary.summary}
-                                    sections={summary.sections}
-                                    signals={segmentAlerts}
-                                    generatedAt={summary.generatedAt}
-                                    cached={summary.cached}
-                                    degraded={summary.degraded}
-                                    loading={summary.loading}
-                                    regenerating={summary.regenerating}
-                                    error={summary.error}
-                                    onRetry={() => retryNeuraSummary(index)}
-                                    onRegenerate={canRegenerate ? () => regenerateNeuraSummary(index) : undefined}
-                                />
+                                <Grid.Item key={summary.type} span={6}>
+                                    <NeuraSummaryCard
+                                        title={summary.title}
+                                        icon={summary.icon}
+                                        color={summary.color}
+                                        summary={summary.summary}
+                                        sections={summary.sections}
+                                        signals={segmentAlerts}
+                                        generatedAt={summary.generatedAt}
+                                        cached={summary.cached}
+                                        degraded={summary.degraded}
+                                        loading={summary.loading}
+                                        regenerating={summary.regenerating}
+                                        error={summary.error}
+                                        onRetry={() => retryNeuraSummary(index)}
+                                        onRegenerate={canRegenerate ? () => regenerateNeuraSummary(index) : undefined}
+                                    />
+                                </Grid.Item>
                             );
                         })}
-                    </div>
-                </div>
+                    </Grid>
+                </Card>
             ) : (
-                <div className="bg-surface/30 border border-line rounded-lg p-6 text-center">
-                    <h2 className="text-xl font-semibold text-fg mb-2">AI Executive Summary</h2>
-                    <p className="text-fg-muted text-sm mb-3">AI-powered executive summaries are available on Growth plans and above.</p>
-                    <span className="inline-block px-3 py-1.5 bg-primary/20 border border-primary/30 rounded-lg text-primary text-xs font-medium">
-                        Upgrade to Growth to unlock AI Summaries
-                    </span>
-                </div>
+                <EmptyState
+                    title="AI Executive Summary"
+                    description="AI-powered executive summaries are available on Growth plans and above. Upgrade to Growth to unlock AI Summaries"
+                />
             ))}
 
             {/* Section 2: Segment Summary Cards */}
-            <div>
-                <h2 className="text-xl font-semibold text-fg mb-4">Business Segments</h2>
-                <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+            <Card title="Business Segments">
+                <Grid>
                     {segments.filter(s => {
                         const deps = SEGMENT_MODULE_DEPS[s.segment_code];
                         if (!deps) return true;
                         return deps.some(mod => isModuleEnabled(mod));
                     }).map((segment) => (
-                        <Button
-                            variant="ghost"
-                            key={segment.segment_code}
-                            onClick={() => onSegmentClick(segment.segment_code)}
-                            className={`
-                                h-auto w-full !flex-col !items-stretch !justify-start whitespace-normal text-left bg-surface/50 border ${getBorderColorClass(segment.color_scheme)}
-                                p-4 hover:shadow-lg group
-                            `}
-                        >
-                            {/* Icon & Trend */}
-                            <div className="flex items-start justify-between mb-3">
-                                <div className={getIconColorClass(segment.color_scheme)}>
-                                    {getSegmentIcon(segment.icon_name)}
-                                </div>
-                                {getTrendIcon(segment.trend)}
-                            </div>
-
-                            {/* Segment Name */}
-                            <h3 className="text-sm font-semibold text-fg mb-1 group-hover:text-fg transition-colors">
-                                {segment.segment_name}
-                            </h3>
-
-                            {/* Primary KPI */}
-                            {segment.primary_kpi && (
-                                <div className="mb-2">
-                                    <div className="text-lg font-bold text-fg">
-                                        {segment.primary_kpi.value.toFixed(1)}
-                                        <span className="text-xs text-fg-muted ml-1">
-                                            {segment.primary_kpi.unit}
-                                        </span>
+                        <Grid.Item key={segment.segment_code} span={4}>
+                            <Card
+                                padding="sm"
+                                onClick={() => onSegmentClick(segment.segment_code)}
+                                aria-label={segment.segment_name}
+                                className={getBorderColorClass(segment.color_scheme)}
+                            >
+                                <Stack gap="tight">
+                                    <div className="flex items-start justify-between">
+                                        <div className={getIconColorClass(segment.color_scheme)}>
+                                            {getSegmentIcon(segment.icon_name)}
+                                        </div>
+                                        {getTrendIcon(segment.trend)}
                                     </div>
-                                </div>
-                            )}
-
-                            {/* Stats */}
-                            <div className="flex items-center justify-between text-xs">
-                                <span className="text-fg-muted">{segment.kpi_count} KPIs</span>
-                                {segment.signal_count > 0 && (
-                                    <span className="text-warning">{segment.signal_count} alerts</span>
-                                )}
-                            </div>
-                        </Button>
+                                    <h3 className="text-sm font-semibold text-fg">{segment.segment_name}</h3>
+                                    {segment.primary_kpi && (
+                                        <div className="text-lg font-bold text-fg">
+                                            {segment.primary_kpi.value.toFixed(1)}
+                                            <span className="text-xs text-fg-muted ml-1">
+                                                {segment.primary_kpi.unit}
+                                            </span>
+                                        </div>
+                                    )}
+                                    <div className="flex items-center justify-between text-xs">
+                                        <span className="text-fg-muted">{segment.kpi_count} KPIs</span>
+                                        {segment.signal_count > 0 && (
+                                            <span className="text-warning">{segment.signal_count} alerts</span>
+                                        )}
+                                    </div>
+                                </Stack>
+                            </Card>
+                        </Grid.Item>
                     ))}
                     {/* Manufacturing — composed locally; not yet served by insight-be */}
-                    <ManufacturingAtAGlanceCard onClick={() => onSegmentClick('manufacturing')} />
-                </div>
-            </div>
+                    <Grid.Item span={4}>
+                        <ManufacturingAtAGlanceCard onClick={() => onSegmentClick('manufacturing')} />
+                    </Grid.Item>
+                </Grid>
+            </Card>
 
             {/* Section 3: Important KPIs Across All Segments */}
             {topKPIs.length > 0 && (
-                <div>
-                    <h2 className="text-xl font-semibold text-fg mb-4">
-                        Important KPIs Across All Segments
-                    </h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <Card title="Important KPIs Across All Segments">
+                    <Grid>
                         {topKPIs.map((kpi) => (
-                            <KPICard key={kpi.kpi_code} kpi={kpi} />
+                            <Grid.Item key={kpi.kpi_code} span={3}>
+                                <KPICard kpi={kpi} />
+                            </Grid.Item>
                         ))}
-                    </div>
-                </div>
+                    </Grid>
+                </Card>
             )}
 
             {/* Section 3b: Related Movements (cross-KPI correlations) — bonus insight, no empty state */}
             {canShowCorrelations && correlations.length > 0 && (
-                <div>
-                    <h2 className="text-xl font-semibold text-fg mb-4">Related Movements</h2>
-                    <div className="bg-surface/50 border border-line rounded-lg p-4 space-y-2">
+                <Card title="Related Movements">
+                    <Stack gap="tight">
                         {correlations.map((pair) => {
                             const nameA = kpiNameMap.get(pair.kpi_code_a) || pair.kpi_code_a;
                             const nameB = kpiNameMap.get(pair.kpi_code_b) || pair.kpi_code_b;
@@ -531,34 +518,25 @@ export const AtAGlanceView: React.FC<AtAGlanceViewProps> = ({ segments, onSegmen
                                 </p>
                             );
                         })}
-                    </div>
-                </div>
+                    </Stack>
+                </Card>
             )}
 
             {/* Section 4: Critical Alerts */}
-            {criticalAlerts.length > 0 && (
-                <div>
-                    <h2 className="text-xl font-semibold text-fg mb-4">
-                        Critical Alerts ({criticalAlerts.length})
-                    </h2>
-                    <div className="space-y-3 max-h-96 overflow-y-auto">
+            {criticalAlerts.length > 0 ? (
+                <Card title={`Critical Alerts (${criticalAlerts.length})`}>
+                    <Stack gap="tight" className="max-h-96 overflow-y-auto">
                         {criticalAlerts.map((alert) => (
                             <AlertCard key={alert.id} alert={alert} onResolve={handleResolveAlert} />
                         ))}
-                    </div>
-                </div>
-            )}
-
-            {/* Empty state for alerts */}
-            {criticalAlerts.length === 0 && (
-                <div className="text-center py-8 bg-surface/30 rounded-lg border border-line">
-                    <AlertCircle className="w-12 h-12 text-fg-subtle mx-auto mb-3" />
-                    <p className="text-fg-muted">No critical alerts at this time</p>
-                </div>
+                    </Stack>
+                </Card>
+            ) : (
+                <EmptyState icon={AlertCircle} title="No critical alerts at this time" />
             )}
 
             {/* Section 5: Module Coverage */}
             <ModuleCoveragePanel />
-        </div>
+        </Stack>
     );
 };

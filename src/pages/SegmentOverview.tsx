@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { TrendingUp, TrendingDown, Minus, AlertCircle } from 'lucide-react';
-import { Button } from '@so360/design-system';
+import { Button, Card, DashboardPageTemplate, EmptyState, Grid, Skeleton, Stack } from '@so360/design-system';
 import { insightApi } from '../services/insightApi';
 import type { SegmentSummary } from '../types/insight';
 import { getInsightIcon } from '../constants/iconMap';
@@ -79,135 +79,120 @@ export const SegmentOverview: React.FC = () => {
         return colorMap[colorScheme.primary] || 'text-fg-muted';
     };
 
+    const title = 'Business Intelligence';
+    const description = 'Monitor key performance indicators across 5 business segments';
+
     if (loading) {
         return (
-            <div className="min-h-screen bg-bg p-8">
-                <div>
-                    <div className="animate-pulse">
-                        <div className="h-10 bg-surface-raised rounded w-64 mb-8"></div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {[1, 2, 3, 4, 5].map((i) => (
-                                <div key={i} className="h-48 bg-surface rounded-lg"></div>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <DashboardPageTemplate title={title} description={description}>
+                <Grid>
+                    {[1, 2, 3, 4, 5].map((i) => (
+                        <Grid.Item key={i} span={4}>
+                            <Skeleton variant="rect" className="h-48" />
+                        </Grid.Item>
+                    ))}
+                </Grid>
+            </DashboardPageTemplate>
         );
     }
 
     if (error) {
         return (
-            <div className="min-h-screen bg-bg p-8">
-                <div>
-                    <div className="bg-danger/20 border border-danger/30 rounded-lg p-6 flex items-start gap-4">
-                        <AlertCircle className="w-6 h-6 text-danger flex-shrink-0 mt-0.5" />
-                        <div>
-                            <h3 className="text-lg font-semibold text-danger mb-2">Failed to Load Segments</h3>
-                            <p className="text-sm text-danger">{error}</p>
-                            <Button variant="secondary" size="sm" className="mt-4" onClick={fetchSegments}>
-                                Retry
-                            </Button>
-                        </div>
+            <DashboardPageTemplate title={title} description={description}>
+                <div className="bg-danger/20 border border-danger/30 rounded-lg p-6 flex items-start gap-4">
+                    <AlertCircle className="w-6 h-6 text-danger flex-shrink-0 mt-0.5" />
+                    <div>
+                        <h3 className="text-lg font-semibold text-danger mb-2">Failed to Load Segments</h3>
+                        <p className="text-sm text-danger">{error}</p>
+                        <Button variant="secondary" size="sm" className="mt-4" onClick={fetchSegments}>
+                            Retry
+                        </Button>
                     </div>
                 </div>
-            </div>
+            </DashboardPageTemplate>
         );
     }
 
     return (
-        <div className="min-h-screen bg-bg p-8">
-            <div>
-                {/* Header */}
-                <div className="mb-8">
-                    <h1 className="text-3xl font-bold text-fg mb-2">Business Intelligence</h1>
-                    <p className="text-fg-muted">
-                        Monitor key performance indicators across 5 business segments
-                    </p>
-                </div>
-
-                {/* Segment Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <DashboardPageTemplate title={title} description={description}>
+            {segments.length === 0 ? (
+                <EmptyState
+                    icon={AlertCircle}
+                    title="No Segments Available"
+                    description="Segment data will appear here once configured."
+                />
+            ) : (
+                <Grid>
                     {segments.map((segment) => (
-                        <Button
-                            variant="ghost"
-                            key={segment.segment_code}
-                            onClick={() => navigate(`/${segment.segment_code}`)}
-                            className={`h-auto w-full !flex-col !items-stretch !justify-start whitespace-normal text-left bg-surface/50 border ${getColorClass(
-                                segment.color_scheme
-                            )} p-6 hover:shadow-lg group`}
-                        >
+                        <Grid.Item key={segment.segment_code} span={4}>
+                            <Card
+                                onClick={() => navigate(`/${segment.segment_code}`)}
+                                aria-label={segment.segment_name}
+                                className={getColorClass(segment.color_scheme)}
+                            >
                             {/* Icon & Name */}
-                            <div className="flex items-start justify-between mb-4">
-                                <div className={`${getIconColorClass(segment.color_scheme)}`}>
-                                    {getSegmentIcon(segment.icon_name)}
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    {getTrendIcon(segment.trend)}
-                                </div>
+                        <div className="flex items-start justify-between mb-4">
+                            <div className={`${getIconColorClass(segment.color_scheme)}`}>
+                                {getSegmentIcon(segment.icon_name)}
                             </div>
+                            <div className="flex items-center gap-2">
+                                {getTrendIcon(segment.trend)}
+                            </div>
+                        </div>
 
-                            <h3 className="text-xl font-semibold text-fg mb-2 group-hover:text-fg transition-colors">
-                                {segment.segment_name}
-                            </h3>
-                            <p className="text-sm text-fg-muted mb-4 line-clamp-2">{segment.description}</p>
+                        <h3 className="text-xl font-semibold text-fg mb-2 group-hover:text-fg transition-colors">
+                            {segment.segment_name}
+                        </h3>
+                        <p className="text-sm text-fg-muted mb-4 line-clamp-2">{segment.description}</p>
 
-                            {/* Primary KPI */}
-                            {segment.primary_kpi && (
-                                <div className="bg-surface-raised/50 rounded-lg p-3 mb-4">
-                                    <div className="text-xs text-fg-subtle mb-1">{segment.primary_kpi.kpi_name}</div>
-                                    <div className="flex items-baseline gap-2">
-                                        <span className="text-2xl font-bold text-fg">
-                                            {isCurrencyUnit(segment.primary_kpi.unit)
-                                                ? formatters.formatCurrency(segment.primary_kpi.value)
-                                                : segment.primary_kpi.value.toFixed(1)}
-                                        </span>
-                                        {!isCurrencyUnit(segment.primary_kpi.unit) && (
-                                            <span className="text-sm text-fg-muted">{segment.primary_kpi.unit}</span>
-                                        )}
-                                    </div>
-                                    {segment.primary_kpi.trend_percentage !== undefined && (
-                                        <div
-                                            className={`text-xs font-medium mt-1 ${
-                                                segment.primary_kpi.trend === 'up'
-                                                    ? 'text-success'
-                                                    : segment.primary_kpi.trend === 'down'
-                                                    ? 'text-danger'
-                                                    : 'text-fg-muted'
-                                            }`}
-                                        >
-                                            {segment.primary_kpi.trend === 'up' ? '+' : ''}
-                                            {segment.primary_kpi.trend_percentage}% from last period
-                                        </div>
+                        {/* Primary KPI */}
+                        {segment.primary_kpi && (
+                            <div className="bg-surface-raised/50 rounded-lg p-3 mb-4">
+                                <div className="text-xs text-fg-subtle mb-1">{segment.primary_kpi.kpi_name}</div>
+                                <div className="flex items-baseline gap-2">
+                                    <span className="text-2xl font-bold text-fg">
+                                        {isCurrencyUnit(segment.primary_kpi.unit)
+                                            ? formatters.formatCurrency(segment.primary_kpi.value)
+                                            : segment.primary_kpi.value.toFixed(1)}
+                                    </span>
+                                    {!isCurrencyUnit(segment.primary_kpi.unit) && (
+                                        <span className="text-sm text-fg-muted">{segment.primary_kpi.unit}</span>
                                     )}
                                 </div>
-                            )}
-
-                            {/* Stats */}
-                            <div className="flex items-center justify-between text-sm">
-                                <div>
-                                    <span className="text-fg-muted">{segment.kpi_count} KPIs</span>
-                                </div>
-                                {segment.signal_count > 0 && (
-                                    <div className="flex items-center gap-1.5 text-warning">
-                                        <AlertCircle className="w-4 h-4" />
-                                        <span>{segment.signal_count} alerts</span>
+                                {segment.primary_kpi.trend_percentage !== undefined && (
+                                    <div
+                                        className={`text-xs font-medium mt-1 ${
+                                            segment.primary_kpi.trend === 'up'
+                                                ? 'text-success'
+                                                : segment.primary_kpi.trend === 'down'
+                                                ? 'text-danger'
+                                                : 'text-fg-muted'
+                                        }`}
+                                    >
+                                        {segment.primary_kpi.trend === 'up' ? '+' : ''}
+                                        {segment.primary_kpi.trend_percentage}% from last period
                                     </div>
                                 )}
                             </div>
-                        </Button>
-                    ))}
-                </div>
+                        )}
 
-                {/* Empty State */}
-                {segments.length === 0 && (
-                    <div className="text-center py-16">
-                        <AlertCircle className="w-16 h-16 text-fg-subtle mx-auto mb-4" />
-                        <h3 className="text-lg font-semibold text-fg-muted mb-2">No Segments Available</h3>
-                        <p className="text-sm text-fg-subtle">Segment data will appear here once configured.</p>
-                    </div>
-                )}
-            </div>
-        </div>
+                        {/* Stats */}
+                        <div className="flex items-center justify-between text-sm">
+                            <div>
+                                <span className="text-fg-muted">{segment.kpi_count} KPIs</span>
+                            </div>
+                            {segment.signal_count > 0 && (
+                                <div className="flex items-center gap-1.5 text-warning">
+                                    <AlertCircle className="w-4 h-4" />
+                                    <span>{segment.signal_count} alerts</span>
+                                </div>
+                            )}
+                        </div>
+                            </Card>
+                        </Grid.Item>
+                    ))}
+                </Grid>
+            )}
+        </DashboardPageTemplate>
     );
 };

@@ -187,7 +187,7 @@ describe('AtAGlanceView', () => {
       await waitFor(() => {
         expect(screen.getByText('Revenue')).toBeInTheDocument();
       });
-      screen.getByText('Revenue').closest('button')?.click();
+      screen.getByText('Revenue').closest('[role="button"]')?.click();
       expect(onClick).toHaveBeenCalledWith('revenue');
     });
   });

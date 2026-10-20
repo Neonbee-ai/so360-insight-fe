@@ -28,6 +28,7 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({ tabs, activeTab, o
             items={tabs.map((tab) => ({ id: tab.id, label: tab.label, icon: getIcon(tab.icon) }))}
             value={activeTab}
             onChange={onChange}
+            maxVisible={5}
         />
     );
 };

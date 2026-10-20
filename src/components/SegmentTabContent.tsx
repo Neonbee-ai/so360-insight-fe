@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Loader2, AlertCircle } from 'lucide-react';
-import { toast, Button } from '@so360/design-system';
+import { toast, Button, Card, Grid, Stack, EmptyState } from '@so360/design-system';
 import { getInsightIcon } from '../constants/iconMap';
 import { KPICard } from './KPICard';
 import { AlertCard } from './AlertCard';
@@ -226,15 +226,17 @@ export const SegmentTabContent: React.FC<SegmentTabContentProps> = ({ segmentCod
     const unresolvedAlerts = segment.signals.filter((s) => !s.resolved_at);
 
     return (
-        <div className="space-y-8">
-            {/* Section 1: Segment Header */}
-            <div className="flex items-start justify-between gap-6">
-                <div className="flex items-start gap-6">
+        <Stack gap="region">
+            {/* Section 1: Segment Header (page title is owned by the page template) */}
+            <Card
+                title={segment.segment_name}
+                actions={<DataFreshnessIndicator />}
+            >
+                <div className="flex items-start gap-4">
                     <div className={getIconColorClass(segment.color_scheme)}>
                         {getSegmentIcon(segment.icon_name)}
                     </div>
                     <div className="flex-1">
-                        <h1 className="text-2xl font-bold text-fg mb-2">{segment.segment_name}</h1>
                         <p className="text-fg-muted max-w-3xl">{segment.description}</p>
                         <div className="flex items-center gap-4 mt-3 text-sm">
                             <span className="text-fg-subtle">{segment.kpis.length} KPIs</span>
@@ -243,9 +245,7 @@ export const SegmentTabContent: React.FC<SegmentTabContentProps> = ({ segmentCod
                         </div>
                     </div>
                 </div>
-                <DataFreshnessIndicator />
-            </div>
-
+            </Card>
             {/* Section 1.5: Neura AI Insights — only shown when at least one required module is enabled */}
             {canShowAiSummary && (() => {
                 const segmentColors: Record<string, 'blue' | 'green' | 'purple' | 'orange'> = {
@@ -278,87 +278,74 @@ export const SegmentTabContent: React.FC<SegmentTabContentProps> = ({ segmentCod
 
             {/* Section 2: KPIs Grid */}
             {segment.kpis.length > 0 && (
-                <div>
-                    <h2 className="text-xl font-semibold text-fg mb-4">Key Performance Indicators</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <Card title="Key Performance Indicators">
+                    <Grid>
                         {segment.kpis.map((kpi) => (
-                            <KPICard key={kpi.kpi_code} kpi={kpi} />
+                            <Grid.Item key={kpi.kpi_code} span={4}>
+                                <KPICard kpi={kpi} />
+                            </Grid.Item>
                         ))}
-                    </div>
-                </div>
+                    </Grid>
+                </Card>
             )}
 
             {/* Section 2.5: Rich Chart Gallery */}
             {(() => {
                 const charts = renderSegmentCharts();
                 return charts ? (
-                    <div>
-                        <h2 className="text-xl font-semibold text-fg mb-4">Analytics Dashboard</h2>
-                        {charts}
-                    </div>
+                    <Card title="Analytics Dashboard">{charts}</Card>
                 ) : null;
             })()}
 
             {/* Section 3: Trend Charts with Time Range Selector */}
             {segment.trends && segment.trends.length > 0 && (
-                <div>
-                    <div className="flex items-center justify-between mb-4">
-                        <h2 className="text-xl font-semibold text-fg">Historical Trends</h2>
-                        <TimeRangeSelector selected={timeRange} onChange={setTimeRange} />
-                    </div>
+                <Card
+                    title="Historical Trends"
+                    actions={<TimeRangeSelector selected={timeRange} onChange={setTimeRange} />}
+                >
                     {loadingTrends ? (
                         <div className="flex items-center justify-center py-12">
                             <Loader2 className="w-8 h-8 text-primary animate-spin" />
                         </div>
                     ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <Grid>
                             {segment.trends.map((trend) => (
-                                <TrendChart
-                                    key={trend.kpi_code}
-                                    trendData={trend}
-                                    color={segment.color_scheme.primary}
-                                />
+                                <Grid.Item key={trend.kpi_code} span={4}>
+                                    <TrendChart
+                                        trendData={trend}
+                                        color={segment.color_scheme.primary}
+                                    />
+                                </Grid.Item>
                             ))}
-                        </div>
+                        </Grid>
                     )}
-                </div>
+                </Card>
             )}
 
             {/* Section 4: Active Alerts */}
             {unresolvedAlerts.length > 0 && (
-                <div>
-                    <h2 className="text-xl font-semibold text-fg mb-4">
-                        Active Alerts ({unresolvedAlerts.length})
-                    </h2>
-                    <div className="space-y-3">
+                <Card title={`Active Alerts (${unresolvedAlerts.length})`}>
+                    <Stack gap="tight">
                         {unresolvedAlerts.slice(0, 10).map((alert) => (
                             <AlertCard key={alert.id} alert={alert} onResolve={handleResolveAlert} />
                         ))}
-                    </div>
-
-                    {unresolvedAlerts.length > 10 && (
-                        <div className="mt-4 text-center">
-                            <p className="text-sm text-fg-muted">
+                        {unresolvedAlerts.length > 10 && (
+                            <p className="text-sm text-fg-muted text-center">
                                 Showing first 10 of {unresolvedAlerts.length} alerts
                             </p>
-                        </div>
-                    )}
-                </div>
+                        )}
+                    </Stack>
+                </Card>
             )}
 
             {/* Empty States */}
             {segment.kpis.length === 0 && (
-                <div className="text-center py-12 bg-surface/30 rounded-lg border border-line">
-                    <p className="text-fg-subtle">No KPIs available for this segment</p>
-                </div>
+                <EmptyState title="No KPIs available for this segment" />
             )}
 
             {unresolvedAlerts.length === 0 && segment.kpis.length > 0 && (
-                <div className="text-center py-8 bg-surface/30 rounded-lg border border-line">
-                    <AlertCircle className="w-12 h-12 text-fg-subtle mx-auto mb-3" />
-                    <p className="text-fg-muted">No active alerts for this segment</p>
-                </div>
+                <EmptyState icon={AlertCircle} title="No active alerts for this segment" />
             )}
-        </div>
+        </Stack>
     );
 };
