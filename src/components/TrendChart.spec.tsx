@@ -58,3 +58,18 @@ describe('TrendChart', () => {
     });
   });
 });
+
+describe('TrendChart zero baseline', () => {
+  describe('Given a series whose first value is zero', () => {
+    it('When all values are zero / Then the change reads 0.0% and never NaN', () => {
+      render(<TrendChart trendData={makeTrend([0, 0, 0])} />);
+      expect(screen.getByText('+0.0%')).toBeInTheDocument();
+      expect(document.body.textContent).not.toMatch(/NaN|Infinity/);
+    });
+
+    it('When the series grows from zero / Then the change is not Infinity', () => {
+      render(<TrendChart trendData={makeTrend([0, 5, 10])} />);
+      expect(document.body.textContent).not.toMatch(/NaN|Infinity/);
+    });
+  });
+});

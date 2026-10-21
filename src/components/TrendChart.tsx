@@ -42,7 +42,8 @@ export const TrendChart: React.FC<TrendChartProps> = ({ trendData, color = 'blue
     // Calculate change percentage
     const firstValue = data[0].value;
     const lastValue = data[data.length - 1].value;
-    const changePercentage = ((lastValue - firstValue) / firstValue) * 100;
+    // A zero baseline has no meaningful percentage change; avoid 0/0 = NaN and x/0 = Infinity.
+    const changePercentage = firstValue === 0 ? 0 : ((lastValue - firstValue) / firstValue) * 100;
     const isPositive = changePercentage >= 0;
 
     // Format date range
