@@ -72,4 +72,13 @@ describe('TrendChart zero baseline', () => {
       expect(document.body.textContent).not.toMatch(/NaN|Infinity/);
     });
   });
+
+  describe('Given a single data point', () => {
+    it('When rendered / Then no SVG path contains NaN', () => {
+      const { container } = render(<TrendChart trendData={makeTrend([42])} />);
+      const ds = Array.from(container.querySelectorAll('path')).map((p) => p.getAttribute('d') ?? '');
+      expect(ds.length).toBeGreaterThan(0);
+      ds.forEach((d) => expect(d).not.toContain('NaN'));
+    });
+  });
 });

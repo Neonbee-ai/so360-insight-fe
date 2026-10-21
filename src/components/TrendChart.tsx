@@ -31,7 +31,8 @@ export const TrendChart: React.FC<TrendChartProps> = ({ trendData, color = 'blue
 
     // Generate SVG path
     const points = data.map((d, i) => {
-        const x = (i / (data.length - 1)) * (width - 2 * padding) + padding;
+        // A single point has no span (n-1 = 0 would yield NaN); centre it.
+        const x = data.length === 1 ? width / 2 : (i / (data.length - 1)) * (width - 2 * padding) + padding;
         const y = height - padding - ((d.value - minValue) / valueRange) * (height - 2 * padding);
         return `${x},${y}`;
     });
