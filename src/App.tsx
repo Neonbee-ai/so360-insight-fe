@@ -10,6 +10,9 @@ import { MfeShellInitializer } from './components/MfeShellInitializer';
 const InsightDashboard = lazy(() =>
     import('./pages/InsightDashboard').then(m => ({ default: m.InsightDashboard }))
 );
+const MyPipelinePage = lazy(() =>
+    import('./pages/MyPipelinePage').then(m => ({ default: m.MyPipelinePage }))
+);
 const AlertsPage = lazy(() =>
     import('./pages/AlertsPage').then(m => ({ default: m.AlertsPage }))
 );
@@ -103,6 +106,24 @@ const SegmentRoute: React.FC = () => {
     );
 };
 
+// "My pipeline" — gated on submodule:insight:my_pipeline (5-state model).
+export const MY_PIPELINE_FLAG = 'submodule:insight:my_pipeline';
+const MyPipelineRoute: React.FC = () => {
+    const shell = useShellBridge();
+    const state = shell?.getFeatureState ? shell.getFeatureState(MY_PIPELINE_FLAG) : 'enabled';
+    return (
+        <FeatureRoute
+            state={state}
+            loading={(shell?.effectiveFlagsLoaded === false)}
+            hiddenFallback={<Navigate to="/" replace />}
+            lockedFallback={<UpgradeLocked />}
+            disabledFallback={<FeatureUnavailable />}
+        >
+            <MyPipelinePage />
+        </FeatureRoute>
+    );
+};
+
 function App() {
     const navigate = useNavigate();
     return (
@@ -112,6 +133,8 @@ function App() {
                 <Routes>
                     <Route path="/" element={<InsightDashboard />} />
                     <Route path="alerts" element={<PermissionGuard permission="analytics.view"><AlertsPage /></PermissionGuard>} />
+
+                    <Route path="my-pipeline" element={<PermissionGuard permission="analytics.view"><MyPipelineRoute /></PermissionGuard>} />
 
                     {/* Path-based segment routes — URL stays as /insight/revenue etc. */}
                     <Route path=":segmentCode" element={<PermissionGuard permission="analytics.view"><SegmentRoute /></PermissionGuard>} />
