@@ -79,6 +79,7 @@ export const MyPipelinePage: React.FC = () => {
 
     return (
         <DashboardPageTemplate
+            trail={[]}
             title="My pipeline"
             description="Your open deals and expected revenue by close month"
             kpis={kpis}
