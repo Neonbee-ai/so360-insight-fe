@@ -49,7 +49,7 @@ export const NeuraSummaryCard: React.FC<NeuraSummaryCardProps> = ({
         },
         green: {
             icon: 'text-success',
-            badge: 'bg-success/20 text-success',
+            badge: 'bg-success-container text-success-on-container',
             regenerate: 'text-success hover:text-success hover:bg-success/10',
         },
         purple: {
