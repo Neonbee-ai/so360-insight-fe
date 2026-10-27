@@ -21,10 +21,10 @@ describe('TimeRangeSelector', () => {
   });
 
   describe('Given a range is selected', () => {
-    it('When "Last 30 days" is active / Then it has the active styling class', () => {
+    it('When "Last 30 days" is active / Then it is checked', () => {
       render(<TimeRangeSelector selected="30d" onChange={vi.fn()} />);
-      const btn = screen.getByText('Last 30 days');
-      expect(btn.className).toContain('bg-blue-500');
+      expect(screen.getByRole('radio', { name: 'Last 30 days' })).toHaveAttribute('aria-checked', 'true');
+      expect(screen.getByRole('radio', { name: 'Last 7 days' })).toHaveAttribute('aria-checked', 'false');
     });
   });
 

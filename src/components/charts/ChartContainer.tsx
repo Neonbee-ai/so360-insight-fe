@@ -4,6 +4,7 @@
  */
 
 import React from 'react';
+import { Card } from '@so360/design-system';
 import { ChartExport } from './ChartExport';
 import { useFeatureFlags, useShellBridge } from '@so360/shell-context';
 
@@ -33,29 +34,20 @@ export const ChartContainer: React.FC<ChartContainerProps> = ({
     const flagsLoaded = shell?.effectiveFlagsLoaded;
     const canExport = (shell?.permissionsLoaded === true) && (shell?.hasPermission?.('analytics.export') ?? false) && flagsLoaded && (isFeatureEnabled('action:insight:chart_export') ?? true);
 
-    return (
-        <div className={`bg-slate-900/50 border border-slate-800 rounded-lg p-6 ${className}`}>
-            {/* Header */}
-            <div className="flex items-start justify-between mb-4">
-                <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-slate-100">{title}</h3>
-                    {description && (
-                        <p className="text-sm text-slate-400 mt-1">{description}</p>
-                    )}
-                </div>
-                {canExport && exportData.length > 0 && (
-                    <ChartExport
-                        chartId={chartId}
-                        chartTitle={title}
-                        data={exportData}
-                        onExportPNG={onExportPNG}
-                        onExportCSV={onExportCSV}
-                    />
-                )}
-            </div>
+    const exportAction = canExport && exportData.length > 0 ? (
+        <ChartExport
+            chartId={chartId}
+            chartTitle={title}
+            data={exportData}
+            onExportPNG={onExportPNG}
+            onExportCSV={onExportCSV}
+        />
+    ) : undefined;
 
-            {/* Chart Content */}
+    return (
+        <Card title={title} actions={exportAction} className={className}>
+            {description && <p className="text-sm text-fg-muted">{description}</p>}
             <div id={chartId}>{children}</div>
-        </div>
+        </Card>
     );
 };

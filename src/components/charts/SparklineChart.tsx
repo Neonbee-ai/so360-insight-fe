@@ -23,7 +23,7 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
     height = 24,
 }) => {
     if (!data || data.length === 0) {
-        return <div className="h-6 bg-slate-800/30 rounded" />;
+        return <div className="h-6 bg-surface-raised/30 rounded" />;
     }
 
     const getLineColor = () => {

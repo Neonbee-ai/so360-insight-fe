@@ -59,16 +59,16 @@ export const DataFreshnessIndicator: React.FC = () => {
 
     const getStatusIcon = () => {
         if (freshness.is_stale) {
-            return <AlertTriangle className="w-4 h-4 text-amber-500" />;
+            return <AlertTriangle className="w-4 h-4 text-warning" />;
         }
-        return <CheckCircle className="w-4 h-4 text-green-500" />;
+        return <CheckCircle className="w-4 h-4 text-success" />;
     };
 
     const getStatusColor = () => {
         if (freshness.is_stale) {
-            return 'text-amber-400';
+            return 'text-warning';
         }
-        return 'text-green-400';
+        return 'text-success';
     };
 
     const tooltipTitle = freshness.next_scheduled_refresh
@@ -77,7 +77,7 @@ export const DataFreshnessIndicator: React.FC = () => {
 
     return (
         <div
-            className="flex items-center gap-2 text-sm text-slate-400 bg-slate-900/30 rounded-lg px-3 py-2 border border-slate-800"
+            className="flex items-center gap-2 text-sm text-fg-muted bg-surface/30 rounded-lg px-3 py-2 border border-line"
             title={tooltipTitle}
         >
             <Clock className="w-4 h-4" />
@@ -90,7 +90,7 @@ export const DataFreshnessIndicator: React.FC = () => {
                     {getStatusIcon()}
                 </>
             ) : (
-                <span className="text-amber-400 font-medium">No data — click Refresh</span>
+                <span className="text-warning font-medium">No data — click Refresh</span>
             )}
         </div>
     );

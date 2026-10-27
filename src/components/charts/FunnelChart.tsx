@@ -28,10 +28,10 @@ export const FunnelChartComponent: React.FC<FunnelChartProps> = ({
     if (!data || data.length === 0) {
         return (
             <div
-                className="flex items-center justify-center bg-slate-900/30 rounded-lg border border-slate-800"
+                className="flex items-center justify-center bg-surface/30 rounded-lg border border-line"
                 style={{ height: `${height}px` }}
             >
-                <p className="text-slate-500 text-sm">No data available</p>
+                <p className="text-fg-subtle text-sm">No data available</p>
             </div>
         );
     }
@@ -71,7 +71,7 @@ export const FunnelChartComponent: React.FC<FunnelChartProps> = ({
                                 }}
                             >
                                 {/* Stage Content */}
-                                <div className="flex items-center justify-between h-full px-4 text-slate-50">
+                                <div className="flex items-center justify-between h-full px-4 text-fg">
                                     <div className="flex-1">
                                         <p className="font-semibold text-sm">{stage.name}</p>
                                         <p className="text-xs opacity-90">
@@ -99,7 +99,7 @@ export const FunnelChartComponent: React.FC<FunnelChartProps> = ({
                                         height="20"
                                         viewBox="0 0 20 20"
                                         fill="none"
-                                        className="text-slate-600"
+                                        className="text-fg-subtle"
                                     >
                                         <path
                                             d="M10 4 L10 16 M10 16 L6 12 M10 16 L14 12"

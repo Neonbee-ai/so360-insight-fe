@@ -110,7 +110,7 @@ describe('SegmentTabContent', () => {
       await waitFor(() => {
         expect(screen.getByText('Revenue')).toBeInTheDocument();
       });
-      expect(screen.getByText('Key Performance Indicators')).toBeInTheDocument();
+      expect(screen.getByText('Key performance indicators')).toBeInTheDocument();
       expect(screen.getByTestId('kpi-card')).toBeInTheDocument();
     });
 

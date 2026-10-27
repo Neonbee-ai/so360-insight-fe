@@ -10,8 +10,8 @@ interface TrendChartProps {
 export const TrendChart: React.FC<TrendChartProps> = ({ trendData, color = 'blue' }) => {
     if (!trendData || trendData.data.length === 0) {
         return (
-            <div className="bg-slate-900/50 rounded-lg border border-slate-800 p-6">
-                <p className="text-sm text-slate-400">No trend data available</p>
+            <div className="bg-surface/50 rounded-lg border border-line p-6">
+                <p className="text-sm text-fg-muted">No trend data available</p>
             </div>
         );
     }
@@ -31,7 +31,8 @@ export const TrendChart: React.FC<TrendChartProps> = ({ trendData, color = 'blue
 
     // Generate SVG path
     const points = data.map((d, i) => {
-        const x = (i / (data.length - 1)) * (width - 2 * padding) + padding;
+        // A single point has no span (n-1 = 0 would yield NaN); centre it.
+        const x = data.length === 1 ? width / 2 : (i / (data.length - 1)) * (width - 2 * padding) + padding;
         const y = height - padding - ((d.value - minValue) / valueRange) * (height - 2 * padding);
         return `${x},${y}`;
     });
@@ -42,7 +43,8 @@ export const TrendChart: React.FC<TrendChartProps> = ({ trendData, color = 'blue
     // Calculate change percentage
     const firstValue = data[0].value;
     const lastValue = data[data.length - 1].value;
-    const changePercentage = ((lastValue - firstValue) / firstValue) * 100;
+    // A zero baseline has no meaningful percentage change; avoid 0/0 = NaN and x/0 = Infinity.
+    const changePercentage = firstValue === 0 ? 0 : ((lastValue - firstValue) / firstValue) * 100;
     const isPositive = changePercentage >= 0;
 
     // Format date range
@@ -52,49 +54,49 @@ export const TrendChart: React.FC<TrendChartProps> = ({ trendData, color = 'blue
     // Color scheme based on prop
     const colorClasses = {
         blue: {
-            gradient: 'from-blue-500/20 to-blue-500/0',
-            stroke: 'stroke-blue-500',
-            text: 'text-blue-400',
+            gradient: 'from-primary/20 to-primary/0',
+            stroke: 'stroke-primary',
+            text: 'text-primary',
         },
         purple: {
-            gradient: 'from-purple-500/20 to-purple-500/0',
-            stroke: 'stroke-purple-500',
-            text: 'text-purple-400',
+            gradient: 'from-accent/20 to-accent/0',
+            stroke: 'stroke-accent',
+            text: 'text-accent',
         },
         green: {
-            gradient: 'from-green-500/20 to-green-500/0',
-            stroke: 'stroke-green-500',
-            text: 'text-green-400',
+            gradient: 'from-success/20 to-success/0',
+            stroke: 'stroke-success',
+            text: 'text-success',
         },
         orange: {
-            gradient: 'from-orange-500/20 to-orange-500/0',
-            stroke: 'stroke-orange-500',
-            text: 'text-orange-400',
+            gradient: 'from-warning/20 to-warning/0',
+            stroke: 'stroke-warning',
+            text: 'text-warning',
         },
         red: {
-            gradient: 'from-red-500/20 to-red-500/0',
-            stroke: 'stroke-red-500',
-            text: 'text-red-400',
+            gradient: 'from-danger/20 to-danger/0',
+            stroke: 'stroke-danger',
+            text: 'text-danger',
         },
     };
 
     const colors = colorClasses[color as keyof typeof colorClasses] || colorClasses.blue;
 
     return (
-        <div className="bg-slate-900/50 rounded-lg border border-slate-800 p-6 hover:border-slate-700 transition-colors">
+        <div className="bg-surface/50 rounded-lg border border-line p-6 hover:border-line transition-colors">
             {/* Header */}
             <div className="flex items-start justify-between mb-4">
                 <div>
-                    <h4 className="text-sm font-medium text-slate-100">{kpi_name}</h4>
-                    <p className="text-xs text-slate-500 mt-1">
+                    <h4 className="text-sm font-medium text-fg">{kpi_name}</h4>
+                    <p className="text-xs text-fg-subtle mt-1">
                         {firstDate} - {lastDate}
                     </p>
                 </div>
                 <div className="text-right">
-                    <div className="text-xl font-semibold text-slate-100">{lastValue.toFixed(1)}</div>
+                    <div className="text-xl font-semibold text-fg">{lastValue.toFixed(1)}</div>
                     <div
                         className={`text-xs font-medium ${
-                            isPositive ? 'text-green-400' : 'text-red-400'
+                            isPositive ? 'text-success' : 'text-danger'
                         }`}
                     >
                         {isPositive ? '+' : ''}

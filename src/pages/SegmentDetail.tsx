@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, TrendingUp, TrendingDown, Minus, AlertCircle, Loader2 } from 'lucide-react';
+import { TrendingUp, TrendingDown, Minus, AlertCircle, Loader2 } from 'lucide-react';
+import { Button, Card, DetailPageTemplate, EmptyState, Grid, Stack, Cluster } from '@so360/design-system';
 import { insightApi } from '../services/insightApi';
 import { TrendChart } from '../components/TrendChart';
 import type { SegmentDetail } from '../types/insight';
@@ -54,174 +55,143 @@ export const SegmentDetailPage: React.FC = () => {
 
     const getIconColorClass = (colorScheme: { primary: string }) => {
         const colorMap: Record<string, string> = {
-            blue: 'text-blue-400',
-            purple: 'text-purple-400',
-            green: 'text-green-400',
-            orange: 'text-orange-400',
-            red: 'text-red-400',
+            blue: 'text-primary',
+            purple: 'text-accent',
+            green: 'text-success',
+            orange: 'text-warning',
+            red: 'text-danger',
         };
-        return colorMap[colorScheme.primary] || 'text-slate-400';
+        return colorMap[colorScheme.primary] || 'text-fg-muted';
     };
 
     const getTrendIcon = (trend: 'up' | 'down' | 'stable') => {
         switch (trend) {
             case 'up':
-                return <TrendingUp className="w-4 h-4 text-green-400" />;
+                return <TrendingUp className="w-4 h-4 text-success" />;
             case 'down':
-                return <TrendingDown className="w-4 h-4 text-red-400" />;
+                return <TrendingDown className="w-4 h-4 text-danger" />;
             default:
-                return <Minus className="w-4 h-4 text-slate-400" />;
+                return <Minus className="w-4 h-4 text-fg-muted" />;
         }
     };
 
     const getSeverityColor = (severity: string) => {
         switch (severity) {
             case 'critical':
-                return 'bg-red-900/20 border-red-500/30 text-red-400';
+                return 'bg-danger/20 border-danger/30 text-danger';
             case 'warning':
-                return 'bg-amber-900/20 border-amber-500/30 text-amber-400';
+                return 'bg-warning/20 border-warning/30 text-warning';
             default:
-                return 'bg-blue-900/20 border-blue-500/30 text-blue-400';
+                return 'bg-primary/20 border-primary/30 text-primary';
         }
     };
 
+    const trail = [{ label: 'Overview', onClick: () => navigate('/') }];
+
     if (loading) {
         return (
-            <div className="min-h-screen bg-slate-950 flex items-center justify-center">
-                <div className="flex flex-col items-center gap-4">
-                    <Loader2 className="w-12 h-12 text-blue-500 animate-spin" />
-                    <p className="text-slate-400">Loading segment details...</p>
+            <DetailPageTemplate trail={trail} title="Segment" loading>
+                <div className="flex flex-col items-center gap-4 py-12">
+                    <Loader2 className="w-12 h-12 text-primary animate-spin" />
+                    <p className="text-fg-muted">Loading segment details...</p>
                 </div>
-            </div>
+            </DetailPageTemplate>
         );
     }
 
     if (error || !segment) {
         return (
-            <div className="min-h-screen bg-slate-950 p-8">
-                <div>
-                    <button
-                        onClick={() => navigate('/')}
-                        className="mb-6 flex items-center gap-2 text-slate-400 hover:text-slate-300 transition-colors"
-                    >
-                        <ArrowLeft className="w-4 h-4" />
-                        Back to Overview
-                    </button>
-
-                    <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-6 flex items-start gap-4">
-                        <AlertCircle className="w-6 h-6 text-red-400 flex-shrink-0 mt-0.5" />
-                        <div>
-                            <h3 className="text-lg font-semibold text-red-400 mb-2">Failed to Load Segment</h3>
-                            <p className="text-sm text-red-300">{error || 'Segment not found'}</p>
-                            <button
-                                onClick={fetchSegmentDetail}
-                                className="mt-4 px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg text-sm font-medium transition-colors"
-                            >
-                                Retry
-                            </button>
-                        </div>
+            <DetailPageTemplate trail={trail} title="Segment">
+                <div className="bg-danger/20 border border-danger/30 rounded-lg p-6 flex items-start gap-4">
+                    <AlertCircle className="w-6 h-6 text-danger flex-shrink-0 mt-0.5" />
+                    <div>
+                        <h3 className="text-lg font-semibold text-danger mb-2">Failed to Load Segment</h3>
+                        <p className="text-sm text-danger">{error || 'Segment not found'}</p>
+                        <Button variant="secondary" size="sm" className="mt-4" onClick={fetchSegmentDetail}>
+                            Retry
+                        </Button>
                     </div>
                 </div>
-            </div>
+            </DetailPageTemplate>
         );
     }
 
     return (
-        <div className="min-h-screen bg-slate-950 p-8">
-            <div>
-                {/* Header */}
-                <div className="mb-8">
-                    <button
-                        onClick={() => navigate('/')}
-                        className="mb-4 flex items-center gap-2 text-slate-400 hover:text-slate-300 transition-colors"
-                    >
-                        <ArrowLeft className="w-4 h-4" />
-                        Back to Overview
-                    </button>
+        <DetailPageTemplate
+            trail={trail}
+            title={segment.segment_name}
+            meta={
+                <Cluster gap="tight">
+                    <span className={getIconColorClass(segment.color_scheme)}>{getSegmentIcon(segment.icon_name)}</span>
+                    <span className="text-fg-muted">{segment.description}</span>
+                </Cluster>
+            }
+        >
+            <Stack gap="region">
+                <Card title="Key performance indicators">
+                    {segment.kpis.length === 0 ? (
+                        <EmptyState title="No KPIs available for this segment" />
+                    ) : (
+                        <Grid>
+                            {segment.kpis.map((kpi) => (
+                                <Grid.Item key={kpi.kpi_code} span={4}>
+                                    <Card padding="sm">
+                                        <div className="flex items-start justify-between mb-3">
+                                            <h3 className="text-sm font-medium text-fg-muted">{kpi.kpi_name}</h3>
+                                            {getTrendIcon(kpi.trend)}
+                                        </div>
 
-                    <div className="flex items-start gap-6">
-                        <div className={`${getIconColorClass(segment.color_scheme)}`}>
-                            {getSegmentIcon(segment.icon_name)}
-                        </div>
-                        <div className="flex-1">
-                            <h1 className="text-3xl font-bold text-slate-100 mb-2">{segment.segment_name}</h1>
-                            <p className="text-slate-400 max-w-3xl">{segment.description}</p>
-                        </div>
-                    </div>
-                </div>
+                                        <div className="flex items-baseline gap-2 mb-2">
+                                            <span className="text-3xl font-bold text-fg">
+                                                {isCurrencyUnit(kpi.unit) ? formatters.formatCurrency(kpi.value) : kpi.value.toFixed(1)}
+                                            </span>
+                                            {!isCurrencyUnit(kpi.unit) && <span className="text-sm text-fg-muted">{kpi.unit}</span>}
+                                        </div>
 
-                {/* KPI Grid */}
-                <div className="mb-8">
-                    <h2 className="text-xl font-semibold text-slate-100 mb-4">Key Performance Indicators</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {segment.kpis.map((kpi) => (
-                            <div
-                                key={kpi.kpi_code}
-                                className="bg-slate-900/50 rounded-lg border border-slate-800 p-6 hover:border-slate-700 transition-colors"
-                            >
-                                <div className="flex items-start justify-between mb-3">
-                                    <h3 className="text-sm font-medium text-slate-400">{kpi.kpi_name}</h3>
-                                    {getTrendIcon(kpi.trend)}
-                                </div>
+                                        {kpi.trend_percentage !== undefined && (
+                                            <div
+                                                className={`text-sm font-medium ${
+                                                    kpi.trend === 'up'
+                                                        ? 'text-success'
+                                                        : kpi.trend === 'down'
+                                                        ? 'text-danger'
+                                                        : 'text-fg-muted'
+                                                }`}
+                                            >
+                                                {kpi.trend === 'up' ? '+' : ''}
+                                                {kpi.trend_percentage}%
+                                                <span className="text-fg-subtle ml-1">from last period</span>
+                                            </div>
+                                        )}
 
-                                <div className="flex items-baseline gap-2 mb-2">
-                                    <span className="text-3xl font-bold text-slate-100">
-                                        {isCurrencyUnit(kpi.unit) ? formatters.formatCurrency(kpi.value) : kpi.value.toFixed(1)}
-                                    </span>
-                                    {!isCurrencyUnit(kpi.unit) && <span className="text-sm text-slate-400">{kpi.unit}</span>}
-                                </div>
-
-                                {kpi.trend_percentage !== undefined && (
-                                    <div
-                                        className={`text-sm font-medium ${
-                                            kpi.trend === 'up'
-                                                ? 'text-green-400'
-                                                : kpi.trend === 'down'
-                                                ? 'text-red-400'
-                                                : 'text-slate-400'
-                                        }`}
-                                    >
-                                        {kpi.trend === 'up' ? '+' : ''}
-                                        {kpi.trend_percentage}%
-                                        <span className="text-slate-500 ml-1">from last period</span>
-                                    </div>
-                                )}
-
-                                <div className="mt-3 pt-3 border-t border-slate-800">
-                                    <div className="text-xs text-slate-500">{kpi.category}</div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-
-                    {segment.kpis.length === 0 && (
-                        <div className="text-center py-12 bg-slate-900/30 rounded-lg border border-slate-800">
-                            <p className="text-slate-500">No KPIs available for this segment</p>
-                        </div>
-                    )}
-                </div>
-
-                {/* Trend Charts */}
-                {segment.trends && segment.trends.length > 0 && (
-                    <div className="mb-8">
-                        <h2 className="text-xl font-semibold text-slate-100 mb-4">30-Day Trends</h2>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {segment.trends.map((trend) => (
-                                <TrendChart
-                                    key={trend.kpi_code}
-                                    trendData={trend}
-                                    color={segment.color_scheme.primary}
-                                />
+                                        <div className="mt-3 pt-3 border-t border-line">
+                                            <div className="text-xs text-fg-subtle">{kpi.category}</div>
+                                        </div>
+                                    </Card>
+                                </Grid.Item>
                             ))}
-                        </div>
-                    </div>
+                        </Grid>
+                    )}
+                </Card>
+
+                {segment.trends && segment.trends.length > 0 && (
+                    <Card title="30-Day Trends">
+                        <Grid>
+                            {segment.trends.map((trend) => (
+                                <Grid.Item key={trend.kpi_code} span={4}>
+                                    <TrendChart
+                                        trendData={trend}
+                                        color={segment.color_scheme.primary}
+                                    />
+                                </Grid.Item>
+                            ))}
+                        </Grid>
+                    </Card>
                 )}
 
-                {/* Active Alerts */}
-                {segment.signals && segment.signals.length > 0 && (
-                    <div>
-                        <h2 className="text-xl font-semibold text-slate-100 mb-4">Active Alerts</h2>
-                        <div className="space-y-4">
+                {segment.signals && segment.signals.length > 0 ? (
+                    <Card title="Active alerts">
+                        <Stack gap="tight">
                             {segment.signals.slice(0, 5).map((alert) => (
                                 <div
                                     key={alert.id}
@@ -229,7 +199,7 @@ export const SegmentDetailPage: React.FC = () => {
                                 >
                                     <div className="flex items-start justify-between mb-2">
                                         <h3 className="font-semibold">{alert.title}</h3>
-                                        <span className="text-xs uppercase font-medium px-2 py-1 bg-slate-900/50 rounded">
+                                        <span className="text-xs font-medium px-2 py-1 bg-surface/50 rounded">
                                             {alert.severity}
                                         </span>
                                     </div>
@@ -242,23 +212,16 @@ export const SegmentDetailPage: React.FC = () => {
                             ))}
 
                             {segment.signals.length > 5 && (
-                                <button
-                                    onClick={() => navigate('/alerts')}
-                                    className="w-full py-3 bg-slate-800/50 hover:bg-slate-800 text-slate-300 rounded-lg transition-colors text-sm font-medium"
-                                >
+                                <Button variant="secondary" onClick={() => navigate('/alerts')}>
                                     View all {segment.signals.length} alerts →
-                                </button>
+                                </Button>
                             )}
-                        </div>
-                    </div>
+                        </Stack>
+                    </Card>
+                ) : (
+                    <EmptyState title="No active alerts for this segment" />
                 )}
-
-                {(!segment.signals || segment.signals.length === 0) && (
-                    <div className="text-center py-12 bg-slate-900/30 rounded-lg border border-slate-800">
-                        <p className="text-slate-500">No active alerts for this segment</p>
-                    </div>
-                )}
-            </div>
-        </div>
+            </Stack>
+        </DetailPageTemplate>
     );
 };

@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AlertCircle, RefreshCw } from 'lucide-react';
+import { Button, DashboardPageTemplate, Grid, Cluster, EmptyState, Skeleton } from '@so360/design-system';
 import { TabNavigation, type Tab } from '../components/TabNavigation';
 import { AtAGlanceView } from '../components/AtAGlanceView';
 import { SegmentTabContent } from '../components/SegmentTabContent';
@@ -61,22 +62,14 @@ const RefreshButton: React.FC<RefreshButtonProps> = ({
     const disabled = isRefreshing || cooldownSeconds > 0;
 
     return (
-        <button
-            onClick={onRefresh}
-            disabled={disabled}
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                disabled
-                    ? 'bg-slate-800 text-slate-500 cursor-not-allowed'
-                    : 'bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-slate-100'
-            }`}
-        >
+        <Button variant="secondary" size="sm" onClick={onRefresh} disabled={disabled}>
             <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
             {isRefreshing
                 ? 'Refreshing...'
                 : cooldownSeconds > 0
                     ? `Refresh in ${formatCooldown(cooldownSeconds)}`
                     : 'Refresh'}
-        </button>
+        </Button>
     );
 };
 
@@ -221,96 +214,79 @@ export const InsightDashboard: React.FC<InsightDashboardProps> = ({ initialTab }
 
     if (loading) {
         return (
-            <div className="min-h-full bg-slate-950 p-8">
-                <div>
-                    <div className="animate-pulse">
-                        <div className="h-10 bg-slate-800 rounded w-64 mb-8"></div>
-                        <div className="h-12 bg-slate-900 rounded mb-6"></div>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            {[1, 2, 3, 4, 5, 6].map((i) => (
-                                <div key={i} className="h-48 bg-slate-900 rounded-lg"></div>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <DashboardPageTemplate
+                title="Insight Dashboard"
+                description="Monitor key metrics across all business segments"
+                bottom={
+                    <Grid>
+                        {[1, 2, 3, 4, 5, 6].map((i) => (
+                            <Grid.Item key={i} span={4}>
+                                <Skeleton variant="rect" className="h-48" />
+                            </Grid.Item>
+                        ))}
+                    </Grid>
+                }
+            />
         );
     }
 
     if (error) {
         return (
-            <div className="min-h-full bg-slate-950 p-8">
-                <div>
-                    <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-6 flex items-start gap-4">
-                        <AlertCircle className="w-6 h-6 text-red-400 flex-shrink-0 mt-0.5" />
-                        <div>
-                            <h3 className="text-lg font-semibold text-red-400 mb-2">Failed to Load Dashboard</h3>
-                            <p className="text-sm text-red-300">{error}</p>
-                            <button
-                                onClick={fetchSegments}
-                                className="mt-4 px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg text-sm font-medium transition-colors"
-                            >
-                                Retry
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <DashboardPageTemplate
+                title="Insight Dashboard"
+                description="Monitor key metrics across all business segments"
+                bottom={
+                    <EmptyState
+                        icon={AlertCircle}
+                        title="Failed to Load Dashboard"
+                        description={error}
+                        action={{ label: 'Retry', onClick: fetchSegments }}
+                    />
+                }
+            />
         );
     }
 
     return (
-        <div className="min-h-full bg-slate-950 p-8">
-            <div>
-                {/* Page Header */}
-                <header className="mb-6 flex items-start justify-between gap-4">
-                    <div>
-                        <h1 className="text-3xl font-bold text-slate-100">Insight Dashboard</h1>
-                        <p className="text-slate-400 mt-1">
-                            Monitor key metrics across all business segments
-                        </p>
-                    </div>
-                    <div className="flex flex-col items-end gap-2 flex-shrink-0">
-                        <DataFreshnessIndicator key={freshnessKey.current} />
-                        {canRefresh ? (
-                            <RefreshButton
-                                onRefresh={handleRefresh}
-                                isRefreshing={isRefreshing}
-                                initialCooldownSeconds={initialCooldownSeconds}
-                            />
+        <DashboardPageTemplate
+            title="Insight Dashboard"
+            description="Monitor key metrics across all business segments"
+            meta={
+                <Cluster gap="tight">
+                    <DataFreshnessIndicator key={freshnessKey.current} />
+                    {!canRefresh && <span className="text-xs text-fg-subtle italic">Upgrade to refresh on demand</span>}
+                    {refreshError && <span className="text-xs text-danger">{refreshError}</span>}
+                </Cluster>
+            }
+            secondaryActions={
+                canRefresh ? (
+                    <RefreshButton
+                        onRefresh={handleRefresh}
+                        isRefreshing={isRefreshing}
+                        initialCooldownSeconds={initialCooldownSeconds}
+                    />
+                ) : undefined
+            }
+            filters={<TabNavigation tabs={tabs} activeTab={effectiveActiveTab} onChange={handleTabChange} />}
+            bottom={
+                <AnimatePresence mode="wait">
+                    <motion.div
+                        key={effectiveActiveTab}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        transition={{ duration: 0.2 }}
+                    >
+                        {effectiveActiveTab === 'at-a-glance' ? (
+                            <AtAGlanceView segments={segments} onSegmentClick={handleSegmentClick} />
+                        ) : effectiveActiveTab === 'manufacturing' ? (
+                            <ManufacturingSegment />
                         ) : (
-                            <span className="text-xs text-slate-500 italic">Upgrade to refresh on demand</span>
+                            <SegmentTabContent segmentCode={effectiveActiveTab} />
                         )}
-                        {refreshError && (
-                            <span className="text-xs text-red-400">{refreshError}</span>
-                        )}
-                    </div>
-                </header>
-
-                {/* Tab Navigation */}
-                <TabNavigation tabs={tabs} activeTab={effectiveActiveTab} onChange={handleTabChange} />
-
-                {/* Tab Content */}
-                <div className="mt-6">
-                    <AnimatePresence mode="wait">
-                        <motion.div
-                            key={effectiveActiveTab}
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -10 }}
-                            transition={{ duration: 0.2 }}
-                        >
-                            {effectiveActiveTab === 'at-a-glance' ? (
-                                <AtAGlanceView segments={segments} onSegmentClick={handleSegmentClick} />
-                            ) : effectiveActiveTab === 'manufacturing' ? (
-                                <ManufacturingSegment />
-                            ) : (
-                                <SegmentTabContent segmentCode={effectiveActiveTab} />
-                            )}
-                        </motion.div>
-                    </AnimatePresence>
-                </div>
-            </div>
-        </div>
+                    </motion.div>
+                </AnimatePresence>
+            }
+        />
     );
 };

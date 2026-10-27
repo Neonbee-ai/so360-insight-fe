@@ -4,7 +4,8 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { Loader2, AlertCircle } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
+import { Alert, Card, Grid, GridItem } from '@so360/design-system';
 import {
     BarChartComponent,
     LineChartComponent,
@@ -57,83 +58,74 @@ export const ExecutionCharts: React.FC<ExecutionChartsProps> = ({ tenantId, orgI
     if (loading) {
         return (
             <div className="flex items-center justify-center py-12">
-                <Loader2 className="w-8 h-8 text-purple-500 animate-spin" />
+                <Loader2 className="w-8 h-8 text-accent animate-spin" />
             </div>
         );
     }
 
     if (error) {
         return (
-            <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-6 flex items-start gap-4">
-                <AlertCircle className="w-6 h-6 text-red-400 flex-shrink-0 mt-0.5" />
-                <div>
-                    <h3 className="text-lg font-semibold text-red-400 mb-2">Failed to Load Charts</h3>
-                    <p className="text-sm text-red-300">{error}</p>
-                </div>
-            </div>
+            <Alert variant="error" title="Failed to load charts">{error}</Alert>
         );
     }
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Grid columns={12} gap="lg">
             {/* Task Completion (Stacked Bar) */}
             {isModuleEnabled('projects') && taskCompletionData && (
-                <div className="bg-slate-900/50 border border-slate-800 rounded-lg p-6">
-                    <div className="mb-4">
-                        <h3 className="text-lg font-semibold text-slate-100">Task Completion Status</h3>
-                        <p className="text-sm text-slate-400 mt-1">On-time vs delayed tasks by month</p>
-                    </div>
-                    <BarChartComponent
-                        data={taskCompletionData}
-                        xAxisKey="week"
-                        series={[
-                            { key: 'completed', name: 'Completed', color: '#10b981', stackId: 'stack' },
-                            { key: 'planned', name: 'Planned', color: '#ef4444', stackId: 'stack' },
-                        ]}
-                        height={280}
-                        segmentColor="execution"
-                        formatValue={(value) => formatNumber(value)}
-                    />
-                </div>
+                <GridItem span={6}>
+                    <Card title="Task Completion Status">
+                        <p className="text-sm text-fg-muted">On-time vs delayed tasks by month</p>
+                        <BarChartComponent
+                            data={taskCompletionData}
+                            xAxisKey="week"
+                            series={[
+                                { key: 'completed', name: 'Completed', color: '#10b981', stackId: 'stack' },
+                                { key: 'planned', name: 'Planned', color: '#ef4444', stackId: 'stack' },
+                            ]}
+                            height={280}
+                            segmentColor="execution"
+                            formatValue={(value) => formatNumber(value)}
+                        />
+                    </Card>
+                </GridItem>
             )}
 
             {/* PR to PO Cycle Time */}
             {isModuleEnabled('procurement') && cycleTimeData && (
-                <div className="bg-slate-900/50 border border-slate-800 rounded-lg p-6">
-                    <div className="mb-4">
-                        <h3 className="text-lg font-semibold text-slate-100">PR → PO Cycle Time</h3>
-                        <p className="text-sm text-slate-400 mt-1">Average days with 5-day target</p>
-                    </div>
-                    <LineChartComponent
-                        data={cycleTimeData}
-                        xAxisKey="month"
-                        series={[
-                            { key: 'avg_days', name: 'Avg Days', color: '#a855f7' },
-                        ]}
-                        height={280}
-                        segmentColor="execution"
-                        formatValue={(value) => `${formatNumber(value, 1)} days`}
-                        formatXAxis={(value) => formatDate(value)}
-                    />
-                </div>
+                <GridItem span={6}>
+                    <Card title="PR → PO Cycle Time">
+                        <p className="text-sm text-fg-muted">Average days with 5-day target</p>
+                        <LineChartComponent
+                            data={cycleTimeData}
+                            xAxisKey="month"
+                            series={[
+                                { key: 'avg_days', name: 'Avg Days', color: '#a855f7' },
+                            ]}
+                            height={280}
+                            segmentColor="execution"
+                            formatValue={(value) => `${formatNumber(value, 1)} days`}
+                            formatXAxis={(value) => formatDate(value)}
+                        />
+                    </Card>
+                </GridItem>
             )}
 
             {/* Workflow Status Distribution */}
             {isModuleEnabled('flow') && workflowStatusData && (
-                <div className="bg-slate-900/50 border border-slate-800 rounded-lg p-6 lg:col-span-2">
-                    <div className="mb-4">
-                        <h3 className="text-lg font-semibold text-slate-100">Workflow Status Distribution</h3>
-                        <p className="text-sm text-slate-400 mt-1">Current workflow state breakdown</p>
-                    </div>
-                    <PieChartComponent
-                        data={workflowStatusData || []}
-                        height={320}
-                        segmentColor="execution"
-                        formatValue={(value) => formatNumber(value)}
-                        colors={['#a855f7', '#c084fc', '#d8b4fe', '#e9d5ff']}
-                    />
-                </div>
+                <GridItem span={12}>
+                    <Card title="Workflow Status Distribution">
+                        <p className="text-sm text-fg-muted">Current workflow state breakdown</p>
+                        <PieChartComponent
+                            data={workflowStatusData || []}
+                            height={320}
+                            segmentColor="execution"
+                            formatValue={(value) => formatNumber(value)}
+                            colors={['#a855f7', '#c084fc', '#d8b4fe', '#e9d5ff']}
+                        />
+                    </Card>
+                </GridItem>
             )}
-        </div>
+        </Grid>
     );
 };

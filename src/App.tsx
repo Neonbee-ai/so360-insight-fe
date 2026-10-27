@@ -1,7 +1,7 @@
 import React, { Suspense, lazy } from 'react';
 import { Routes, Route, Navigate, useParams, useNavigate } from 'react-router-dom';
 import { useShellBridge } from '@so360/shell-context';
-import { FeatureRoute } from '@so360/design-system';
+import { Button, CombScope, FeatureRoute } from '@so360/design-system';
 import { MfeShellInitializer } from './components/MfeShellInitializer';
 
 // Route components are lazy-loaded so recharts (~150KB gz, pulled in transitively
@@ -10,6 +10,9 @@ import { MfeShellInitializer } from './components/MfeShellInitializer';
 const InsightDashboard = lazy(() =>
     import('./pages/InsightDashboard').then(m => ({ default: m.InsightDashboard }))
 );
+const MyPipelinePage = lazy(() =>
+    import('./pages/MyPipelinePage').then(m => ({ default: m.MyPipelinePage }))
+);
 const AlertsPage = lazy(() =>
     import('./pages/AlertsPage').then(m => ({ default: m.AlertsPage }))
 );
@@ -17,8 +20,8 @@ const AlertsPage = lazy(() =>
 // Lightweight fallback shown while a lazy route chunk loads. Mirrors the
 // existing "initializing" visual language so the swap is imperceptible.
 const RouteFallback: React.FC = () => (
-    <div className="min-h-screen bg-slate-950 flex items-center justify-center">
-        <div className="text-slate-400">Loading…</div>
+    <div className="min-h-screen bg-bg flex items-center justify-center">
+        <div className="text-fg-muted">Loading…</div>
     </div>
 );
 
@@ -31,27 +34,23 @@ const SEGMENT_FLAG_MAP: Record<string, string> = {
 const UpgradeLocked = () => {
     const navigate = useNavigate();
     return (
-        <div className="flex flex-col items-center justify-center min-h-[400px] gap-4 text-center px-6">
+        <div className="flex flex-col items-center justify-center min-h-96 gap-4 text-center px-6">
             <div>
-                <h2 className="text-lg font-semibold text-slate-100">This feature is part of a higher plan</h2>
-                <p className="text-sm text-slate-400 mt-1">Upgrade your plan to unlock it.</p>
+                <h2 className="text-lg font-semibold text-fg">This feature is part of a higher plan</h2>
+                <p className="text-sm text-fg-muted mt-1">Upgrade your plan to unlock it.</p>
             </div>
-            <button
-                type="button"
-                onClick={() => navigate('/org/billing')}
-                className="px-4 py-2 rounded bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium transition-colors"
-            >
+            <Button type="button" onClick={() => navigate('/org/billing')}>
                 Upgrade plan
-            </button>
+            </Button>
         </div>
     );
 };
 
 // Route-level panel shown when a segment's feature is `disabled` (admin turned it off).
 const FeatureUnavailable = () => (
-    <div className="flex flex-col items-center justify-center min-h-[400px] gap-2 text-center px-6">
-        <h2 className="text-lg font-semibold text-slate-100">Feature unavailable</h2>
-        <p className="text-sm text-slate-400">This feature has been turned off for your organization.</p>
+    <div className="flex flex-col items-center justify-center min-h-96 gap-2 text-center px-6">
+        <h2 className="text-lg font-semibold text-fg">Feature unavailable</h2>
+        <p className="text-sm text-fg-muted">This feature has been turned off for your organization.</p>
     </div>
 );
 
@@ -74,8 +73,8 @@ const PermissionGuard = ({ permission, children }: { permission: string | string
     if (allowed) return <>{children}</>;
     return (
         <div className="flex flex-col items-center justify-center px-6 py-16 text-center">
-            <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100">You don&apos;t have access to this page</h2>
-            <p className="mt-2 max-w-md text-sm text-slate-600 dark:text-slate-400">
+            <h2 className="text-lg font-semibold text-fg">You don&apos;t have access to this page</h2>
+            <p className="mt-2 max-w-md text-sm text-fg-subtle">
                 Your role doesn&apos;t include permission for this page. Ask an administrator if you need it.
             </p>
         </div>
@@ -107,19 +106,42 @@ const SegmentRoute: React.FC = () => {
     );
 };
 
-function App() {
+// "My pipeline" — gated on submodule:insight:my_pipeline (5-state model).
+export const MY_PIPELINE_FLAG = 'submodule:insight:my_pipeline';
+const MyPipelineRoute: React.FC = () => {
+    const shell = useShellBridge();
+    const state = shell?.getFeatureState ? shell.getFeatureState(MY_PIPELINE_FLAG) : 'enabled';
     return (
+        <FeatureRoute
+            state={state}
+            loading={(shell?.effectiveFlagsLoaded === false)}
+            hiddenFallback={<Navigate to="/" replace />}
+            lockedFallback={<UpgradeLocked />}
+            disabledFallback={<FeatureUnavailable />}
+        >
+            <MyPipelinePage />
+        </FeatureRoute>
+    );
+};
+
+function App() {
+    const navigate = useNavigate();
+    return (
+        <CombScope module="insight" root={{ label: 'Insight', to: '/insight' }} navigate={(to) => navigate(to)}>
         <MfeShellInitializer>
             <Suspense fallback={<RouteFallback />}>
                 <Routes>
                     <Route path="/" element={<InsightDashboard />} />
                     <Route path="alerts" element={<PermissionGuard permission="analytics.view"><AlertsPage /></PermissionGuard>} />
 
+                    <Route path="my-pipeline" element={<PermissionGuard permission="analytics.view"><MyPipelineRoute /></PermissionGuard>} />
+
                     {/* Path-based segment routes — URL stays as /insight/revenue etc. */}
                     <Route path=":segmentCode" element={<PermissionGuard permission="analytics.view"><SegmentRoute /></PermissionGuard>} />
                 </Routes>
             </Suspense>
         </MfeShellInitializer>
+        </CombScope>
     );
 }
 
