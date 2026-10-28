@@ -2,12 +2,14 @@ import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import federation from '@originjs/vite-plugin-federation';
 import path from 'path';
+import { federationCssRootCopy } from './vite-plugins/federation-css-root-copy';
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
   return {
     base: env.VITE_BASE_URL || process.env.VITE_BASE_URL || 'http://localhost:3024/',
     plugins: [
+        federationCssRootCopy(),
         react({
             jsxRuntime: 'automatic',
         }),
