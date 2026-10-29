@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AlertCircle, RefreshCw } from 'lucide-react';
-import { Button, DashboardPageTemplate, Grid, Cluster, EmptyState } from '@so360/design-system';
+import { Button, DashboardPageTemplate, Cluster, EmptyState } from '@so360/design-system';
 import { TabNavigation, type Tab } from '../components/TabNavigation';
 import { AtAGlanceView } from '../components/AtAGlanceView';
 import { SegmentTabContent } from '../components/SegmentTabContent';
