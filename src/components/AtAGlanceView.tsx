@@ -167,16 +167,6 @@ export const AtAGlanceView: React.FC<AtAGlanceViewProps> = ({ segments, onSegmen
         try {
             setLoading(true);
 
-            // Fetch critical alerts
-            const alertsResponse = await insightApi.getAlerts({
-                severity: 'critical,warning',
-                unresolved_only: true,
-                limit: 10,
-            });
-            setCriticalAlerts(
-                alertsResponse.data.filter((s: any) => isModuleEnabled(stripPrefix(s.module_code || '')))
-            );
-
             // Only fetch segments whose required modules are enabled
             const enabledSegments = segments.filter(s => {
                 const deps = SEGMENT_MODULE_DEPS[s.segment_code];
@@ -184,10 +174,28 @@ export const AtAGlanceView: React.FC<AtAGlanceViewProps> = ({ segments, onSegmen
                 return deps.some(mod => isModuleEnabled(mod));
             });
 
-            // Fetch full details for enabled segments to get KPIs
-            const segmentDetails = await Promise.all(
+            // Alerts and segment details are independent: fetch them in parallel
+            // (was alerts -> details, a serial waterfall). One failing segment no
+            // longer discards the others.
+            const alertsPromise = insightApi
+                .getAlerts({ severity: 'critical,warning', unresolved_only: true, limit: 10 })
+                .then((alertsResponse) => {
+                    setCriticalAlerts(
+                        alertsResponse.data.filter((s: any) => isModuleEnabled(stripPrefix(s.module_code || '')))
+                    );
+                })
+                .catch((err) => console.error('Failed to fetch critical alerts:', err));
+
+            const settled = await Promise.allSettled(
                 enabledSegments.map((s) => insightApi.getSegmentDetail(s.segment_code))
             );
+            await alertsPromise;
+            const segmentDetails = settled
+                .filter((r): r is PromiseFulfilledResult<Awaited<ReturnType<typeof insightApi.getSegmentDetail>>> => r.status === 'fulfilled')
+                .map((r) => r.value);
+            if (segmentDetails.length === 0 && enabledSegments.length > 0) {
+                throw new Error('No segment details could be loaded');
+            }
 
             // Collect KPIs from enabled segments, filtered by enabled module
             const allKPIs = segmentDetails

@@ -59,6 +59,17 @@ describe('insightApi', () => {
     });
   });
 
+  describe('Given two concurrent reads of the same uncached key', () => {
+    it('When both fire before the first resolves / Then only one HTTP request is made', async () => {
+      mockGet.mockResolvedValue({ data: { module_code: 'dedupe-mod', kpis: [] } });
+      await Promise.all([
+        insightApi.getModuleInsights('dedupe-mod'),
+        insightApi.getModuleInsights('dedupe-mod'),
+      ]);
+      expect(mockGet).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe('Given getModuleInsights', () => {
     it('When module provided / Then fetches module data', async () => {
       mockGet.mockResolvedValue({ data: { module_code: 'crm', kpis: [] } });

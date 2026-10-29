@@ -22,15 +22,27 @@ const CACHE_TTL = 2 * 60 * 1000; // 2 minutes
 const CACHE_MAX = 100; // hard ceiling on retained entries
 const apiCache = createTtlCache<any>({ ttlMs: CACHE_TTL, maxEntries: CACHE_MAX });
 
+// In-flight requests by key: a dashboard load mounts several components that ask
+// for the same endpoint at once (e.g. /segments, /data-freshness); share one call.
+const inFlight = new Map<string, Promise<any>>();
+
 function cachedGet<T>(key: string, fetcher: () => Promise<T>): Promise<T> {
     const cached = apiCache.get(key);
     if (cached !== undefined) {
         return Promise.resolve(cached as T);
     }
-    return fetcher().then(data => {
-        apiCache.set(key, data);
-        return data;
-    });
+    const pending = inFlight.get(key);
+    if (pending) return pending as Promise<T>;
+    const p = fetcher()
+        .then(data => {
+            apiCache.set(key, data);
+            return data;
+        })
+        .finally(() => {
+            if (inFlight.get(key) === p) inFlight.delete(key);
+        });
+    inFlight.set(key, p);
+    return p;
 }
 
 function invalidateCache(prefix?: string): void {
