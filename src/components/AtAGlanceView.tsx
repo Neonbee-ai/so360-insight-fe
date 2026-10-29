@@ -5,7 +5,7 @@ import { KPICard } from './KPICard';
 import { AlertCard } from './AlertCard';
 import { NeuraSummaryCard } from './NeuraSummaryCard';
 import { ModuleCoveragePanel } from './ModuleCoveragePanel';
-import { toast, Card, Grid, Stack, EmptyState, Skeleton } from '@so360/design-system';
+import { toast, Card, Grid, Stack, EmptyState } from '@so360/design-system';
 import { insightApi } from '../services/insightApi';
 import { manufacturingApi, buildManufacturingHeaders } from '../services/manufacturingApi';
 import type { SegmentSummary, KPI, Alert, AiSummarySections, CorrelationPair } from '../types/insight';
@@ -102,7 +102,6 @@ export const AtAGlanceView: React.FC<AtAGlanceViewProps> = ({ segments, onSegmen
     const [kpiNameMap, setKpiNameMap] = useState<Map<string, string>>(new Map());
     const [criticalAlerts, setCriticalAlerts] = useState<Alert[]>([]);
     const [correlations, setCorrelations] = useState<CorrelationPair[]>([]);
-    const [loading, setLoading] = useState(true);
 
     // Determine which summary cards to show based on enabled modules
     const visibleCardConfigs = useMemo(
@@ -165,8 +164,6 @@ export const AtAGlanceView: React.FC<AtAGlanceViewProps> = ({ segments, onSegmen
 
     const fetchAtAGlanceData = async () => {
         try {
-            setLoading(true);
-
             // Progressive render: the /segments payload already carries each
             // segment's primary KPI, so paint those immediately and refine with
             // full segment details when they arrive (instead of holding the
@@ -177,7 +174,6 @@ export const AtAGlanceView: React.FC<AtAGlanceViewProps> = ({ segments, onSegmen
                 .slice(0, 12);
             if (seed.length > 0) {
                 setTopKPIs(seed);
-                setLoading(false);
             }
 
             // Only fetch segments whose required modules are enabled
@@ -243,8 +239,6 @@ export const AtAGlanceView: React.FC<AtAGlanceViewProps> = ({ segments, onSegmen
                 .map((s) => s.primary_kpi)
                 .filter((kpi): kpi is KPI => kpi !== null);
             setTopKPIs(allPrimaryKPIs.slice(0, 12));
-        } finally {
-            setLoading(false);
         }
     };
 
@@ -409,34 +403,8 @@ export const AtAGlanceView: React.FC<AtAGlanceViewProps> = ({ segments, onSegmen
         }
     };
 
-    if (loading) {
-        return (
-            <Stack gap="region">
-                <Grid>
-                    {Array.from({ length: visibleCardConfigs.length || 4 }, (_, i) => (
-                        <Grid.Item key={i} span={6}>
-                            <Skeleton variant="rect" className="h-48" />
-                        </Grid.Item>
-                    ))}
-                </Grid>
-                <Grid>
-                    {[1, 2, 3, 4, 5].map((i) => (
-                        <Grid.Item key={i} span={4}>
-                            <Skeleton variant="rect" className="h-32" />
-                        </Grid.Item>
-                    ))}
-                </Grid>
-                <Grid>
-                    {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-                        <Grid.Item key={i} span={3}>
-                            <Skeleton variant="rect" className="h-40" />
-                        </Grid.Item>
-                    ))}
-                </Grid>
-            </Stack>
-        );
-    }
-
+    // No page-level busy state: segment cards render from props, KPIs/alerts fill in when
+    // their (secondary) requests settle.
     return (
         <Stack gap="region">
             {/* Section 1: AI Executive Summary — hidden until flags resolve */}

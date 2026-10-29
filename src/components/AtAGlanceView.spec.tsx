@@ -126,11 +126,12 @@ describe('AtAGlanceView', () => {
   });
 
   describe('Given loading state', () => {
-    it('When data is being fetched and no primary KPI is known / Then shows skeleton', () => {
+    it('When data is being fetched and no primary KPI is known / Then renders the page without a page-level skeleton', () => {
       mockApi.getAlerts.mockReturnValue(new Promise(() => {}));
       const noKpi = [{ ...mockSegments[0], primary_kpi: null }];
       const { container } = render(<AtAGlanceView segments={noKpi} onSegmentClick={vi.fn()} />);
-      expect(container.querySelector('.animate-pulse')).toBeInTheDocument();
+      expect(container.querySelector('[aria-busy="true"]')).not.toBeInTheDocument();
+      expect(screen.getByText('Business segments')).toBeInTheDocument();
     });
 
     it('Given slow segment details and alerts / When primary KPIs are known / Then page paints them without waiting', async () => {

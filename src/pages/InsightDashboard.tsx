@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AlertCircle, RefreshCw } from 'lucide-react';
-import { Button, DashboardPageTemplate, Grid, Cluster, EmptyState, Skeleton } from '@so360/design-system';
+import { Button, DashboardPageTemplate, Grid, Cluster, EmptyState } from '@so360/design-system';
 import { TabNavigation, type Tab } from '../components/TabNavigation';
 import { AtAGlanceView } from '../components/AtAGlanceView';
 import { SegmentTabContent } from '../components/SegmentTabContent';
@@ -261,13 +261,7 @@ export const InsightDashboard: React.FC<InsightDashboardProps> = ({ initialTab }
                     >
                         {effectiveActiveTab === 'at-a-glance' ? (
                             loading ? (
-                                <Grid>
-                                    {[1, 2, 3, 4, 5, 6].map((i) => (
-                                        <Grid.Item key={i} span={4}>
-                                            <Skeleton variant="rect" className="h-48" />
-                                        </Grid.Item>
-                                    ))}
-                                </Grid>
+                                <div className="min-h-48" />
                             ) : (
                                 <AtAGlanceView segments={segments} onSegmentClick={handleSegmentClick} />
                             )
