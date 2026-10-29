@@ -126,10 +126,18 @@ describe('AtAGlanceView', () => {
   });
 
   describe('Given loading state', () => {
-    it('When data is being fetched / Then shows skeleton', () => {
+    it('When data is being fetched and no primary KPI is known / Then shows skeleton', () => {
       mockApi.getAlerts.mockReturnValue(new Promise(() => {}));
-      const { container } = render(<AtAGlanceView segments={mockSegments} onSegmentClick={vi.fn()} />);
+      const noKpi = [{ ...mockSegments[0], primary_kpi: null }];
+      const { container } = render(<AtAGlanceView segments={noKpi} onSegmentClick={vi.fn()} />);
       expect(container.querySelector('.animate-pulse')).toBeInTheDocument();
+    });
+
+    it('Given slow segment details and alerts / When primary KPIs are known / Then page paints them without waiting', async () => {
+      mockApi.getAlerts.mockReturnValue(new Promise(() => {}));
+      mockApi.getSegmentDetail.mockReturnValue(new Promise(() => {}));
+      render(<AtAGlanceView segments={mockSegments} onSegmentClick={vi.fn()} />);
+      await waitFor(() => expect(screen.getByText('Total Revenue')).toBeInTheDocument());
     });
   });
 

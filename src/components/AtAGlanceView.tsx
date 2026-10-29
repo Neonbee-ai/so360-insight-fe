@@ -167,6 +167,19 @@ export const AtAGlanceView: React.FC<AtAGlanceViewProps> = ({ segments, onSegmen
         try {
             setLoading(true);
 
+            // Progressive render: the /segments payload already carries each
+            // segment's primary KPI, so paint those immediately and refine with
+            // full segment details when they arrive (instead of holding the
+            // skeleton until every per-segment request settles).
+            const seed = segments
+                .map((s) => s.primary_kpi)
+                .filter((kpi): kpi is KPI => kpi !== null)
+                .slice(0, 12);
+            if (seed.length > 0) {
+                setTopKPIs(seed);
+                setLoading(false);
+            }
+
             // Only fetch segments whose required modules are enabled
             const enabledSegments = segments.filter(s => {
                 const deps = SEGMENT_MODULE_DEPS[s.segment_code];
