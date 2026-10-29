@@ -261,6 +261,24 @@ export const AtAGlanceView: React.FC<AtAGlanceViewProps> = ({ segments, onSegmen
                 };
                 return updated;
             });
+            if (data.generating) {
+                insightApi.pollAiSummary(segmentCode, (d) => {
+                    setNeuraSummaries((prev) => {
+                        const updated = [...prev];
+                        updated[index] = {
+                            ...updated[index],
+                            summary: d.summary || null,
+                            sections: d.sections || null,
+                            generatedAt: d.generated_at || null,
+                            cached: d.cached ?? false,
+                            degraded: d.degraded ?? false,
+                            loading: false,
+                            error: null,
+                        };
+                        return updated;
+                    });
+                });
+            }
         } catch (err) {
             console.error(`Failed to fetch AI summary (${segmentCode}):`, err);
             setNeuraSummaries((prev) => {

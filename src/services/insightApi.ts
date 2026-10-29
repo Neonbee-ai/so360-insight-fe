@@ -262,10 +262,47 @@ class InsightApiClient {
     // ===== AI SUMMARY METHODS =====
 
     async getAiSummary(segmentCode: string): Promise<any> {
-        return cachedGet(`ai-summary:${segmentCode}`, async () => {
+        const data = await cachedGet(`ai-summary:${segmentCode}`, async () => {
             const response = await this.client.get(`/ai-summary/${segmentCode}`);
             return response.data;
         });
+        // The BE answers `generating: true` when Neura has not finished within its budget.
+        // That placeholder must never be cached or the real summary would be hidden for the TTL.
+        if (data && data.generating) invalidateCache(`ai-summary:${segmentCode}`);
+        return data;
+    }
+
+    /**
+     * Quietly re-poll a summary the BE reported as still generating. Never shows a spinner;
+     * stops on the first real result, after `tries` attempts, or when the returned cancel fn runs.
+     */
+    pollAiSummary(
+        segmentCode: string,
+        onResult: (data: any) => void,
+        tries = 6,
+        delayMs = 5000,
+    ): () => void {
+        let cancelled = false;
+        let timer: ReturnType<typeof setTimeout> | undefined;
+        const step = (left: number) => {
+            if (left <= 0) return;
+            timer = setTimeout(async () => {
+                if (cancelled) return;
+                try {
+                    const data = await this.getAiSummary(segmentCode);
+                    if (cancelled) return;
+                    if (data && data.generating) step(left - 1);
+                    else onResult(data);
+                } catch {
+                    /* stay on the empty state */
+                }
+            }, delayMs);
+        };
+        step(tries);
+        return () => {
+            cancelled = true;
+            if (timer) clearTimeout(timer);
+        };
     }
 
     async regenerateAiSummary(segmentCode: string): Promise<any> {

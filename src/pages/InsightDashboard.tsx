@@ -212,24 +212,6 @@ export const InsightDashboard: React.FC<InsightDashboardProps> = ({ initialTab }
     // If active tab is no longer visible (module was disabled), fall back to at-a-glance
     const effectiveActiveTab = tabs.some(t => t.id === activeTab) ? activeTab : 'at-a-glance';
 
-    if (loading) {
-        return (
-            <DashboardPageTemplate
-                title="Insight Dashboard"
-                description="Monitor key metrics across all business segments"
-                bottom={
-                    <Grid>
-                        {[1, 2, 3, 4, 5, 6].map((i) => (
-                            <Grid.Item key={i} span={4}>
-                                <Skeleton variant="rect" className="h-48" />
-                            </Grid.Item>
-                        ))}
-                    </Grid>
-                }
-            />
-        );
-    }
-
     if (error) {
         return (
             <DashboardPageTemplate
@@ -278,7 +260,17 @@ export const InsightDashboard: React.FC<InsightDashboardProps> = ({ initialTab }
                         transition={{ duration: 0.2 }}
                     >
                         {effectiveActiveTab === 'at-a-glance' ? (
-                            <AtAGlanceView segments={segments} onSegmentClick={handleSegmentClick} />
+                            loading ? (
+                                <Grid>
+                                    {[1, 2, 3, 4, 5, 6].map((i) => (
+                                        <Grid.Item key={i} span={4}>
+                                            <Skeleton variant="rect" className="h-48" />
+                                        </Grid.Item>
+                                    ))}
+                                </Grid>
+                            ) : (
+                                <AtAGlanceView segments={segments} onSegmentClick={handleSegmentClick} />
+                            )
                         ) : effectiveActiveTab === 'manufacturing' ? (
                             <ManufacturingSegment />
                         ) : (
