@@ -214,7 +214,7 @@ export const InsightDashboard: React.FC<InsightDashboardProps> = ({ initialTab }
 
     if (error) {
         return (
-            <DashboardPageTemplate
+            <DashboardPageTemplate trail={[]}
                 title="Insight Dashboard"
                 description="Monitor key metrics across all business segments"
                 bottom={
@@ -230,7 +230,7 @@ export const InsightDashboard: React.FC<InsightDashboardProps> = ({ initialTab }
     }
 
     return (
-        <DashboardPageTemplate
+        <DashboardPageTemplate trail={[]}
             title="Insight Dashboard"
             description="Monitor key metrics across all business segments"
             meta={
