@@ -94,7 +94,7 @@ export const ChartExport: React.FC<ChartExportProps> = ({
                     />
 
                     {/* Menu */}
-                    <div className="absolute right-0 top-full mt-2 w-48 bg-surface border border-line rounded-lg shadow-xl z-20">
+                    <div className="absolute right-0 top-full mt-2 w-48 bg-surface border border-line rounded-lg shadow-overlay z-20">
                         <div className="py-1">
                             <Button
                                 variant="ghost"
