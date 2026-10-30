@@ -87,7 +87,7 @@ export const ChartExport: React.FC<ChartExportProps> = ({
 
             {showMenu && (
                 <>
-                    {/* Backdrop */}
+                    {/* comb-exception: invisible click-away layer for the export menu (no DS popover wraps this IconButton) */}
                     <div
                         className="fixed inset-0 z-10"
                         onClick={() => setShowMenu(false)}
