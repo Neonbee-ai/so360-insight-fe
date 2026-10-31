@@ -126,16 +126,25 @@ export const EmptyState = ({ title, description, action }: any) =>
 export const Banner = ({ title, children, action }: any) =>
   React.createElement('div', { role: 'alert' }, title ? React.createElement('strong', null, title) : null, children,
     action ? React.createElement('button', { type: 'button', onClick: action.onClick }, action.label) : null);
-const trailNode = (trail: any[] = []) =>
-  trail.length
-    ? React.createElement(
-        'nav',
-        { 'aria-label': 'Breadcrumb' },
-        trail.map((t: any) =>
-          React.createElement('button', { key: t.label, type: 'button', onClick: t.onClick }, t.label),
-        ),
-      )
-    : null;
+/** CombScope mirror: provides module/root/navigate; page trails prepend the root crumb like resolveTrail. */
+const CombScopeCtx = React.createContext<any>(null);
+export const CombScope = ({ children, ...scope }: any) =>
+  React.createElement(CombScopeCtx.Provider, { value: scope }, children);
+export const useCombScope = () => React.useContext(CombScopeCtx);
+const TrailNav = ({ trail = [] }: { trail?: any[] }) => {
+  const scope = React.useContext(CombScopeCtx);
+  const root = scope?.root;
+  const items = root && trail[0]?.label !== root.label ? [root, ...trail] : trail;
+  if (!items.length) return null;
+  return React.createElement(
+    'nav',
+    { 'aria-label': 'Breadcrumb' },
+    items.map((t: any) =>
+      React.createElement('button', { key: t.label, type: 'button', onClick: t.onClick ?? (t.to ? () => scope?.navigate?.(t.to) : undefined) }, t.label),
+    ),
+  );
+};
+const trailNode = (trail: any[] = []) => React.createElement(TrailNav, { trail });
 const pageShell = (testid: string) => ({
   title, description, trail, meta, status, filters, toolbarEnd, secondaryActions, headerSecondaryActions, primaryAction,
   kpis, primary, secondary, bottom, views, search, tabs, activeTab, onTabChange, sidePanel, children, loading,
@@ -162,7 +171,8 @@ const pageShell = (testid: string) => ({
     primary ?? null,
     secondary ?? null,
     bottom ?? null,
-    loading ? null : children,
+    // Real Comb templates swap children for a busy skeleton while loading.
+    loading ? React.createElement('div', { 'data-slot': 'loading', 'aria-busy': 'true' }) : children,
     sidePanel ?? null,
   );
 export const DashboardPageTemplate = pageShell('dashboard-page-template');

@@ -14,6 +14,7 @@ vi.mock('@so360/shell-context', () => ({
 vi.mock('../services/insightApi', () => ({
   insightApi: {
     getSegmentDetail: vi.fn(),
+    getChartData: vi.fn(() => new Promise(() => {})),
     getKPITrend: vi.fn(),
     resolveAlert: vi.fn(),
     getAuthHeaders: vi.fn(() => ({})),

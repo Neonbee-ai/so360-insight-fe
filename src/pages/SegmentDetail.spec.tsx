@@ -46,7 +46,8 @@ describe('SegmentDetailPage', () => {
     it('When data is being fetched / Then shows loading spinner', () => {
       mockApi.getSegmentDetail.mockReturnValue(new Promise(() => {}));
       wrap('/revenue');
-      expect(screen.getByText('Loading segment details...')).toBeInTheDocument();
+      // Comb DetailPageTemplate renders its own skeleton while loading (children are not shown).
+      expect(screen.getByTestId('detail-page-template').querySelector('[data-slot="loading"]')).toBeInTheDocument();
     });
   });
 

@@ -34,7 +34,8 @@ describe('MyPipelinePage', () => {
         await waitFor(() => expect(screen.getByText('Acme rollout')).toBeInTheDocument());
         expect(screen.getByText('Globex renewal')).toBeInTheDocument();
         expect(screen.getByText(/Open pipeline/)).toBeInTheDocument();
-        expect(screen.getByText(/Weighted forecast.*\$860\.00/)).toBeInTheDocument();
+        // Comb KpiCard renders label and value as separate nodes.
+        expect(screen.getByText('Weighted forecast').closest('[data-testid="kpi-card-ds"]')).toHaveTextContent('$860.00');
         expect(screen.getByText('Nov 2026')).toBeInTheDocument();
         expect(screen.getByText('Overdue')).toBeInTheDocument();
     });
