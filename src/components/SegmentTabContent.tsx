@@ -268,7 +268,7 @@ export const SegmentTabContent: React.FC<SegmentTabContentProps> = ({ segmentCod
                     <div className={getIconColorClass(segment.color_scheme)}>
                         {getSegmentIcon(segment.icon_name)}
                     </div>
-                    <div className="flex-1">
+                    <div className="flex-1 min-w-0 break-words">
                         <p className="text-fg-muted max-w-3xl">{segment.description}</p>
                         <div className="flex items-center gap-4 mt-3 text-sm">
                             <span className="text-fg-subtle">{segment.kpis.length} KPIs</span>

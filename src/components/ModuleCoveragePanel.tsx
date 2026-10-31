@@ -29,14 +29,14 @@ export const ModuleCoveragePanel: React.FC = () => {
 
     return (
         <div>
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
                 <h2 className="text-xl font-semibold text-fg">Module Coverage</h2>
                 <span className="text-sm text-fg-muted">
                     {activeCount} of {MODULE_REGISTRY.length} modules active
                     &nbsp;·&nbsp;{totalKpis} KPIs&nbsp;·&nbsp;{totalAlerts} alerts
                 </span>
             </div>
-            <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-3">
+            <div className="grid grid-cols-2 min-[480px]:grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-3">
                 {MODULE_REGISTRY.map(mod => {
                     const enabled = isModuleEnabled(mod.id);
                     const Icon = getInsightIcon(mod.icon);

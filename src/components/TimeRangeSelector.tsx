@@ -30,8 +30,9 @@ const TIME_RANGES: TimeRangeOption[] = [
 
 export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({ selected, onChange }) => {
     return (
-        <div className="flex items-center gap-2">
-            <Calendar className="w-4 h-4 text-fg-muted" />
+        <div className="flex items-center gap-2 min-w-0 max-w-full">
+            <Calendar className="w-4 h-4 text-fg-muted shrink-0" />
+            <div className="min-w-0 overflow-x-auto">
             <SegmentedControl
                 name="insight-time-range"
                 aria-label="Time range"
@@ -39,6 +40,7 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({ selected, 
                 value={selected}
                 onChange={(v) => onChange(v as TimeRange)}
             />
+            </div>
         </div>
     );
 };
