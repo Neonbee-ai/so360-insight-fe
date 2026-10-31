@@ -1,6 +1,7 @@
 import React from 'react';
 import { getInsightIcon } from '../constants/iconMap';
 import { useModules } from '@so360/shell-context';
+import { Badge } from '@so360/design-system';
 
 const MODULE_REGISTRY = [
     { id: 'crm',         name: 'CRM',          icon: 'Users',         color: 'blue',   kpis: 6, alerts: 2 },
@@ -49,13 +50,9 @@ export const ModuleCoveragePanel: React.FC = () => {
                         `}>
                             <div className="flex items-center justify-between">
                                 {Icon && <Icon className={`w-4 h-4 ${enabled ? 'text-fg-muted' : 'text-fg-subtle'}`} />}
-                                <span className={`text-xs font-medium px-1.5 py-0.5 rounded-full ${
-                                    enabled
-                                        ? 'bg-success-container text-success-on-container'
-                                        : 'bg-surface-raised text-fg-subtle'
-                                }`}>
+                                <Badge tone={enabled ? 'success' : 'neutral'} size="sm" shape="pill">
                                     {enabled ? 'Active' : 'Inactive'}
-                                </span>
+                                </Badge>
                             </div>
                             <p className={`text-sm font-semibold ${enabled ? 'text-fg' : 'text-fg-subtle'}`}>
                                 {mod.name}
