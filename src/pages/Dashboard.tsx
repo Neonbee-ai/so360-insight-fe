@@ -95,7 +95,7 @@ export const Dashboard: React.FC = () => {
         : undefined;
 
     return (
-        <DashboardPageTemplate
+        <DashboardPageTemplate trail={[]}
             title="Insight Dashboard"
             description="Real-time KPIs and intelligent alerts across all modules"
             meta={<span>Last updated: {dashboard ? formatters.formatDateTime(dashboard.computed_at) : 'N/A'}</span>}

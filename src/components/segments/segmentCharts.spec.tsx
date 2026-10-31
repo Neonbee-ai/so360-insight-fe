@@ -184,6 +184,23 @@ describe('FinanceCharts', () => {
             );
         });
     });
+
+    describe('Given only one of the three charts fails', () => {
+        beforeEach(() => {
+            mockGetChartData.mockImplementation(async (_s: string, metric: string) => {
+                if (metric === 'burn_rate_projection') throw new Error('timeout');
+                return chartResponse();
+            });
+        });
+
+        it('When rendered / Then the remaining charts still render and no error state shows', async () => {
+            render(<FinanceCharts {...props} />);
+            await waitFor(() =>
+                expect(screen.getAllByTestId('rc').length).toBeGreaterThan(0),
+            );
+            expect(screen.queryByText(ERROR_HEADING)).not.toBeInTheDocument();
+        });
+    });
 });
 
 // =============================================================================

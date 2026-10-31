@@ -110,8 +110,11 @@ Grid.Item = GridItem;
 export const Stack: any = passthrough();
 export const Cluster: any = passthrough();
 export const Split: any = passthrough();
-export const KpiCard = ({ label, value, hint, ...props }: any) =>
-  React.createElement('div', { 'data-testid': props['data-testid'] ?? 'kpi-card-ds' }, label, ' ', value, hint ?? null);
+export const KpiCard = ({ label, value, hint, onClick, icon: _i, loading: _l, delta: _d, deltaLabel: _dl, name: _n, className: _c, ...props }: any) =>
+  React.createElement('div', { 'data-testid': props['data-testid'] ?? 'kpi-card-ds', ...(onClick ? { role: 'button', onClick } : {}) },
+    React.createElement('span', null, label), ' ',
+    React.createElement('span', null, value),
+    hint != null ? React.createElement('span', null, hint) : null);
 export const EmptyState = ({ title, description, action }: any) =>
   React.createElement(
     'div',

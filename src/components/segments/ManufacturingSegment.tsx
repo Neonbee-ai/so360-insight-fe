@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Loader2, Factory, AlertCircle, RefreshCw } from 'lucide-react';
 import { formatNumber } from '../charts/chartUtils';
 import { useShell } from '@so360/shell-context';
-import { Button } from '@so360/design-system';
+import { Button, Grid, KpiCard } from '@so360/design-system';
 import {
     manufacturingApi,
     buildManufacturingHeaders,
@@ -32,18 +32,6 @@ const NO_ORG_MESSAGE = 'Select an organization to view Manufacturing metrics.';
 
 const fmtPct = (n: number) => `${(n ?? 0).toFixed(1)}%`;
 const fmtNum = (n: number) => formatNumber(n ?? 0);
-
-const Tile: React.FC<{ label: string; value: React.ReactNode; sub?: string; tone?: 'default' | 'pos' | 'neg' }> =
-    ({ label, value, sub, tone = 'default' }) => {
-        const colour = tone === 'pos' ? 'text-success' : tone === 'neg' ? 'text-danger' : 'text-fg';
-        return (
-            <div className="bg-surface/50 border border-line rounded-lg p-6 hover:bg-surface/70 transition-all">
-                <p className="text-sm text-fg-muted mb-3">{label}</p>
-                <div className={`text-3xl font-bold ${colour}`}>{value}</div>
-                {sub && <div className="text-xs text-fg-subtle mt-2">{sub}</div>}
-            </div>
-        );
-    };
 
 export const ManufacturingSegment: React.FC = () => {
     const { currentOrg, accessToken } = useShell();
@@ -143,16 +131,16 @@ export const ManufacturingSegment: React.FC = () => {
                 </div>
             )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <Tile label="Open MOs" value={summary.mo_in_progress + summary.mo_planned} sub={`${summary.mo_total} total · ${summary.mo_done} done`} />
-                <Tile label="In Progress" value={summary.mo_in_progress} tone="pos" sub={`${summary.wo_open} work orders open`} />
-                <Tile label="On-time %" value={fmtPct(summary.on_time_pct)} tone={summary.on_time_pct >= 90 ? 'pos' : 'neg'} sub="MOs delivered by planned end" />
-                <Tile label="Cost Variance" value={fmtPct(variance)} tone={variance > 5 ? 'neg' : variance < -5 ? 'pos' : 'default'} sub={variance > 0 ? 'Actual over standard' : 'Actual under standard'} />
-                <Tile label="Total Produced" value={fmtNum(summary.total_produced)} sub="units (life-to-date)" />
-                <Tile label="Scrap" value={fmtPct(summary.scrap_pct)} tone={summary.scrap_pct > 3 ? 'neg' : 'default'} sub={`${fmtNum(summary.total_scrap_qty)} units scrapped`} />
-                <Tile label="MOs Planned" value={summary.mo_planned} sub="awaiting start" />
-                <Tile label="MOs Completed" value={summary.mo_done} tone="pos" sub="lifetime" />
-            </div>
+            <Grid columns={4} gap="md">
+                <KpiCard label="Open MOs" value={summary.mo_in_progress + summary.mo_planned} hint={`${summary.mo_total} total · ${summary.mo_done} done`} />
+                <KpiCard label="In Progress" value={summary.mo_in_progress} hint={`${summary.wo_open} work orders open`} />
+                <KpiCard label="On-time %" value={fmtPct(summary.on_time_pct)} hint="MOs delivered by planned end" />
+                <KpiCard label="Cost Variance" value={fmtPct(variance)} hint={variance > 0 ? 'Actual over standard' : 'Actual under standard'} />
+                <KpiCard label="Total Produced" value={fmtNum(summary.total_produced)} hint="units (life-to-date)" />
+                <KpiCard label="Scrap" value={fmtPct(summary.scrap_pct)} hint={`${fmtNum(summary.total_scrap_qty)} units scrapped`} />
+                <KpiCard label="MOs Planned" value={summary.mo_planned} hint="awaiting start" />
+                <KpiCard label="MOs Completed" value={summary.mo_done} hint="lifetime" />
+            </Grid>
 
             {util.length > 0 && (
                 <div className="bg-surface/50 border border-line rounded-lg p-6">

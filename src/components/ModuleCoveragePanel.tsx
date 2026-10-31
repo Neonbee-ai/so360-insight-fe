@@ -1,6 +1,7 @@
 import React from 'react';
 import { getInsightIcon } from '../constants/iconMap';
 import { useModules } from '@so360/shell-context';
+import { Badge } from '@so360/design-system';
 
 const MODULE_REGISTRY = [
     { id: 'crm',         name: 'CRM',          icon: 'Users',         color: 'blue',   kpis: 6, alerts: 2 },
@@ -29,14 +30,14 @@ export const ModuleCoveragePanel: React.FC = () => {
 
     return (
         <div>
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
                 <h2 className="text-xl font-semibold text-fg">Module Coverage</h2>
                 <span className="text-sm text-fg-muted">
                     {activeCount} of {MODULE_REGISTRY.length} modules active
                     &nbsp;·&nbsp;{totalKpis} KPIs&nbsp;·&nbsp;{totalAlerts} alerts
                 </span>
             </div>
-            <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-3">
+            <div className="grid grid-cols-2 min-[480px]:grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-3">
                 {MODULE_REGISTRY.map(mod => {
                     const enabled = isModuleEnabled(mod.id);
                     const Icon = getInsightIcon(mod.icon);
@@ -49,13 +50,9 @@ export const ModuleCoveragePanel: React.FC = () => {
                         `}>
                             <div className="flex items-center justify-between">
                                 {Icon && <Icon className={`w-4 h-4 ${enabled ? 'text-fg-muted' : 'text-fg-subtle'}`} />}
-                                <span className={`text-xs font-medium px-1.5 py-0.5 rounded-full ${
-                                    enabled
-                                        ? 'bg-success-container text-success-on-container'
-                                        : 'bg-surface-raised text-fg-subtle'
-                                }`}>
+                                <Badge tone={enabled ? 'success' : 'neutral'} size="sm" shape="pill">
                                     {enabled ? 'Active' : 'Inactive'}
-                                </span>
+                                </Badge>
                             </div>
                             <p className={`text-sm font-semibold ${enabled ? 'text-fg' : 'text-fg-subtle'}`}>
                                 {mod.name}

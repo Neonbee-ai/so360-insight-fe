@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Loader2, AlertCircle } from 'lucide-react';
 import { toast, Button, Card, Grid, Stack, EmptyState } from '@so360/design-system';
 import { getInsightIcon } from '../constants/iconMap';
@@ -30,6 +30,14 @@ interface SegmentTabContentProps {
     segmentCode: string;
 }
 
+const SEGMENT_CHART_TYPES: Record<string, string[]> = {
+    finance: ['cash_flow_waterfall', 'burn_rate_projection', 'expense_variance'],
+    revenue: ['revenue_trend', 'conversion_funnel', 'aging_buckets'],
+    execution: ['task_completion', 'pr_cycle_time', 'workflow_status'],
+    delivery: ['delivery_rate', 'inventory_turnover', 'backorder_analysis'],
+    workforce: ['utilization_trend', 'overtime_distribution', 'compliance_gauge'],
+};
+
 export const SegmentTabContent: React.FC<SegmentTabContentProps> = ({ segmentCode }) => {
     const { isModuleEnabled } = useModules();
     const { isFeatureEnabled } = useFeatureFlags();
@@ -56,8 +64,19 @@ export const SegmentTabContent: React.FC<SegmentTabContentProps> = ({ segmentCod
     const hasRequiredModules = summaryModules.length === 0 || summaryModules.some(m => isModuleEnabled(m));
     const canShowAiSummary = canShowAiSummaryFeature && hasRequiredModules;
 
+    const trendsCustomRef = useRef(false);
+    const cancelPollRef = useRef<(() => void) | null>(null);
+
+    useEffect(() => () => { cancelPollRef.current?.(); }, [segmentCode]);
+
     useEffect(() => {
+        trendsCustomRef.current = false;
         fetchSegmentDetail();
+        // Warm the chart endpoints in parallel with the detail call (cachedGet shares in-flight
+        // requests) so charts do not wait behind the segment detail round trip.
+        (SEGMENT_CHART_TYPES[segmentCode] ?? []).forEach((t) => {
+            insightApi.getChartData(segmentCode, t).catch(() => undefined);
+        });
         if (canShowAiSummary) {
             fetchNeuraInsight();
         } else {
@@ -66,7 +85,10 @@ export const SegmentTabContent: React.FC<SegmentTabContentProps> = ({ segmentCod
     }, [segmentCode, canShowAiSummary]);
 
     useEffect(() => {
-        if (segment) {
+        // The segment detail already carries 30d trends; refetching one call per KPI on mount is a
+        // duplicate N+1. Only refetch once the user picks a different range.
+        if (timeRange !== '30d') trendsCustomRef.current = true;
+        if (segment && (timeRange !== '30d' || trendsCustomRef.current)) {
             fetchTrendsForRange();
         }
     }, [timeRange, segment?.segment_code]);
@@ -81,6 +103,16 @@ export const SegmentTabContent: React.FC<SegmentTabContentProps> = ({ segmentCod
             setNeuraGeneratedAt(data.generated_at || null);
             setNeuraCached(data.cached ?? false);
             setNeuraDegraded(data.degraded ?? false);
+            if (data.generating) {
+                cancelPollRef.current?.();
+                cancelPollRef.current = insightApi.pollAiSummary(segmentCode, (d) => {
+                    setNeuraSummary(d.summary || null);
+                    setNeuraSections(d.sections || null);
+                    setNeuraGeneratedAt(d.generated_at || null);
+                    setNeuraCached(d.cached ?? false);
+                    setNeuraDegraded(d.degraded ?? false);
+                });
+            }
         } catch (err) {
             setNeuraError(err instanceof Error ? err.message : 'Failed to load AI insights');
         } finally {
@@ -236,7 +268,7 @@ export const SegmentTabContent: React.FC<SegmentTabContentProps> = ({ segmentCod
                     <div className={getIconColorClass(segment.color_scheme)}>
                         {getSegmentIcon(segment.icon_name)}
                     </div>
-                    <div className="flex-1">
+                    <div className="flex-1 min-w-0 break-words">
                         <p className="text-fg-muted max-w-3xl">{segment.description}</p>
                         <div className="flex items-center gap-4 mt-3 text-sm">
                             <span className="text-fg-subtle">{segment.kpis.length} KPIs</span>

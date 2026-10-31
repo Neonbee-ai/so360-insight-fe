@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { TrendingUp, TrendingDown, Minus, AlertCircle } from 'lucide-react';
-import { Button, Card, DashboardPageTemplate, EmptyState, Grid, Skeleton } from '@so360/design-system';
+import { Button, Card, DashboardPageTemplate, EmptyState, Grid, KpiCard, Skeleton } from '@so360/design-system';
 import { insightApi } from '../services/insightApi';
 import type { SegmentSummary } from '../types/insight';
 import { getInsightIcon } from '../constants/iconMap';
@@ -147,33 +147,15 @@ export const SegmentOverview: React.FC = () => {
 
                         {/* Primary KPI */}
                         {segment.primary_kpi && (
-                            <div className="bg-surface-raised/50 rounded-lg p-3 mb-4">
-                                <div className="text-xs text-fg-subtle mb-1">{segment.primary_kpi.kpi_name}</div>
-                                <div className="flex items-baseline gap-2">
-                                    <span className="text-2xl font-bold text-fg">
-                                        {isCurrencyUnit(segment.primary_kpi.unit)
-                                            ? formatters.formatCurrency(segment.primary_kpi.value)
-                                            : segment.primary_kpi.value.toFixed(1)}
-                                    </span>
-                                    {!isCurrencyUnit(segment.primary_kpi.unit) && (
-                                        <span className="text-sm text-fg-muted">{segment.primary_kpi.unit}</span>
-                                    )}
-                                </div>
-                                {segment.primary_kpi.trend_percentage !== undefined && (
-                                    <div
-                                        className={`text-xs font-medium mt-1 ${
-                                            segment.primary_kpi.trend === 'up'
-                                                ? 'text-success'
-                                                : segment.primary_kpi.trend === 'down'
-                                                ? 'text-danger'
-                                                : 'text-fg-muted'
-                                        }`}
-                                    >
-                                        {segment.primary_kpi.trend === 'up' ? '+' : ''}
-                                        {segment.primary_kpi.trend_percentage}% from last period
-                                    </div>
-                                )}
-                            </div>
+                            <KpiCard
+                                className="mb-4"
+                                label={segment.primary_kpi.kpi_name}
+                                value={isCurrencyUnit(segment.primary_kpi.unit)
+                                    ? formatters.formatCurrency(segment.primary_kpi.value)
+                                    : `${segment.primary_kpi.value.toFixed(1)}${segment.primary_kpi.unit ? ` ${segment.primary_kpi.unit}` : ''}`}
+                                delta={segment.primary_kpi.trend_percentage}
+                                deltaLabel={segment.primary_kpi.trend_percentage !== undefined ? 'from last period' : undefined}
+                            />
                         )}
 
                         {/* Stats */}

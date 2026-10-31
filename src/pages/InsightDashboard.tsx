@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AlertCircle, RefreshCw } from 'lucide-react';
-import { Button, DashboardPageTemplate, Grid, Cluster, EmptyState, Skeleton } from '@so360/design-system';
+import { Button, DashboardPageTemplate, Cluster, EmptyState } from '@so360/design-system';
 import { TabNavigation, type Tab } from '../components/TabNavigation';
 import { AtAGlanceView } from '../components/AtAGlanceView';
 import { SegmentTabContent } from '../components/SegmentTabContent';
@@ -212,27 +212,9 @@ export const InsightDashboard: React.FC<InsightDashboardProps> = ({ initialTab }
     // If active tab is no longer visible (module was disabled), fall back to at-a-glance
     const effectiveActiveTab = tabs.some(t => t.id === activeTab) ? activeTab : 'at-a-glance';
 
-    if (loading) {
-        return (
-            <DashboardPageTemplate
-                title="Insight Dashboard"
-                description="Monitor key metrics across all business segments"
-                bottom={
-                    <Grid>
-                        {[1, 2, 3, 4, 5, 6].map((i) => (
-                            <Grid.Item key={i} span={4}>
-                                <Skeleton variant="rect" className="h-48" />
-                            </Grid.Item>
-                        ))}
-                    </Grid>
-                }
-            />
-        );
-    }
-
     if (error) {
         return (
-            <DashboardPageTemplate
+            <DashboardPageTemplate trail={[]}
                 title="Insight Dashboard"
                 description="Monitor key metrics across all business segments"
                 bottom={
@@ -248,7 +230,7 @@ export const InsightDashboard: React.FC<InsightDashboardProps> = ({ initialTab }
     }
 
     return (
-        <DashboardPageTemplate
+        <DashboardPageTemplate trail={[]}
             title="Insight Dashboard"
             description="Monitor key metrics across all business segments"
             meta={
@@ -278,7 +260,11 @@ export const InsightDashboard: React.FC<InsightDashboardProps> = ({ initialTab }
                         transition={{ duration: 0.2 }}
                     >
                         {effectiveActiveTab === 'at-a-glance' ? (
-                            <AtAGlanceView segments={segments} onSegmentClick={handleSegmentClick} />
+                            loading ? (
+                                <div className="min-h-48" />
+                            ) : (
+                                <AtAGlanceView segments={segments} onSegmentClick={handleSegmentClick} />
+                            )
                         ) : effectiveActiveTab === 'manufacturing' ? (
                             <ManufacturingSegment />
                         ) : (

@@ -37,15 +37,23 @@ export const FinanceCharts: React.FC<FinanceChartsProps> = ({ tenantId, orgId })
             setLoading(true);
             setError(null);
 
-            const [cashFlowRes, burnRateRes, expenseRes] = await Promise.all([
+            // allSettled: one slow/failed chart must not blank the other two.
+            const results = await Promise.allSettled([
                 insightApi.getChartData('finance', 'cash_flow_waterfall'),
                 insightApi.getChartData('finance', 'burn_rate_projection'),
                 insightApi.getChartData('finance', 'expense_variance'),
             ]);
+            const rows = (r: PromiseSettledResult<any>) =>
+                r.status === 'fulfilled' ? r.value?.data?.data?.data || [] : [];
 
-            setCashFlowData(cashFlowRes.data?.data?.data || []);
-            setBurnRateData(burnRateRes.data?.data?.data || []);
-            setExpenseData(expenseRes.data?.data?.data || []);
+            setCashFlowData(rows(results[0]));
+            setBurnRateData(rows(results[1]));
+            setExpenseData(rows(results[2]));
+
+            const firstFailure = results.find((r): r is PromiseRejectedResult => r.status === 'rejected');
+            if (firstFailure && results.every((r) => r.status === 'rejected')) {
+                throw firstFailure.reason;
+            }
         } catch (err: any) {
             setError(err.message || 'Failed to load finance charts');
         } finally {

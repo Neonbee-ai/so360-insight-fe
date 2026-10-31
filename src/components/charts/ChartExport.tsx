@@ -87,14 +87,14 @@ export const ChartExport: React.FC<ChartExportProps> = ({
 
             {showMenu && (
                 <>
-                    {/* Backdrop */}
+                    {/* comb-exception: invisible click-away layer for the export menu (no DS popover wraps this IconButton) */}
                     <div
                         className="fixed inset-0 z-10"
                         onClick={() => setShowMenu(false)}
                     />
 
                     {/* Menu */}
-                    <div className="absolute right-0 top-full mt-2 w-48 bg-surface border border-line rounded-lg shadow-xl z-20">
+                    <div className="absolute right-0 top-full mt-2 w-48 bg-surface border border-line rounded-lg shadow-overlay z-20">
                         <div className="py-1">
                             <Button
                                 variant="ghost"

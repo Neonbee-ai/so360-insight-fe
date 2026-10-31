@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { TrendingUp, TrendingDown, Minus, AlertCircle, Loader2 } from 'lucide-react';
-import { Button, Card, DetailPageTemplate, EmptyState, Grid, Stack, Cluster } from '@so360/design-system';
+import { AlertCircle, Loader2 } from 'lucide-react';
+import { Button, Card, DetailPageTemplate, EmptyState, Grid, KpiCard, Stack, Cluster } from '@so360/design-system';
 import { insightApi } from '../services/insightApi';
 import { TrendChart } from '../components/TrendChart';
 import type { SegmentDetail } from '../types/insight';
@@ -64,17 +64,6 @@ export const SegmentDetailPage: React.FC = () => {
         return colorMap[colorScheme.primary] || 'text-fg-muted';
     };
 
-    const getTrendIcon = (trend: 'up' | 'down' | 'stable') => {
-        switch (trend) {
-            case 'up':
-                return <TrendingUp className="w-4 h-4 text-success" />;
-            case 'down':
-                return <TrendingDown className="w-4 h-4 text-danger" />;
-            default:
-                return <Minus className="w-4 h-4 text-fg-muted" />;
-        }
-    };
-
     const getSeverityColor = (severity: string) => {
         switch (severity) {
             case 'critical':
@@ -135,39 +124,13 @@ export const SegmentDetailPage: React.FC = () => {
                         <Grid>
                             {segment.kpis.map((kpi) => (
                                 <Grid.Item key={kpi.kpi_code} span={4}>
-                                    <Card padding="sm">
-                                        <div className="flex items-start justify-between mb-3">
-                                            <h3 className="text-sm font-medium text-fg-muted">{kpi.kpi_name}</h3>
-                                            {getTrendIcon(kpi.trend)}
-                                        </div>
-
-                                        <div className="flex items-baseline gap-2 mb-2">
-                                            <span className="text-3xl font-bold text-fg">
-                                                {isCurrencyUnit(kpi.unit) ? formatters.formatCurrency(kpi.value) : kpi.value.toFixed(1)}
-                                            </span>
-                                            {!isCurrencyUnit(kpi.unit) && <span className="text-sm text-fg-muted">{kpi.unit}</span>}
-                                        </div>
-
-                                        {kpi.trend_percentage !== undefined && (
-                                            <div
-                                                className={`text-sm font-medium ${
-                                                    kpi.trend === 'up'
-                                                        ? 'text-success'
-                                                        : kpi.trend === 'down'
-                                                        ? 'text-danger'
-                                                        : 'text-fg-muted'
-                                                }`}
-                                            >
-                                                {kpi.trend === 'up' ? '+' : ''}
-                                                {kpi.trend_percentage}%
-                                                <span className="text-fg-subtle ml-1">from last period</span>
-                                            </div>
-                                        )}
-
-                                        <div className="mt-3 pt-3 border-t border-line">
-                                            <div className="text-xs text-fg-subtle">{kpi.category}</div>
-                                        </div>
-                                    </Card>
+                                    <KpiCard
+                                        label={kpi.kpi_name}
+                                        value={isCurrencyUnit(kpi.unit) ? formatters.formatCurrency(kpi.value) : `${kpi.value.toFixed(1)}${kpi.unit ? ` ${kpi.unit}` : ''}`}
+                                        delta={kpi.trend_percentage}
+                                        deltaLabel={kpi.trend_percentage !== undefined ? 'from last period' : undefined}
+                                        hint={kpi.category}
+                                    />
                                 </Grid.Item>
                             ))}
                         </Grid>
