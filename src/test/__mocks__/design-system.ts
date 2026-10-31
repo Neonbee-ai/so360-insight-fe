@@ -111,7 +111,10 @@ export const Stack: any = passthrough();
 export const Cluster: any = passthrough();
 export const Split: any = passthrough();
 export const KpiCard = ({ label, value, hint, ...props }: any) =>
-  React.createElement('div', { 'data-testid': props['data-testid'] ?? 'kpi-card-ds' }, label, ' ', value, hint ?? null);
+  React.createElement('div', { 'data-testid': props['data-testid'] ?? 'kpi-card-ds' },
+    React.createElement('span', null, label), ' ',
+    React.createElement('span', null, value),
+    hint != null ? React.createElement('span', null, hint) : null);
 export const EmptyState = ({ title, description, action }: any) =>
   React.createElement(
     'div',
