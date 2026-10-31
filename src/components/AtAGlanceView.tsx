@@ -5,7 +5,7 @@ import { KPICard } from './KPICard';
 import { AlertCard } from './AlertCard';
 import { NeuraSummaryCard } from './NeuraSummaryCard';
 import { ModuleCoveragePanel } from './ModuleCoveragePanel';
-import { toast, Card, Grid, Stack, EmptyState } from '@so360/design-system';
+import { toast, Card, Grid, Stack, EmptyState, KpiCard } from '@so360/design-system';
 import { insightApi } from '../services/insightApi';
 import { manufacturingApi, buildManufacturingHeaders } from '../services/manufacturingApi';
 import type { SegmentSummary, KPI, Alert, AiSummarySections, CorrelationPair } from '../types/insight';
@@ -28,33 +28,26 @@ const ManufacturingAtAGlanceCard: React.FC<{ onClick: () => void }> = ({ onClick
             .catch(() => setData(null));
     }, [currentOrg?.id, currentOrg?.tenant_id, accessToken]);
     return (
-        <Card
-            padding="sm"
+        <KpiCard
+            name="manufacturing"
+            label="Manufacturing"
             onClick={onClick}
-            aria-label="Manufacturing"
-            className="border-success/20 hover:border-success/40"
-        >
-            <Stack gap="tight">
-                <Factory className="w-5 h-5 text-success" />
-                <h3 className="text-sm font-semibold text-fg">Manufacturing</h3>
-                {data ? (
-                    <>
-                        <div className="text-lg font-bold text-fg">
-                            {data.mo_in_progress + data.mo_planned}
-                            <span className="text-xs text-fg-muted ml-1">open MOs</span>
-                        </div>
-                        <div className="flex items-center justify-between text-xs">
-                            <span className="text-fg-muted">{data.wo_open} WOs open</span>
-                            {data.scrap_pct > 3 && (
-                                <span className="text-warning">scrap {data.scrap_pct.toFixed(1)}%</span>
-                            )}
-                        </div>
-                    </>
+            className="h-full"
+            icon={Factory}
+            value={data ? data.mo_in_progress + data.mo_planned : '—'}
+            hint={
+                data ? (
+                    <span className="flex items-center justify-between gap-2">
+                        <span>open MOs · {data.wo_open} WOs open</span>
+                        {data.scrap_pct > 3 && (
+                            <span className="text-warning">scrap {data.scrap_pct.toFixed(1)}%</span>
+                        )}
+                    </span>
                 ) : (
-                    <div className="text-xs text-fg-subtle">Connecting…</div>
-                )}
-            </Stack>
-        </Card>
+                    <span className="text-fg-subtle">Connecting…</span>
+                )
+            }
+        />
     );
 };
 
@@ -354,34 +347,6 @@ export const AtAGlanceView: React.FC<AtAGlanceViewProps> = ({ segments, onSegmen
         }
     };
 
-    const getSegmentIcon = (iconName: string) => {
-        const IconComponent = getInsightIcon(iconName);
-        if (!IconComponent) return null;
-        return <IconComponent className="w-8 h-8" />;
-    };
-
-    const getIconColorClass = (colorScheme: { primary: string }) => {
-        const colorMap: Record<string, string> = {
-            blue: 'text-primary',
-            purple: 'text-accent',
-            green: 'text-success',
-            orange: 'text-warning',
-            red: 'text-danger',
-        };
-        return colorMap[colorScheme.primary] || 'text-fg-muted';
-    };
-
-    const getBorderColorClass = (colorScheme: { primary: string }) => {
-        const colorMap: Record<string, string> = {
-            blue: 'border-primary/30 hover:border-primary',
-            purple: 'border-accent/30 hover:border-accent',
-            green: 'border-success/30 hover:border-success',
-            orange: 'border-warning/30 hover:border-warning',
-            red: 'border-danger/30 hover:border-danger',
-        };
-        return colorMap[colorScheme.primary] || 'border-line hover:border-line-strong';
-    };
-
     const getTrendIcon = (trend: 'up' | 'down' | 'stable') => {
         switch (trend) {
             case 'up':
@@ -459,36 +424,26 @@ export const AtAGlanceView: React.FC<AtAGlanceViewProps> = ({ segments, onSegmen
                         return deps.some(mod => isModuleEnabled(mod));
                     }).map((segment) => (
                         <Grid.Item key={segment.segment_code} span={4}>
-                            <Card
-                                padding="sm"
+                            <KpiCard
+                                name={segment.segment_code}
+                                label={segment.segment_name}
+                                icon={getInsightIcon(segment.icon_name) ?? undefined}
                                 onClick={() => onSegmentClick(segment.segment_code)}
-                                aria-label={segment.segment_name}
-                                className={getBorderColorClass(segment.color_scheme)}
-                            >
-                                <Stack gap="tight">
-                                    <div className="flex items-start justify-between">
-                                        <div className={getIconColorClass(segment.color_scheme)}>
-                                            {getSegmentIcon(segment.icon_name)}
-                                        </div>
+                                className="h-full"
+                                value={segment.primary_kpi ? segment.primary_kpi.value.toFixed(1) : '—'}
+                                hint={
+                                    <span className="flex items-center justify-between gap-2">
+                                        <span>
+                                            {segment.primary_kpi?.unit && <span className="mr-2">{segment.primary_kpi.unit}</span>}
+                                            {segment.kpi_count} KPIs
+                                            {segment.signal_count > 0 && (
+                                                <span className="ml-2 text-warning">{segment.signal_count} alerts</span>
+                                            )}
+                                        </span>
                                         {getTrendIcon(segment.trend)}
-                                    </div>
-                                    <h3 className="text-sm font-semibold text-fg">{segment.segment_name}</h3>
-                                    {segment.primary_kpi && (
-                                        <div className="text-lg font-bold text-fg">
-                                            {segment.primary_kpi.value.toFixed(1)}
-                                            <span className="text-xs text-fg-muted ml-1">
-                                                {segment.primary_kpi.unit}
-                                            </span>
-                                        </div>
-                                    )}
-                                    <div className="flex items-center justify-between text-xs">
-                                        <span className="text-fg-muted">{segment.kpi_count} KPIs</span>
-                                        {segment.signal_count > 0 && (
-                                            <span className="text-warning">{segment.signal_count} alerts</span>
-                                        )}
-                                    </div>
-                                </Stack>
-                            </Card>
+                                    </span>
+                                }
+                            />
                         </Grid.Item>
                     ))}
                     {/* Manufacturing — composed locally; not yet served by insight-be */}

@@ -6,7 +6,7 @@ import { useFormatters } from '@so360/formatters';
 import { useShell, useFeatureFlags, useShellBridge } from '@so360/shell-context';
 import { classifyKpiUnit, formatNumber, formatPercentage } from './charts/chartUtils';
 import { insightApi } from '../services/insightApi';
-import { IconButton, TextField } from '@so360/design-system';
+import { IconButton, KpiCard, TextField } from '@so360/design-system';
 
 interface KPICardProps {
     kpi: KPI;
@@ -97,29 +97,31 @@ const KPICardInner: React.FC<KPICardProps> = ({ kpi }) => {
         return 'text-fg-muted';
     };
 
-    return (
-        <div className="relative bg-surface/50 border border-line rounded-lg p-6 hover:bg-surface/70 transition-all">
-            {!isCounter && canEditTargets && !isEditingTarget && (
-                <IconButton
-                    label="Set target"
-                    size="sm"
-                    className="absolute top-3 right-3"
-                    onClick={startEditingTarget}
-                    icon={<Pencil className="w-3.5 h-3.5" />}
-                />
+    const targetLine = !isCounter && effectiveTargetValue !== undefined && !isEditingTarget ? (
+        <div
+            className={`text-xs mt-1 ${
+                effectiveVariance === null || effectiveVariance === undefined
+                    ? 'text-fg-muted'
+                    : effectiveVariance >= 0
+                        ? 'text-success'
+                        : 'text-danger'
+            }`}
+        >
+            Target: {formatValueFor(effectiveTargetValue)}
+            {effectiveVariance !== null && effectiveVariance !== undefined && (
+                <> · {effectiveVariance >= 0 ? '+' : ''}{formatNumber(effectiveVariance, 1)}% vs target</>
             )}
+        </div>
+    ) : null;
 
-            <div className="flex items-start justify-between mb-3">
-                <div>
-                    <p className="text-sm text-fg-muted mb-1">{kpi.kpi_name}</p>
-                    <p className="text-xs text-fg-subtle">{kpi.category}</p>
-                </div>
+    const hint = (
+        <div className="space-y-1">
+            <div className="flex items-center justify-between gap-2">
+                <span className="text-fg-subtle">
+                    {kpi.category}
+                    {displayUnit && <span className="ml-2 text-fg-muted">{displayUnit}</span>}
+                </span>
                 {!isCounter && getTrendIcon()}
-            </div>
-
-            <div className="flex items-baseline gap-2 mb-2">
-                <span className="text-3xl font-bold text-fg">{formatValue()}</span>
-                {displayUnit && <span className="text-sm text-fg-muted">{displayUnit}</span>}
             </div>
 
             {!isCounter && kpi.trend_percentage !== undefined && (
@@ -129,23 +131,7 @@ const KPICardInner: React.FC<KPICardProps> = ({ kpi }) => {
                 </div>
             )}
 
-            {/* Target / variance line */}
-            {!isCounter && effectiveTargetValue !== undefined && !isEditingTarget && (
-                <div
-                    className={`text-xs mt-1 ${
-                        effectiveVariance === null || effectiveVariance === undefined
-                            ? 'text-fg-muted'
-                            : effectiveVariance >= 0
-                                ? 'text-success'
-                                : 'text-danger'
-                    }`}
-                >
-                    Target: {formatValueFor(effectiveTargetValue)}
-                    {effectiveVariance !== null && effectiveVariance !== undefined && (
-                        <> · {effectiveVariance >= 0 ? '+' : ''}{formatNumber(effectiveVariance, 1)}% vs target</>
-                    )}
-                </div>
-            )}
+            {targetLine}
 
             {/* Inline target editor */}
             {!isCounter && isEditingTarget && (
@@ -180,7 +166,7 @@ const KPICardInner: React.FC<KPICardProps> = ({ kpi }) => {
 
             {/* 7-Day Sparkline */}
             {!isCounter && kpi.sparkline_data && kpi.sparkline_data.length > 0 && (
-                <div className="mt-3 pt-3 border-t border-line">
+                <div className="mt-2 pt-2 border-t border-line">
                     <p className="text-xs text-fg-subtle mb-1">Last 7 days</p>
                     <SparklineChart
                         data={kpi.sparkline_data}
@@ -188,6 +174,27 @@ const KPICardInner: React.FC<KPICardProps> = ({ kpi }) => {
                         height={24}
                     />
                 </div>
+            )}
+        </div>
+    );
+
+    return (
+        <div className="relative h-full">
+            <KpiCard
+                name={kpi.kpi_code}
+                label={kpi.kpi_name}
+                value={formatValue()}
+                hint={hint}
+                className="h-full pr-10"
+            />
+            {!isCounter && canEditTargets && !isEditingTarget && (
+                <IconButton
+                    label="Set target"
+                    size="sm"
+                    className="absolute top-3 right-3"
+                    onClick={startEditingTarget}
+                    icon={<Pencil className="w-3.5 h-3.5" />}
+                />
             )}
         </div>
     );
