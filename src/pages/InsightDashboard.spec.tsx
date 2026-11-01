@@ -80,10 +80,11 @@ describe('InsightDashboard', () => {
   });
 
   describe('Given loading state', () => {
-    it('When segments are being fetched / Then shows skeleton', () => {
+    it('When segments are being fetched / Then shows no busy indicator', () => {
       mockApi.getSegments.mockReturnValue(new Promise(() => {}));
       wrap(<InsightDashboard />);
-      expect(document.querySelector('.animate-pulse')).toBeInTheDocument();
+      expect(document.querySelector('.animate-pulse')).not.toBeInTheDocument();
+      expect(document.querySelector('[aria-busy="true"]')).not.toBeInTheDocument();
     });
   });
 

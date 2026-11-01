@@ -30,8 +30,8 @@ export const MfeShellInitializer: React.FC<MfeShellInitializerProps> = ({ childr
 
     if (!isSynced) {
         return (
-            <div className="min-h-screen bg-slate-950 flex items-center justify-center">
-                <div className="text-slate-400">Initializing Insight module...</div>
+            <div className="min-h-screen bg-bg flex items-center justify-center">
+                <div className="text-fg-muted">Initializing Insight module...</div>
             </div>
         );
     }

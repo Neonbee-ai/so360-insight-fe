@@ -84,7 +84,7 @@ describe('AlertsPage', () => {
       await waitFor(() => {
         expect(screen.getByText('Unresolved')).toBeInTheDocument();
       });
-      const allBtn = screen.getByRole('button', { name: 'All' });
+      const allBtn = screen.getByRole('radio', { name: 'All' });
       await userEvent.click(allBtn);
       await waitFor(() => {
         expect(mockApi.getAlerts).toHaveBeenCalledWith(expect.objectContaining({ unresolved_only: false }));

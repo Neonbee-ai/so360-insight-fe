@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Loader2, Factory, AlertCircle, RefreshCw } from 'lucide-react';
 import { formatNumber } from '../charts/chartUtils';
 import { useShell } from '@so360/shell-context';
+import { Button, Grid, KpiCard } from '@so360/design-system';
 import {
     manufacturingApi,
     buildManufacturingHeaders,
@@ -31,18 +32,6 @@ const NO_ORG_MESSAGE = 'Select an organization to view Manufacturing metrics.';
 
 const fmtPct = (n: number) => `${(n ?? 0).toFixed(1)}%`;
 const fmtNum = (n: number) => formatNumber(n ?? 0);
-
-const Tile: React.FC<{ label: string; value: React.ReactNode; sub?: string; tone?: 'default' | 'pos' | 'neg' }> =
-    ({ label, value, sub, tone = 'default' }) => {
-        const colour = tone === 'pos' ? 'text-emerald-300' : tone === 'neg' ? 'text-rose-300' : 'text-slate-100';
-        return (
-            <div className="bg-slate-900/50 border border-slate-800 rounded-lg p-6 hover:bg-slate-900/70 transition-all">
-                <p className="text-sm text-slate-400 mb-3">{label}</p>
-                <div className={`text-3xl font-bold ${colour}`}>{value}</div>
-                {sub && <div className="text-xs text-slate-500 mt-2">{sub}</div>}
-            </div>
-        );
-    };
 
 export const ManufacturingSegment: React.FC = () => {
     const { currentOrg, accessToken } = useShell();
@@ -89,8 +78,8 @@ export const ManufacturingSegment: React.FC = () => {
 
     if (loading && !summary) {
         return (
-            <div className="flex items-center justify-center py-24">
-                <Loader2 className="w-8 h-8 text-emerald-400 animate-spin" />
+            <div className="flex items-center justify-center py-10">
+                <Loader2 className="w-8 h-8 text-success animate-spin" />
             </div>
         );
     }
@@ -99,20 +88,16 @@ export const ManufacturingSegment: React.FC = () => {
     if (error && !summary) {
         const isNoOrg = error === NO_ORG_MESSAGE;
         return (
-            <div className="m-8 p-6 bg-slate-900/50 border border-slate-800 rounded-lg flex items-start gap-4">
-                <AlertCircle className="w-6 h-6 text-amber-400 mt-0.5 shrink-0" />
+            <div className="m-8 p-6 bg-surface/50 border border-line rounded-lg flex items-start gap-4">
+                <AlertCircle className="w-6 h-6 text-warning mt-0.5 shrink-0" />
                 <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-slate-100 mb-1">Manufacturing metrics unavailable</h3>
-                    <p className="text-sm text-slate-400">{error}</p>
+                    <h3 className="text-lg font-semibold text-fg mb-1">Manufacturing metrics unavailable</h3>
+                    <p className="text-sm text-fg-muted">{error}</p>
                     {!isNoOrg && (
-                        <button
-                            type="button"
-                            onClick={retry}
-                            className="mt-4 inline-flex items-center gap-2 px-3 py-1.5 text-sm rounded-md border border-slate-700 text-slate-200 hover:bg-slate-800 transition-colors"
-                        >
-                            <RefreshCw className="w-4 h-4" />
-                            Retry
-                        </button>
+                        <Button variant="secondary" size="sm" onClick={retry}>
+                                <RefreshCw className="w-4 h-4" />
+                                Retry
+                        </Button>
                     )}
                 </div>
             </div>
@@ -124,48 +109,44 @@ export const ManufacturingSegment: React.FC = () => {
     return (
         <div className="space-y-6">
             <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
-                    <Factory className="w-5 h-5 text-emerald-300" />
+                <div className="w-10 h-10 rounded-lg bg-success/10 border border-success/20 flex items-center justify-center">
+                    <Factory className="w-5 h-5 text-success" />
                 </div>
                 <div>
-                    <h2 className="text-xl font-semibold text-slate-100">Manufacturing</h2>
-                    <p className="text-sm text-slate-400">Production execution KPIs · refreshed every 30s</p>
+                    <h2 className="text-xl font-semibold text-fg">Manufacturing</h2>
+                    <p className="text-sm text-fg-muted">Production execution KPIs · refreshed every 30s</p>
                 </div>
             </div>
 
             {error && (
-                <div className="p-4 bg-slate-900/50 border border-slate-800 rounded-lg flex items-center gap-3">
-                    <AlertCircle className="w-5 h-5 text-amber-400 shrink-0" />
-                    <p className="text-sm text-slate-400 flex-1">
+                <div className="p-4 bg-surface/50 border border-line rounded-lg flex items-center gap-3">
+                    <AlertCircle className="w-5 h-5 text-warning shrink-0" />
+                    <p className="text-sm text-fg-muted flex-1">
                         Showing the last available figures. {error}
                     </p>
-                    <button
-                        type="button"
-                        onClick={retry}
-                        className="inline-flex items-center gap-2 px-3 py-1.5 text-sm rounded-md border border-slate-700 text-slate-200 hover:bg-slate-800 transition-colors"
-                    >
-                        <RefreshCw className="w-4 h-4" />
-                        Retry
-                    </button>
+                    <Button variant="secondary" size="sm" onClick={retry}>
+                            <RefreshCw className="w-4 h-4" />
+                            Retry
+                    </Button>
                 </div>
             )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <Tile label="Open MOs" value={summary.mo_in_progress + summary.mo_planned} sub={`${summary.mo_total} total · ${summary.mo_done} done`} />
-                <Tile label="In Progress" value={summary.mo_in_progress} tone="pos" sub={`${summary.wo_open} work orders open`} />
-                <Tile label="On-time %" value={fmtPct(summary.on_time_pct)} tone={summary.on_time_pct >= 90 ? 'pos' : 'neg'} sub="MOs delivered by planned end" />
-                <Tile label="Cost Variance" value={fmtPct(variance)} tone={variance > 5 ? 'neg' : variance < -5 ? 'pos' : 'default'} sub={variance > 0 ? 'Actual over standard' : 'Actual under standard'} />
-                <Tile label="Total Produced" value={fmtNum(summary.total_produced)} sub="units (life-to-date)" />
-                <Tile label="Scrap" value={fmtPct(summary.scrap_pct)} tone={summary.scrap_pct > 3 ? 'neg' : 'default'} sub={`${fmtNum(summary.total_scrap_qty)} units scrapped`} />
-                <Tile label="MOs Planned" value={summary.mo_planned} sub="awaiting start" />
-                <Tile label="MOs Completed" value={summary.mo_done} tone="pos" sub="lifetime" />
-            </div>
+            <Grid columns={4} gap="md">
+                <KpiCard label="Open MOs" value={summary.mo_in_progress + summary.mo_planned} hint={`${summary.mo_total} total · ${summary.mo_done} done`} />
+                <KpiCard label="In Progress" value={summary.mo_in_progress} hint={`${summary.wo_open} work orders open`} />
+                <KpiCard label="On-time %" value={fmtPct(summary.on_time_pct)} hint="MOs delivered by planned end" />
+                <KpiCard label="Cost Variance" value={fmtPct(variance)} hint={variance > 0 ? 'Actual over standard' : 'Actual under standard'} />
+                <KpiCard label="Total Produced" value={fmtNum(summary.total_produced)} hint="units (life-to-date)" />
+                <KpiCard label="Scrap" value={fmtPct(summary.scrap_pct)} hint={`${fmtNum(summary.total_scrap_qty)} units scrapped`} />
+                <KpiCard label="MOs Planned" value={summary.mo_planned} hint="awaiting start" />
+                <KpiCard label="MOs Completed" value={summary.mo_done} hint="lifetime" />
+            </Grid>
 
             {util.length > 0 && (
-                <div className="bg-slate-900/50 border border-slate-800 rounded-lg p-6">
+                <div className="bg-surface/50 border border-line rounded-lg p-6">
                     <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-base font-semibold text-slate-100">Work Centre Utilisation (OEE)</h3>
-                        <span className="text-xs text-slate-500">{util.length} centres</span>
+                        <h3 className="text-base font-semibold text-fg">Work Centre Utilisation (OEE)</h3>
+                        <span className="text-xs text-fg-subtle">{util.length} centres</span>
                     </div>
                     <div className="space-y-4">
                         {util.map((wc) => {
@@ -174,19 +155,19 @@ export const ManufacturingSegment: React.FC = () => {
                                 <div key={wc.work_center_id}>
                                     <div className="flex items-center justify-between mb-1.5">
                                         <div>
-                                            <span className="text-sm text-slate-200">{wc.name}</span>
-                                            <span className="text-xs text-slate-500 ml-2 font-mono">{wc.code}</span>
+                                            <span className="text-sm text-fg">{wc.name}</span>
+                                            <span className="text-xs text-fg-subtle ml-2 font-mono">{wc.code}</span>
                                         </div>
                                         <div className="text-sm tabular-nums">
-                                            <span className={onTarget ? 'text-emerald-300' : 'text-amber-300'}>
+                                            <span className={onTarget ? 'text-success' : 'text-warning'}>
                                                 {fmtPct(wc.oee_pct)}
                                             </span>
-                                            <span className="text-slate-500"> / {wc.target_pct}%</span>
-                                            <span className="text-xs text-slate-500 ml-3">{wc.wos_done}/{wc.wos_total} WO</span>
+                                            <span className="text-fg-subtle"> / {wc.target_pct}%</span>
+                                            <span className="text-xs text-fg-subtle ml-3">{wc.wos_done}/{wc.wos_total} WO</span>
                                         </div>
                                     </div>
-                                    <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
-                                        <div className={`h-full transition-all ${onTarget ? 'bg-emerald-500' : 'bg-amber-500'}`}
+                                    <div className="h-2 bg-surface-raised rounded-full overflow-hidden">
+                                        <div className={`h-full transition-all ${onTarget ? 'bg-success' : 'bg-warning'}`}
                                              style={{ width: `${Math.min(wc.oee_pct, 100)}%` }} />
                                     </div>
                                 </div>
@@ -196,7 +177,7 @@ export const ManufacturingSegment: React.FC = () => {
                 </div>
             )}
 
-            <div className="text-xs text-slate-500 text-center pt-2">
+            <div className="text-xs text-fg-subtle text-center pt-2">
                 Source: Manufacturing module · live polling
             </div>
         </div>

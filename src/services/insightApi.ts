@@ -2,6 +2,7 @@ import axios, { AxiosInstance } from 'axios';
 import { attachToastErrorHandler } from '@so360/design-system';
 import { createTtlCache } from './ttlCache';
 import type {
+    MyPipeline,
     Dashboard,
     ModuleInsights,
     AlertsResponse,
@@ -21,15 +22,27 @@ const CACHE_TTL = 2 * 60 * 1000; // 2 minutes
 const CACHE_MAX = 100; // hard ceiling on retained entries
 const apiCache = createTtlCache<any>({ ttlMs: CACHE_TTL, maxEntries: CACHE_MAX });
 
+// In-flight requests by key: a dashboard load mounts several components that ask
+// for the same endpoint at once (e.g. /segments, /data-freshness); share one call.
+const inFlight = new Map<string, Promise<any>>();
+
 function cachedGet<T>(key: string, fetcher: () => Promise<T>): Promise<T> {
     const cached = apiCache.get(key);
     if (cached !== undefined) {
         return Promise.resolve(cached as T);
     }
-    return fetcher().then(data => {
-        apiCache.set(key, data);
-        return data;
-    });
+    const pending = inFlight.get(key);
+    if (pending) return pending as Promise<T>;
+    const p = fetcher()
+        .then(data => {
+            apiCache.set(key, data);
+            return data;
+        })
+        .finally(() => {
+            if (inFlight.get(key) === p) inFlight.delete(key);
+        });
+    inFlight.set(key, p);
+    return p;
 }
 
 function invalidateCache(prefix?: string): void {
@@ -105,6 +118,12 @@ class InsightApiClient {
             const response = await this.client.get<Dashboard>('/dashboard');
             return response.data;
         });
+    }
+
+    async getMyPipeline(): Promise<MyPipeline> {
+        // Not cached long-term: a rep expects their own pipeline to be current.
+        const response = await this.client.get<MyPipeline>('/my-pipeline');
+        return response.data;
     }
 
     async getModuleInsights(moduleCode: string): Promise<ModuleInsights> {
@@ -243,10 +262,47 @@ class InsightApiClient {
     // ===== AI SUMMARY METHODS =====
 
     async getAiSummary(segmentCode: string): Promise<any> {
-        return cachedGet(`ai-summary:${segmentCode}`, async () => {
+        const data = await cachedGet(`ai-summary:${segmentCode}`, async () => {
             const response = await this.client.get(`/ai-summary/${segmentCode}`);
             return response.data;
         });
+        // The BE answers `generating: true` when Neura has not finished within its budget.
+        // That placeholder must never be cached or the real summary would be hidden for the TTL.
+        if (data && data.generating) invalidateCache(`ai-summary:${segmentCode}`);
+        return data;
+    }
+
+    /**
+     * Quietly re-poll a summary the BE reported as still generating. Never shows a spinner;
+     * stops on the first real result, after `tries` attempts, or when the returned cancel fn runs.
+     */
+    pollAiSummary(
+        segmentCode: string,
+        onResult: (data: any) => void,
+        tries = 6,
+        delayMs = 5000,
+    ): () => void {
+        let cancelled = false;
+        let timer: ReturnType<typeof setTimeout> | undefined;
+        const step = (left: number) => {
+            if (left <= 0) return;
+            timer = setTimeout(async () => {
+                if (cancelled) return;
+                try {
+                    const data = await this.getAiSummary(segmentCode);
+                    if (cancelled) return;
+                    if (data && data.generating) step(left - 1);
+                    else onResult(data);
+                } catch {
+                    /* stay on the empty state */
+                }
+            }, delayMs);
+        };
+        step(tries);
+        return () => {
+            cancelled = true;
+            if (timer) clearTimeout(timer);
+        };
     }
 
     async regenerateAiSummary(segmentCode: string): Promise<any> {

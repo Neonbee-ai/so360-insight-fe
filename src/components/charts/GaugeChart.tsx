@@ -117,7 +117,7 @@ export const GaugeChartComponent: React.FC<GaugeChartProps> = ({
             </svg>
 
             {/* Legend */}
-            <div className="flex items-center gap-4 mt-4 text-xs text-slate-400">
+            <div className="flex items-center gap-4 mt-4 text-xs text-fg-muted">
                 <div className="flex items-center gap-1">
                     <div className="w-3 h-3 rounded-full" style={{ backgroundColor: STATUS_COLORS.negative }} />
                     <span>&lt; {thresholds.low}%</span>

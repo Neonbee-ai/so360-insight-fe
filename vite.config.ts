@@ -31,7 +31,6 @@ export default defineConfig(({ mode }) => {
                 // runtime serves one instance — preventing recharts' dispatcher mismatch.
                 'use-sync-external-store': { singleton: true },
                 'framer-motion': { singleton: true },
-                'lucide-react': { singleton: true },
                 axios: { singleton: true },
                 '@so360/shell-context': { singleton: true },
                 '@so360/design-system': { singleton: true },

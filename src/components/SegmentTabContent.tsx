@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Loader2, AlertCircle } from 'lucide-react';
-import { toast } from '@so360/design-system';
+import { toast, Button, Card, Grid, Stack, EmptyState } from '@so360/design-system';
 import { getInsightIcon } from '../constants/iconMap';
 import { KPICard } from './KPICard';
 import { AlertCard } from './AlertCard';
@@ -30,6 +30,14 @@ interface SegmentTabContentProps {
     segmentCode: string;
 }
 
+const SEGMENT_CHART_TYPES: Record<string, string[]> = {
+    finance: ['cash_flow_waterfall', 'burn_rate_projection', 'expense_variance'],
+    revenue: ['revenue_trend', 'conversion_funnel', 'aging_buckets'],
+    execution: ['task_completion', 'pr_cycle_time', 'workflow_status'],
+    delivery: ['delivery_rate', 'inventory_turnover', 'backorder_analysis'],
+    workforce: ['utilization_trend', 'overtime_distribution', 'compliance_gauge'],
+};
+
 export const SegmentTabContent: React.FC<SegmentTabContentProps> = ({ segmentCode }) => {
     const { isModuleEnabled } = useModules();
     const { isFeatureEnabled } = useFeatureFlags();
@@ -56,8 +64,19 @@ export const SegmentTabContent: React.FC<SegmentTabContentProps> = ({ segmentCod
     const hasRequiredModules = summaryModules.length === 0 || summaryModules.some(m => isModuleEnabled(m));
     const canShowAiSummary = canShowAiSummaryFeature && hasRequiredModules;
 
+    const trendsCustomRef = useRef(false);
+    const cancelPollRef = useRef<(() => void) | null>(null);
+
+    useEffect(() => () => { cancelPollRef.current?.(); }, [segmentCode]);
+
     useEffect(() => {
+        trendsCustomRef.current = false;
         fetchSegmentDetail();
+        // Warm the chart endpoints in parallel with the detail call (cachedGet shares in-flight
+        // requests) so charts do not wait behind the segment detail round trip.
+        (SEGMENT_CHART_TYPES[segmentCode] ?? []).forEach((t) => {
+            insightApi.getChartData(segmentCode, t).catch(() => undefined);
+        });
         if (canShowAiSummary) {
             fetchNeuraInsight();
         } else {
@@ -66,7 +85,10 @@ export const SegmentTabContent: React.FC<SegmentTabContentProps> = ({ segmentCod
     }, [segmentCode, canShowAiSummary]);
 
     useEffect(() => {
-        if (segment) {
+        // The segment detail already carries 30d trends; refetching one call per KPI on mount is a
+        // duplicate N+1. Only refetch once the user picks a different range.
+        if (timeRange !== '30d') trendsCustomRef.current = true;
+        if (segment && (timeRange !== '30d' || trendsCustomRef.current)) {
             fetchTrendsForRange();
         }
     }, [timeRange, segment?.segment_code]);
@@ -81,6 +103,16 @@ export const SegmentTabContent: React.FC<SegmentTabContentProps> = ({ segmentCod
             setNeuraGeneratedAt(data.generated_at || null);
             setNeuraCached(data.cached ?? false);
             setNeuraDegraded(data.degraded ?? false);
+            if (data.generating) {
+                cancelPollRef.current?.();
+                cancelPollRef.current = insightApi.pollAiSummary(segmentCode, (d) => {
+                    setNeuraSummary(d.summary || null);
+                    setNeuraSections(d.sections || null);
+                    setNeuraGeneratedAt(d.generated_at || null);
+                    setNeuraCached(d.cached ?? false);
+                    setNeuraDegraded(d.degraded ?? false);
+                });
+            }
         } catch (err) {
             setNeuraError(err instanceof Error ? err.message : 'Failed to load AI insights');
         } finally {
@@ -152,13 +184,13 @@ export const SegmentTabContent: React.FC<SegmentTabContentProps> = ({ segmentCod
 
     const getIconColorClass = (colorScheme: { primary: string }) => {
         const colorMap: Record<string, string> = {
-            blue: 'text-blue-400',
-            purple: 'text-purple-400',
-            green: 'text-green-400',
-            orange: 'text-orange-400',
-            red: 'text-red-400',
+            blue: 'text-primary',
+            purple: 'text-accent',
+            green: 'text-success',
+            orange: 'text-warning',
+            red: 'text-danger',
         };
-        return colorMap[colorScheme.primary] || 'text-slate-400';
+        return colorMap[colorScheme.primary] || 'text-fg-muted';
     };
 
     const handleResolveAlert = async (alertId: string) => {
@@ -201,8 +233,8 @@ export const SegmentTabContent: React.FC<SegmentTabContentProps> = ({ segmentCod
         return (
             <div className="flex items-center justify-center py-12">
                 <div className="flex flex-col items-center gap-4">
-                    <Loader2 className="w-12 h-12 text-blue-500 animate-spin" />
-                    <p className="text-slate-400">Loading segment details...</p>
+                    <Loader2 className="w-12 h-12 text-primary animate-spin" />
+                    <p className="text-fg-muted">Loading segment details...</p>
                 </div>
             </div>
         );
@@ -210,17 +242,14 @@ export const SegmentTabContent: React.FC<SegmentTabContentProps> = ({ segmentCod
 
     if (error || !segment) {
         return (
-            <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-6 flex items-start gap-4">
-                <AlertCircle className="w-6 h-6 text-red-400 flex-shrink-0 mt-0.5" />
+            <div className="bg-danger/20 border border-danger/30 rounded-lg p-6 flex items-start gap-4">
+                <AlertCircle className="w-6 h-6 text-danger flex-shrink-0 mt-0.5" />
                 <div>
-                    <h3 className="text-lg font-semibold text-red-400 mb-2">Failed to Load Segment</h3>
-                    <p className="text-sm text-red-300">{error || 'Segment not found'}</p>
-                    <button
-                        onClick={fetchSegmentDetail}
-                        className="mt-4 px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg text-sm font-medium transition-colors"
-                    >
+                    <h3 className="text-lg font-semibold text-danger mb-2">Failed to Load Segment</h3>
+                    <p className="text-sm text-danger">{error || 'Segment not found'}</p>
+                    <Button variant="secondary" size="sm" className="mt-4" onClick={fetchSegmentDetail}>
                         Retry
-                    </button>
+                    </Button>
                 </div>
             </div>
         );
@@ -229,26 +258,26 @@ export const SegmentTabContent: React.FC<SegmentTabContentProps> = ({ segmentCod
     const unresolvedAlerts = segment.signals.filter((s) => !s.resolved_at);
 
     return (
-        <div className="space-y-8">
-            {/* Section 1: Segment Header */}
-            <div className="flex items-start justify-between gap-6">
-                <div className="flex items-start gap-6">
+        <Stack gap="region">
+            {/* Section 1: Segment Header (page title is owned by the page template) */}
+            <Card
+                title={segment.segment_name}
+                actions={<DataFreshnessIndicator />}
+            >
+                <div className="flex items-start gap-4">
                     <div className={getIconColorClass(segment.color_scheme)}>
                         {getSegmentIcon(segment.icon_name)}
                     </div>
-                    <div className="flex-1">
-                        <h1 className="text-2xl font-bold text-slate-100 mb-2">{segment.segment_name}</h1>
-                        <p className="text-slate-400 max-w-3xl">{segment.description}</p>
+                    <div className="flex-1 min-w-0 break-words">
+                        <p className="text-fg-muted max-w-3xl">{segment.description}</p>
                         <div className="flex items-center gap-4 mt-3 text-sm">
-                            <span className="text-slate-500">{segment.kpis.length} KPIs</span>
-                            <span className="text-slate-600">•</span>
-                            <span className="text-slate-500">{unresolvedAlerts.length} Active Alerts</span>
+                            <span className="text-fg-subtle">{segment.kpis.length} KPIs</span>
+                            <span className="text-fg-subtle">•</span>
+                            <span className="text-fg-subtle">{unresolvedAlerts.length} Active Alerts</span>
                         </div>
                     </div>
                 </div>
-                <DataFreshnessIndicator />
-            </div>
-
+            </Card>
             {/* Section 1.5: Neura AI Insights — only shown when at least one required module is enabled */}
             {canShowAiSummary && (() => {
                 const segmentColors: Record<string, 'blue' | 'green' | 'purple' | 'orange'> = {
@@ -281,87 +310,74 @@ export const SegmentTabContent: React.FC<SegmentTabContentProps> = ({ segmentCod
 
             {/* Section 2: KPIs Grid */}
             {segment.kpis.length > 0 && (
-                <div>
-                    <h2 className="text-xl font-semibold text-slate-100 mb-4">Key Performance Indicators</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <Card title="Key performance indicators">
+                    <Grid>
                         {segment.kpis.map((kpi) => (
-                            <KPICard key={kpi.kpi_code} kpi={kpi} />
+                            <Grid.Item key={kpi.kpi_code} span={4}>
+                                <KPICard kpi={kpi} />
+                            </Grid.Item>
                         ))}
-                    </div>
-                </div>
+                    </Grid>
+                </Card>
             )}
 
             {/* Section 2.5: Rich Chart Gallery */}
             {(() => {
                 const charts = renderSegmentCharts();
                 return charts ? (
-                    <div>
-                        <h2 className="text-xl font-semibold text-slate-100 mb-4">Analytics Dashboard</h2>
-                        {charts}
-                    </div>
+                    <Card title="Analytics dashboard">{charts}</Card>
                 ) : null;
             })()}
 
             {/* Section 3: Trend Charts with Time Range Selector */}
             {segment.trends && segment.trends.length > 0 && (
-                <div>
-                    <div className="flex items-center justify-between mb-4">
-                        <h2 className="text-xl font-semibold text-slate-100">Historical Trends</h2>
-                        <TimeRangeSelector selected={timeRange} onChange={setTimeRange} />
-                    </div>
+                <Card
+                    title="Historical Trends"
+                    actions={<TimeRangeSelector selected={timeRange} onChange={setTimeRange} />}
+                >
                     {loadingTrends ? (
                         <div className="flex items-center justify-center py-12">
-                            <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+                            <Loader2 className="w-8 h-8 text-primary animate-spin" />
                         </div>
                     ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <Grid>
                             {segment.trends.map((trend) => (
-                                <TrendChart
-                                    key={trend.kpi_code}
-                                    trendData={trend}
-                                    color={segment.color_scheme.primary}
-                                />
+                                <Grid.Item key={trend.kpi_code} span={4}>
+                                    <TrendChart
+                                        trendData={trend}
+                                        color={segment.color_scheme.primary}
+                                    />
+                                </Grid.Item>
                             ))}
-                        </div>
+                        </Grid>
                     )}
-                </div>
+                </Card>
             )}
 
             {/* Section 4: Active Alerts */}
             {unresolvedAlerts.length > 0 && (
-                <div>
-                    <h2 className="text-xl font-semibold text-slate-100 mb-4">
-                        Active Alerts ({unresolvedAlerts.length})
-                    </h2>
-                    <div className="space-y-3">
+                <Card title={`Active Alerts (${unresolvedAlerts.length})`}>
+                    <Stack gap="tight">
                         {unresolvedAlerts.slice(0, 10).map((alert) => (
                             <AlertCard key={alert.id} alert={alert} onResolve={handleResolveAlert} />
                         ))}
-                    </div>
-
-                    {unresolvedAlerts.length > 10 && (
-                        <div className="mt-4 text-center">
-                            <p className="text-sm text-slate-400">
+                        {unresolvedAlerts.length > 10 && (
+                            <p className="text-sm text-fg-muted text-center">
                                 Showing first 10 of {unresolvedAlerts.length} alerts
                             </p>
-                        </div>
-                    )}
-                </div>
+                        )}
+                    </Stack>
+                </Card>
             )}
 
             {/* Empty States */}
             {segment.kpis.length === 0 && (
-                <div className="text-center py-12 bg-slate-900/30 rounded-lg border border-slate-800">
-                    <p className="text-slate-500">No KPIs available for this segment</p>
-                </div>
+                <EmptyState title="No KPIs available for this segment" />
             )}
 
             {unresolvedAlerts.length === 0 && segment.kpis.length > 0 && (
-                <div className="text-center py-8 bg-slate-900/30 rounded-lg border border-slate-800">
-                    <AlertCircle className="w-12 h-12 text-slate-600 mx-auto mb-3" />
-                    <p className="text-slate-400">No active alerts for this segment</p>
-                </div>
+                <EmptyState icon={AlertCircle} title="No active alerts for this segment" />
             )}
-        </div>
+        </Stack>
     );
 };

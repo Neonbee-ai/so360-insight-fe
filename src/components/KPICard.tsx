@@ -6,6 +6,7 @@ import { useFormatters } from '@so360/formatters';
 import { useShell, useFeatureFlags, useShellBridge } from '@so360/shell-context';
 import { classifyKpiUnit, formatNumber, formatPercentage } from './charts/chartUtils';
 import { insightApi } from '../services/insightApi';
+import { IconButton, KpiCard, TextField } from '@so360/design-system';
 
 interface KPICardProps {
     kpi: KPI;
@@ -85,41 +86,42 @@ const KPICardInner: React.FC<KPICardProps> = ({ kpi }) => {
     const isCounter = kpi.kpi_type === 'counter';
 
     const getTrendIcon = () => {
-        if (kpi.trend === 'up') return <TrendingUp className="w-5 h-5 text-green-500" />;
-        if (kpi.trend === 'down') return <TrendingDown className="w-5 h-5 text-red-500" />;
-        return <Minus className="w-5 h-5 text-slate-400" />;
+        if (kpi.trend === 'up') return <TrendingUp className="w-5 h-5 text-success" />;
+        if (kpi.trend === 'down') return <TrendingDown className="w-5 h-5 text-danger" />;
+        return <Minus className="w-5 h-5 text-fg-muted" />;
     };
 
     const getTrendColor = () => {
-        if (kpi.trend === 'up') return 'text-green-500';
-        if (kpi.trend === 'down') return 'text-red-500';
-        return 'text-slate-400';
+        if (kpi.trend === 'up') return 'text-success';
+        if (kpi.trend === 'down') return 'text-danger';
+        return 'text-fg-muted';
     };
 
-    return (
-        <div className="relative bg-slate-900/50 border border-slate-800 rounded-lg p-6 hover:bg-slate-900/70 transition-all">
-            {!isCounter && canEditTargets && !isEditingTarget && (
-                <button
-                    type="button"
-                    aria-label="Set target"
-                    onClick={startEditingTarget}
-                    className="absolute top-3 right-3 p-1 rounded text-slate-500 hover:text-slate-300 hover:bg-slate-800 transition-colors"
-                >
-                    <Pencil className="w-3.5 h-3.5" />
-                </button>
+    const targetLine = !isCounter && effectiveTargetValue !== undefined && !isEditingTarget ? (
+        <div
+            className={`text-xs mt-1 ${
+                effectiveVariance === null || effectiveVariance === undefined
+                    ? 'text-fg-muted'
+                    : effectiveVariance >= 0
+                        ? 'text-success'
+                        : 'text-danger'
+            }`}
+        >
+            Target: {formatValueFor(effectiveTargetValue)}
+            {effectiveVariance !== null && effectiveVariance !== undefined && (
+                <> · {effectiveVariance >= 0 ? '+' : ''}{formatNumber(effectiveVariance, 1)}% vs target</>
             )}
+        </div>
+    ) : null;
 
-            <div className="flex items-start justify-between mb-3">
-                <div>
-                    <p className="text-sm text-slate-400 mb-1">{kpi.kpi_name}</p>
-                    <p className="text-xs text-slate-500">{kpi.category}</p>
-                </div>
+    const hint = (
+        <div className="space-y-1">
+            <div className="flex items-center justify-between gap-2">
+                <span className="text-fg-subtle">
+                    {kpi.category}
+                    {displayUnit && <span className="ml-2 text-fg-muted">{displayUnit}</span>}
+                </span>
                 {!isCounter && getTrendIcon()}
-            </div>
-
-            <div className="flex items-baseline gap-2 mb-2">
-                <span className="text-3xl font-bold text-slate-100">{formatValue()}</span>
-                {displayUnit && <span className="text-sm text-slate-400">{displayUnit}</span>}
             </div>
 
             {!isCounter && kpi.trend_percentage !== undefined && (
@@ -129,66 +131,70 @@ const KPICardInner: React.FC<KPICardProps> = ({ kpi }) => {
                 </div>
             )}
 
-            {/* Target / variance line */}
-            {!isCounter && effectiveTargetValue !== undefined && !isEditingTarget && (
-                <div
-                    className={`text-xs mt-1 ${
-                        effectiveVariance === null || effectiveVariance === undefined
-                            ? 'text-slate-400'
-                            : effectiveVariance >= 0
-                                ? 'text-green-500'
-                                : 'text-red-500'
-                    }`}
-                >
-                    Target: {formatValueFor(effectiveTargetValue)}
-                    {effectiveVariance !== null && effectiveVariance !== undefined && (
-                        <> · {effectiveVariance >= 0 ? '+' : ''}{formatNumber(effectiveVariance, 1)}% vs target</>
-                    )}
-                </div>
-            )}
+            {targetLine}
 
             {/* Inline target editor */}
             {!isCounter && isEditingTarget && (
                 <div className="flex items-center gap-1 mt-1" data-testid="target-editor">
-                    <input
+                    <TextField
+                        name="kpi-target"
                         type="number"
+                        size="sm"
+                        aria-label="Target value"
                         value={targetInput}
                         onChange={(e) => setTargetInput(e.target.value)}
                         placeholder="Target value"
-                        className="w-24 text-xs bg-slate-800 border border-slate-700 rounded px-1.5 py-0.5 text-slate-100"
+                        className="w-24"
                         autoFocus
                     />
-                    <button
-                        type="button"
-                        aria-label="Save target"
+                    <IconButton
+                        label="Save target"
+                        size="sm"
                         onClick={saveTarget}
                         disabled={savingTarget}
-                        className="p-1 rounded text-green-500 hover:bg-slate-800 disabled:opacity-50"
-                    >
-                        <Check className="w-3.5 h-3.5" />
-                    </button>
-                    <button
-                        type="button"
-                        aria-label="Cancel"
+                        icon={<Check className="w-3.5 h-3.5 text-success" />}
+                    />
+                    <IconButton
+                        label="Cancel"
+                        size="sm"
                         onClick={cancelEditingTarget}
                         disabled={savingTarget}
-                        className="p-1 rounded text-slate-500 hover:bg-slate-800 disabled:opacity-50"
-                    >
-                        <X className="w-3.5 h-3.5" />
-                    </button>
+                        icon={<X className="w-3.5 h-3.5" />}
+                    />
                 </div>
             )}
 
             {/* 7-Day Sparkline */}
             {!isCounter && kpi.sparkline_data && kpi.sparkline_data.length > 0 && (
-                <div className="mt-3 pt-3 border-t border-slate-800">
-                    <p className="text-xs text-slate-500 mb-1">Last 7 days</p>
+                <div className="mt-2 pt-2 border-t border-line">
+                    <p className="text-xs text-fg-subtle mb-1">Last 7 days</p>
                     <SparklineChart
                         data={kpi.sparkline_data}
                         trend={kpi.trend}
                         height={24}
                     />
                 </div>
+            )}
+        </div>
+    );
+
+    return (
+        <div className="relative h-full">
+            <KpiCard
+                name={kpi.kpi_code}
+                label={kpi.kpi_name}
+                value={formatValue()}
+                hint={hint}
+                className="h-full pr-10"
+            />
+            {!isCounter && canEditTargets && !isEditingTarget && (
+                <IconButton
+                    label="Set target"
+                    size="sm"
+                    className="absolute top-3 right-3"
+                    onClick={startEditingTarget}
+                    icon={<Pencil className="w-3.5 h-3.5" />}
+                />
             )}
         </div>
     );

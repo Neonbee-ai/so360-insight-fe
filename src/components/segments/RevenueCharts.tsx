@@ -4,7 +4,8 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { Loader2, AlertCircle } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
+import { Alert, Grid, GridItem } from '@so360/design-system';
 import {
     LineChartComponent,
     FunnelChartComponent,
@@ -58,27 +59,22 @@ export const RevenueCharts: React.FC<RevenueChartsProps> = ({ tenantId, orgId })
     if (loading) {
         return (
             <div className="flex items-center justify-center py-12">
-                <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+                <Loader2 className="w-8 h-8 text-primary animate-spin" />
             </div>
         );
     }
 
     if (error) {
         return (
-            <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-6 flex items-start gap-4">
-                <AlertCircle className="w-6 h-6 text-red-400 flex-shrink-0 mt-0.5" />
-                <div>
-                    <h3 className="text-lg font-semibold text-red-400 mb-2">Failed to Load Charts</h3>
-                    <p className="text-sm text-red-300">{error}</p>
-                </div>
-            </div>
+            <Alert variant="error" title="Failed to load charts">{error}</Alert>
         );
     }
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Grid columns={12} gap="lg">
             {/* Revenue vs Target Trend */}
             {(isModuleEnabled('crm') || isModuleEnabled('accounting')) && revenueTrendData && (
+                <GridItem span={6}>
                 <ChartContainer
                     title="Revenue vs Target"
                     description="Monthly performance comparison"
@@ -98,10 +94,12 @@ export const RevenueCharts: React.FC<RevenueChartsProps> = ({ tenantId, orgId })
                         formatXAxis={(value) => formatDate(value)}
                     />
                 </ChartContainer>
+                </GridItem>
             )}
 
             {/* Deal Conversion Funnel */}
             {isModuleEnabled('crm') && funnelData && (
+                <GridItem span={6}>
                 <ChartContainer
                     title="Deal Conversion Funnel"
                     description="Sales pipeline progression"
@@ -115,16 +113,17 @@ export const RevenueCharts: React.FC<RevenueChartsProps> = ({ tenantId, orgId })
                         formatValue={(value) => formatCurrency(value)}
                     />
                 </ChartContainer>
+                </GridItem>
             )}
 
             {/* Invoice Aging Distribution */}
             {isModuleEnabled('accounting') && agingData && (
+                <GridItem span={12}>
                 <ChartContainer
                     title="Invoice Aging Distribution"
                     description="Outstanding invoices by age bucket"
                     chartId="aging-buckets-chart"
                     exportData={agingData}
-                    className="lg:col-span-2"
                 >
                     <BarChartComponent
                         data={agingData}
@@ -135,7 +134,8 @@ export const RevenueCharts: React.FC<RevenueChartsProps> = ({ tenantId, orgId })
                         formatValue={(value) => formatCurrency(value)}
                     />
                 </ChartContainer>
+                </GridItem>
             )}
-        </div>
+        </Grid>
     );
 };

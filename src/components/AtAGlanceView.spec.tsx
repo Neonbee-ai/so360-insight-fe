@@ -126,10 +126,19 @@ describe('AtAGlanceView', () => {
   });
 
   describe('Given loading state', () => {
-    it('When data is being fetched / Then shows skeleton', () => {
+    it('When data is being fetched and no primary KPI is known / Then renders the page without a page-level skeleton', () => {
       mockApi.getAlerts.mockReturnValue(new Promise(() => {}));
-      const { container } = render(<AtAGlanceView segments={mockSegments} onSegmentClick={vi.fn()} />);
-      expect(container.querySelector('.animate-pulse')).toBeInTheDocument();
+      const noKpi = [{ ...mockSegments[0], primary_kpi: null }];
+      const { container } = render(<AtAGlanceView segments={noKpi} onSegmentClick={vi.fn()} />);
+      expect(container.querySelector('[aria-busy="true"]')).not.toBeInTheDocument();
+      expect(screen.getByText('Business segments')).toBeInTheDocument();
+    });
+
+    it('Given slow segment details and alerts / When primary KPIs are known / Then page paints them without waiting', async () => {
+      mockApi.getAlerts.mockReturnValue(new Promise(() => {}));
+      mockApi.getSegmentDetail.mockReturnValue(new Promise(() => {}));
+      render(<AtAGlanceView segments={mockSegments} onSegmentClick={vi.fn()} />);
+      await waitFor(() => expect(screen.getByText('Total Revenue')).toBeInTheDocument());
     });
   });
 
@@ -137,7 +146,7 @@ describe('AtAGlanceView', () => {
     it('When rendered / Then shows business segments section', async () => {
       render(<AtAGlanceView segments={mockSegments} onSegmentClick={vi.fn()} />);
       await waitFor(() => {
-        expect(screen.getByText('Business Segments')).toBeInTheDocument();
+        expect(screen.getByText('Business segments')).toBeInTheDocument();
       });
     });
 
@@ -187,7 +196,7 @@ describe('AtAGlanceView', () => {
       await waitFor(() => {
         expect(screen.getByText('Revenue')).toBeInTheDocument();
       });
-      screen.getByText('Revenue').closest('button')?.click();
+      screen.getByText('Revenue').closest('[role="button"]')?.click();
       expect(onClick).toHaveBeenCalledWith('revenue');
     });
   });
@@ -197,7 +206,7 @@ describe('AtAGlanceView', () => {
       mockShell = { effectiveFlagsLoaded: false, isFeatureEnabled: () => true };
       render(<AtAGlanceView segments={mockSegments} onSegmentClick={vi.fn()} />);
       await waitFor(() => {
-        expect(screen.getByText('Business Segments')).toBeInTheDocument();
+        expect(screen.getByText('Business segments')).toBeInTheDocument();
       });
       expect(screen.queryByText('AI Executive Summary')).not.toBeInTheDocument();
     });
@@ -220,7 +229,7 @@ describe('AtAGlanceView', () => {
       ]);
       render(<AtAGlanceView segments={mockSegments} onSegmentClick={vi.fn()} />);
       await waitFor(() => {
-        expect(screen.getByText('Related Movements')).toBeInTheDocument();
+        expect(screen.getByText('Related movements')).toBeInTheDocument();
       });
       // 'Total Revenue' is resolved from the loaded KPI map (kpi_code r1);
       // 'inv_turnover' has no matching KPI in the loaded map so falls back to its code.
@@ -233,9 +242,9 @@ describe('AtAGlanceView', () => {
       mockApi.getCorrelations.mockResolvedValue([]);
       render(<AtAGlanceView segments={mockSegments} onSegmentClick={vi.fn()} />);
       await waitFor(() => {
-        expect(screen.getByText('Business Segments')).toBeInTheDocument();
+        expect(screen.getByText('Business segments')).toBeInTheDocument();
       });
-      expect(screen.queryByText('Related Movements')).not.toBeInTheDocument();
+      expect(screen.queryByText('Related movements')).not.toBeInTheDocument();
     });
   });
 
@@ -247,9 +256,9 @@ describe('AtAGlanceView', () => {
       ]);
       render(<AtAGlanceView segments={mockSegments} onSegmentClick={vi.fn()} />);
       await waitFor(() => {
-        expect(screen.getByText('Business Segments')).toBeInTheDocument();
+        expect(screen.getByText('Business segments')).toBeInTheDocument();
       });
-      expect(screen.queryByText('Related Movements')).not.toBeInTheDocument();
+      expect(screen.queryByText('Related movements')).not.toBeInTheDocument();
       expect(mockApi.getCorrelations).not.toHaveBeenCalled();
     });
   });

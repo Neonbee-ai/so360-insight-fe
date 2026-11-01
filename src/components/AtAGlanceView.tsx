@@ -5,7 +5,7 @@ import { KPICard } from './KPICard';
 import { AlertCard } from './AlertCard';
 import { NeuraSummaryCard } from './NeuraSummaryCard';
 import { ModuleCoveragePanel } from './ModuleCoveragePanel';
-import { toast } from '@so360/design-system';
+import { toast, Card, Grid, Stack, EmptyState, KpiCard } from '@so360/design-system';
 import { insightApi } from '../services/insightApi';
 import { manufacturingApi, buildManufacturingHeaders } from '../services/manufacturingApi';
 import type { SegmentSummary, KPI, Alert, AiSummarySections, CorrelationPair } from '../types/insight';
@@ -28,33 +28,26 @@ const ManufacturingAtAGlanceCard: React.FC<{ onClick: () => void }> = ({ onClick
             .catch(() => setData(null));
     }, [currentOrg?.id, currentOrg?.tenant_id, accessToken]);
     return (
-        <button onClick={onClick}
-            className="bg-slate-900/50 rounded-lg border border-emerald-500/20 p-4 text-left transition-all hover:shadow-lg hover:border-emerald-500/40 group">
-            <div className="flex items-start justify-between mb-3">
-                <Factory className="w-5 h-5 text-emerald-400" />
-            </div>
-            <h3 className="text-sm font-semibold text-slate-100 mb-1 group-hover:text-slate-50 transition-colors">
-                Manufacturing
-            </h3>
-            {data ? (
-                <>
-                    <div className="mb-2">
-                        <div className="text-lg font-bold text-slate-100">
-                            {data.mo_in_progress + data.mo_planned}
-                            <span className="text-xs text-slate-400 ml-1">open MOs</span>
-                        </div>
-                    </div>
-                    <div className="flex items-center justify-between text-xs">
-                        <span className="text-slate-400">{data.wo_open} WOs open</span>
+        <KpiCard
+            name="manufacturing"
+            label="Manufacturing"
+            onClick={onClick}
+            className="h-full"
+            icon={Factory}
+            value={data ? data.mo_in_progress + data.mo_planned : '—'}
+            hint={
+                data ? (
+                    <span className="flex items-center justify-between gap-2">
+                        <span>open MOs · {data.wo_open} WOs open</span>
                         {data.scrap_pct > 3 && (
-                            <span className="text-amber-400">scrap {data.scrap_pct.toFixed(1)}%</span>
+                            <span className="text-warning">scrap {data.scrap_pct.toFixed(1)}%</span>
                         )}
-                    </div>
-                </>
-            ) : (
-                <div className="text-xs text-slate-500">Connecting…</div>
-            )}
-        </button>
+                    </span>
+                ) : (
+                    <span className="text-fg-subtle">Connecting…</span>
+                )
+            }
+        />
     );
 };
 
@@ -102,7 +95,6 @@ export const AtAGlanceView: React.FC<AtAGlanceViewProps> = ({ segments, onSegmen
     const [kpiNameMap, setKpiNameMap] = useState<Map<string, string>>(new Map());
     const [criticalAlerts, setCriticalAlerts] = useState<Alert[]>([]);
     const [correlations, setCorrelations] = useState<CorrelationPair[]>([]);
-    const [loading, setLoading] = useState(true);
 
     // Determine which summary cards to show based on enabled modules
     const visibleCardConfigs = useMemo(
@@ -165,17 +157,17 @@ export const AtAGlanceView: React.FC<AtAGlanceViewProps> = ({ segments, onSegmen
 
     const fetchAtAGlanceData = async () => {
         try {
-            setLoading(true);
-
-            // Fetch critical alerts
-            const alertsResponse = await insightApi.getAlerts({
-                severity: 'critical,warning',
-                unresolved_only: true,
-                limit: 10,
-            });
-            setCriticalAlerts(
-                alertsResponse.data.filter((s: any) => isModuleEnabled(stripPrefix(s.module_code || '')))
-            );
+            // Progressive render: the /segments payload already carries each
+            // segment's primary KPI, so paint those immediately and refine with
+            // full segment details when they arrive (instead of holding the
+            // skeleton until every per-segment request settles).
+            const seed = segments
+                .map((s) => s.primary_kpi)
+                .filter((kpi): kpi is KPI => kpi !== null)
+                .slice(0, 12);
+            if (seed.length > 0) {
+                setTopKPIs(seed);
+            }
 
             // Only fetch segments whose required modules are enabled
             const enabledSegments = segments.filter(s => {
@@ -184,10 +176,28 @@ export const AtAGlanceView: React.FC<AtAGlanceViewProps> = ({ segments, onSegmen
                 return deps.some(mod => isModuleEnabled(mod));
             });
 
-            // Fetch full details for enabled segments to get KPIs
-            const segmentDetails = await Promise.all(
+            // Alerts and segment details are independent: fetch them in parallel
+            // (was alerts -> details, a serial waterfall). One failing segment no
+            // longer discards the others.
+            const alertsPromise = insightApi
+                .getAlerts({ severity: 'critical,warning', unresolved_only: true, limit: 10 })
+                .then((alertsResponse) => {
+                    setCriticalAlerts(
+                        alertsResponse.data.filter((s: any) => isModuleEnabled(stripPrefix(s.module_code || '')))
+                    );
+                })
+                .catch((err) => console.error('Failed to fetch critical alerts:', err));
+
+            const settled = await Promise.allSettled(
                 enabledSegments.map((s) => insightApi.getSegmentDetail(s.segment_code))
             );
+            await alertsPromise;
+            const segmentDetails = settled
+                .filter((r): r is PromiseFulfilledResult<Awaited<ReturnType<typeof insightApi.getSegmentDetail>>> => r.status === 'fulfilled')
+                .map((r) => r.value);
+            if (segmentDetails.length === 0 && enabledSegments.length > 0) {
+                throw new Error('No segment details could be loaded');
+            }
 
             // Collect KPIs from enabled segments, filtered by enabled module
             const allKPIs = segmentDetails
@@ -222,8 +232,6 @@ export const AtAGlanceView: React.FC<AtAGlanceViewProps> = ({ segments, onSegmen
                 .map((s) => s.primary_kpi)
                 .filter((kpi): kpi is KPI => kpi !== null);
             setTopKPIs(allPrimaryKPIs.slice(0, 12));
-        } finally {
-            setLoading(false);
         }
     };
 
@@ -253,6 +261,24 @@ export const AtAGlanceView: React.FC<AtAGlanceViewProps> = ({ segments, onSegmen
                 };
                 return updated;
             });
+            if (data.generating) {
+                insightApi.pollAiSummary(segmentCode, (d) => {
+                    setNeuraSummaries((prev) => {
+                        const updated = [...prev];
+                        updated[index] = {
+                            ...updated[index],
+                            summary: d.summary || null,
+                            sections: d.sections || null,
+                            generatedAt: d.generated_at || null,
+                            cached: d.cached ?? false,
+                            degraded: d.degraded ?? false,
+                            loading: false,
+                            error: null,
+                        };
+                        return updated;
+                    });
+                });
+            }
         } catch (err) {
             console.error(`Failed to fetch AI summary (${segmentCode}):`, err);
             setNeuraSummaries((prev) => {
@@ -321,42 +347,14 @@ export const AtAGlanceView: React.FC<AtAGlanceViewProps> = ({ segments, onSegmen
         }
     };
 
-    const getSegmentIcon = (iconName: string) => {
-        const IconComponent = getInsightIcon(iconName);
-        if (!IconComponent) return null;
-        return <IconComponent className="w-8 h-8" />;
-    };
-
-    const getIconColorClass = (colorScheme: { primary: string }) => {
-        const colorMap: Record<string, string> = {
-            blue: 'text-blue-400',
-            purple: 'text-purple-400',
-            green: 'text-green-400',
-            orange: 'text-orange-400',
-            red: 'text-red-400',
-        };
-        return colorMap[colorScheme.primary] || 'text-slate-400';
-    };
-
-    const getBorderColorClass = (colorScheme: { primary: string }) => {
-        const colorMap: Record<string, string> = {
-            blue: 'border-blue-500/30 hover:border-blue-500',
-            purple: 'border-purple-500/30 hover:border-purple-500',
-            green: 'border-green-500/30 hover:border-green-500',
-            orange: 'border-orange-500/30 hover:border-orange-500',
-            red: 'border-red-500/30 hover:border-red-500',
-        };
-        return colorMap[colorScheme.primary] || 'border-slate-700 hover:border-slate-600';
-    };
-
     const getTrendIcon = (trend: 'up' | 'down' | 'stable') => {
         switch (trend) {
             case 'up':
-                return <TrendingUp className="w-4 h-4 text-green-400" />;
+                return <TrendingUp className="w-4 h-4 text-success" />;
             case 'down':
-                return <TrendingDown className="w-4 h-4 text-red-400" />;
+                return <TrendingDown className="w-4 h-4 text-danger" />;
             default:
-                return <Minus className="w-4 h-4 text-slate-400" />;
+                return <Minus className="w-4 h-4 text-fg-muted" />;
         }
     };
 
@@ -370,40 +368,14 @@ export const AtAGlanceView: React.FC<AtAGlanceViewProps> = ({ segments, onSegmen
         }
     };
 
-    if (loading) {
-        return (
-            <div className="space-y-8">
-                <div className="animate-pulse">
-                    {/* AI Summary skeletons */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-                        {Array.from({ length: visibleCardConfigs.length || 4 }, (_, i) => (
-                            <div key={i} className="h-48 bg-slate-900 rounded-lg"></div>
-                        ))}
-                    </div>
-                    {/* Segment skeletons */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
-                        {[1, 2, 3, 4, 5].map((i) => (
-                            <div key={i} className="h-32 bg-slate-900 rounded-lg"></div>
-                        ))}
-                    </div>
-                    {/* KPI skeletons */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                        {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-                            <div key={i} className="h-40 bg-slate-900 rounded-lg"></div>
-                        ))}
-                    </div>
-                </div>
-            </div>
-        );
-    }
-
+    // No page-level busy state: segment cards render from props, KPIs/alerts fill in when
+    // their (secondary) requests settle.
     return (
-        <div className="space-y-8">
+        <Stack gap="region">
             {/* Section 1: AI Executive Summary — hidden until flags resolve */}
             {flagsLoaded !== false && (canShowAiSummary ? (
-                <div>
-                    <h2 className="text-xl font-semibold text-slate-100 mb-4">AI Executive Summary</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Card title="AI Executive Summary">
+                    <Grid>
                         {neuraSummaries.map((summary, index) => {
                             const cfg = visibleCardConfigs[index];
                             const segmentAlerts = cfg
@@ -414,150 +386,119 @@ export const AtAGlanceView: React.FC<AtAGlanceViewProps> = ({ segments, onSegmen
                                   ).slice(0, 3)
                                 : [];
                             return (
-                                <NeuraSummaryCard
-                                    key={summary.type}
-                                    title={summary.title}
-                                    icon={summary.icon}
-                                    color={summary.color}
-                                    summary={summary.summary}
-                                    sections={summary.sections}
-                                    signals={segmentAlerts}
-                                    generatedAt={summary.generatedAt}
-                                    cached={summary.cached}
-                                    degraded={summary.degraded}
-                                    loading={summary.loading}
-                                    regenerating={summary.regenerating}
-                                    error={summary.error}
-                                    onRetry={() => retryNeuraSummary(index)}
-                                    onRegenerate={canRegenerate ? () => regenerateNeuraSummary(index) : undefined}
-                                />
+                                <Grid.Item key={summary.type} span={6}>
+                                    <NeuraSummaryCard
+                                        title={summary.title}
+                                        icon={summary.icon}
+                                        color={summary.color}
+                                        summary={summary.summary}
+                                        sections={summary.sections}
+                                        signals={segmentAlerts}
+                                        generatedAt={summary.generatedAt}
+                                        cached={summary.cached}
+                                        degraded={summary.degraded}
+                                        loading={summary.loading}
+                                        regenerating={summary.regenerating}
+                                        error={summary.error}
+                                        onRetry={() => retryNeuraSummary(index)}
+                                        onRegenerate={canRegenerate ? () => regenerateNeuraSummary(index) : undefined}
+                                    />
+                                </Grid.Item>
                             );
                         })}
-                    </div>
-                </div>
+                    </Grid>
+                </Card>
             ) : (
-                <div className="bg-slate-900/30 border border-slate-800 rounded-lg p-6 text-center">
-                    <h2 className="text-xl font-semibold text-slate-100 mb-2">AI Executive Summary</h2>
-                    <p className="text-slate-400 text-sm mb-3">AI-powered executive summaries are available on Growth plans and above.</p>
-                    <span className="inline-block px-3 py-1.5 bg-blue-600/20 border border-blue-500/30 rounded-lg text-blue-400 text-xs font-medium">
-                        Upgrade to Growth to unlock AI Summaries
-                    </span>
-                </div>
+                <EmptyState
+                    title="AI Executive Summary"
+                    description="AI-powered executive summaries are available on Growth plans and above. Upgrade to Growth to unlock AI Summaries"
+                />
             ))}
 
             {/* Section 2: Segment Summary Cards */}
-            <div>
-                <h2 className="text-xl font-semibold text-slate-100 mb-4">Business Segments</h2>
-                <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+            <Card title="Business segments">
+                <Grid>
                     {segments.filter(s => {
                         const deps = SEGMENT_MODULE_DEPS[s.segment_code];
                         if (!deps) return true;
                         return deps.some(mod => isModuleEnabled(mod));
                     }).map((segment) => (
-                        <button
-                            key={segment.segment_code}
-                            onClick={() => onSegmentClick(segment.segment_code)}
-                            className={`
-                                bg-slate-900/50 rounded-lg border ${getBorderColorClass(segment.color_scheme)}
-                                p-4 text-left transition-all hover:shadow-lg group
-                            `}
-                        >
-                            {/* Icon & Trend */}
-                            <div className="flex items-start justify-between mb-3">
-                                <div className={getIconColorClass(segment.color_scheme)}>
-                                    {getSegmentIcon(segment.icon_name)}
-                                </div>
-                                {getTrendIcon(segment.trend)}
-                            </div>
-
-                            {/* Segment Name */}
-                            <h3 className="text-sm font-semibold text-slate-100 mb-1 group-hover:text-slate-50 transition-colors">
-                                {segment.segment_name}
-                            </h3>
-
-                            {/* Primary KPI */}
-                            {segment.primary_kpi && (
-                                <div className="mb-2">
-                                    <div className="text-lg font-bold text-slate-100">
-                                        {segment.primary_kpi.value.toFixed(1)}
-                                        <span className="text-xs text-slate-400 ml-1">
-                                            {segment.primary_kpi.unit}
+                        <Grid.Item key={segment.segment_code} span={4}>
+                            <KpiCard
+                                name={segment.segment_code}
+                                label={segment.segment_name}
+                                icon={getInsightIcon(segment.icon_name) ?? undefined}
+                                onClick={() => onSegmentClick(segment.segment_code)}
+                                className="h-full"
+                                value={segment.primary_kpi ? segment.primary_kpi.value.toFixed(1) : '—'}
+                                hint={
+                                    <span className="flex items-center justify-between gap-2">
+                                        <span>
+                                            {segment.primary_kpi?.unit && <span className="mr-2">{segment.primary_kpi.unit}</span>}
+                                            {segment.kpi_count} KPIs
+                                            {segment.signal_count > 0 && (
+                                                <span className="ml-2 text-warning">{segment.signal_count} alerts</span>
+                                            )}
                                         </span>
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* Stats */}
-                            <div className="flex items-center justify-between text-xs">
-                                <span className="text-slate-400">{segment.kpi_count} KPIs</span>
-                                {segment.signal_count > 0 && (
-                                    <span className="text-amber-400">{segment.signal_count} alerts</span>
-                                )}
-                            </div>
-                        </button>
+                                        {getTrendIcon(segment.trend)}
+                                    </span>
+                                }
+                            />
+                        </Grid.Item>
                     ))}
                     {/* Manufacturing — composed locally; not yet served by insight-be */}
-                    <ManufacturingAtAGlanceCard onClick={() => onSegmentClick('manufacturing')} />
-                </div>
-            </div>
+                    <Grid.Item span={4}>
+                        <ManufacturingAtAGlanceCard onClick={() => onSegmentClick('manufacturing')} />
+                    </Grid.Item>
+                </Grid>
+            </Card>
 
             {/* Section 3: Important KPIs Across All Segments */}
             {topKPIs.length > 0 && (
-                <div>
-                    <h2 className="text-xl font-semibold text-slate-100 mb-4">
-                        Important KPIs Across All Segments
-                    </h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <Card title="Important KPIs Across All Segments">
+                    <Grid>
                         {topKPIs.map((kpi) => (
-                            <KPICard key={kpi.kpi_code} kpi={kpi} />
+                            <Grid.Item key={kpi.kpi_code} span={3}>
+                                <KPICard kpi={kpi} />
+                            </Grid.Item>
                         ))}
-                    </div>
-                </div>
+                    </Grid>
+                </Card>
             )}
 
             {/* Section 3b: Related Movements (cross-KPI correlations) — bonus insight, no empty state */}
             {canShowCorrelations && correlations.length > 0 && (
-                <div>
-                    <h2 className="text-xl font-semibold text-slate-100 mb-4">Related Movements</h2>
-                    <div className="bg-slate-900/50 border border-slate-800 rounded-lg p-4 space-y-2">
+                <Card title="Related movements">
+                    <Stack gap="tight">
                         {correlations.map((pair) => {
                             const nameA = kpiNameMap.get(pair.kpi_code_a) || pair.kpi_code_a;
                             const nameB = kpiNameMap.get(pair.kpi_code_b) || pair.kpi_code_b;
                             const arrow = pair.direction === 'same' ? '↑↑' : '↕';
                             return (
-                                <p key={`${pair.kpi_code_a}:${pair.kpi_code_b}`} className="text-sm text-slate-400">
+                                <p key={`${pair.kpi_code_a}:${pair.kpi_code_b}`} className="text-sm text-fg-muted">
                                     {nameA} {arrow} moved with {nameB} (r={pair.correlation.toFixed(2)}, {pair.direction})
                                 </p>
                             );
                         })}
-                    </div>
-                </div>
+                    </Stack>
+                </Card>
             )}
 
             {/* Section 4: Critical Alerts */}
-            {criticalAlerts.length > 0 && (
-                <div>
-                    <h2 className="text-xl font-semibold text-slate-100 mb-4">
-                        Critical Alerts ({criticalAlerts.length})
-                    </h2>
-                    <div className="space-y-3 max-h-96 overflow-y-auto">
+            {criticalAlerts.length > 0 ? (
+                <Card title={`Critical Alerts (${criticalAlerts.length})`}>
+                    <Stack gap="tight">
                         {criticalAlerts.map((alert) => (
                             <AlertCard key={alert.id} alert={alert} onResolve={handleResolveAlert} />
                         ))}
-                    </div>
-                </div>
-            )}
-
-            {/* Empty state for alerts */}
-            {criticalAlerts.length === 0 && (
-                <div className="text-center py-8 bg-slate-900/30 rounded-lg border border-slate-800">
-                    <AlertCircle className="w-12 h-12 text-slate-600 mx-auto mb-3" />
-                    <p className="text-slate-400">No critical alerts at this time</p>
-                </div>
+                    </Stack>
+                </Card>
+            ) : (
+                <EmptyState icon={AlertCircle} title="No critical alerts at this time" />
             )}
 
             {/* Section 5: Module Coverage */}
             <ModuleCoveragePanel />
-        </div>
+        </Stack>
     );
 };

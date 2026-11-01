@@ -4,7 +4,8 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { Loader2, AlertCircle } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
+import { Alert, Card, Grid, GridItem } from '@so360/design-system';
 import {
     AreaChartComponent,
     LineChartComponent,
@@ -57,81 +58,72 @@ export const DeliveryCharts: React.FC<DeliveryChartsProps> = ({ tenantId, orgId 
     if (loading) {
         return (
             <div className="flex items-center justify-center py-12">
-                <Loader2 className="w-8 h-8 text-green-500 animate-spin" />
+                <Loader2 className="w-8 h-8 text-success animate-spin" />
             </div>
         );
     }
 
     if (error) {
         return (
-            <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-6 flex items-start gap-4">
-                <AlertCircle className="w-6 h-6 text-red-400 flex-shrink-0 mt-0.5" />
-                <div>
-                    <h3 className="text-lg font-semibold text-red-400 mb-2">Failed to Load Charts</h3>
-                    <p className="text-sm text-red-300">{error}</p>
-                </div>
-            </div>
+            <Alert variant="error" title="Failed to load charts">{error}</Alert>
         );
     }
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Grid columns={12} gap="lg">
             {/* On-Time Delivery Rate */}
             {isModuleEnabled('procurement') && deliveryRateData && (
-                <div className="bg-slate-900/50 border border-slate-800 rounded-lg p-6 lg:col-span-2">
-                    <div className="mb-4">
-                        <h3 className="text-lg font-semibold text-slate-100">On-Time Delivery Rate</h3>
-                        <p className="text-sm text-slate-400 mt-1">Trend with 80% target band</p>
-                    </div>
-                    <AreaChartComponent
-                        data={deliveryRateData}
-                        xAxisKey="month"
-                        yAxisKey="on_time"
-                        height={280}
-                        segmentColor="delivery"
-                        formatValue={(value) => formatPercentage(value)}
-                        formatXAxis={(value) => formatDate(value)}
-                        targetLine={{ value: 80, label: '80% Target', color: '#f59e0b' }}
-                    />
-                </div>
+                <GridItem span={12}>
+                    <Card title="On-Time Delivery Rate">
+                        <p className="text-sm text-fg-muted">Trend with 80% target band</p>
+                        <AreaChartComponent
+                            data={deliveryRateData}
+                            xAxisKey="month"
+                            yAxisKey="on_time"
+                            height={280}
+                            segmentColor="delivery"
+                            formatValue={(value) => formatPercentage(value)}
+                            formatXAxis={(value) => formatDate(value)}
+                            targetLine={{ value: 80, label: '80% Target', color: '#f59e0b' }}
+                        />
+                    </Card>
+                </GridItem>
             )}
 
             {/* Inventory Turnover */}
             {isModuleEnabled('inventory') && turnoverData && (
-                <div className="bg-slate-900/50 border border-slate-800 rounded-lg p-6">
-                    <div className="mb-4">
-                        <h3 className="text-lg font-semibold text-slate-100">Inventory Turnover</h3>
-                        <p className="text-sm text-slate-400 mt-1">Top categories comparison</p>
-                    </div>
-                    <LineChartComponent
-                        data={turnoverData}
-                        xAxisKey="category"
-                        series={[{ key: 'turnover', name: 'Inventory Turnover', color: '#10b981' }]}
-                        height={280}
-                        segmentColor="delivery"
-                        formatValue={(value) => formatNumber(value, 1)}
-                    />
-                </div>
+                <GridItem span={6}>
+                    <Card title="Inventory Turnover">
+                        <p className="text-sm text-fg-muted">Top categories comparison</p>
+                        <LineChartComponent
+                            data={turnoverData}
+                            xAxisKey="category"
+                            series={[{ key: 'turnover', name: 'Inventory Turnover', color: '#10b981' }]}
+                            height={280}
+                            segmentColor="delivery"
+                            formatValue={(value) => formatNumber(value, 1)}
+                        />
+                    </Card>
+                </GridItem>
             )}
 
             {/* Backorder Analysis */}
             {(isModuleEnabled('procurement') || isModuleEnabled('inventory')) && backorderData && (
-                <div className="bg-slate-900/50 border border-slate-800 rounded-lg p-6">
-                    <div className="mb-4">
-                        <h3 className="text-lg font-semibold text-slate-100">Backorders by Category</h3>
-                        <p className="text-sm text-slate-400 mt-1">Items on backorder</p>
-                    </div>
-                    <BarChartComponent
-                        data={backorderData}
-                        xAxisKey="week"
-                        series={[{ key: 'backorders', name: 'Backorders', color: '#ef4444' }]}
-                        height={280}
-                        segmentColor="delivery"
-                        formatValue={(value) => formatNumber(value)}
-                        layout="horizontal"
-                    />
-                </div>
+                <GridItem span={6}>
+                    <Card title="Backorders by Category">
+                        <p className="text-sm text-fg-muted">Items on backorder</p>
+                        <BarChartComponent
+                            data={backorderData}
+                            xAxisKey="week"
+                            series={[{ key: 'backorders', name: 'Backorders', color: '#ef4444' }]}
+                            height={280}
+                            segmentColor="delivery"
+                            formatValue={(value) => formatNumber(value)}
+                            layout="horizontal"
+                        />
+                    </Card>
+                </GridItem>
             )}
-        </div>
+        </Grid>
     );
 };

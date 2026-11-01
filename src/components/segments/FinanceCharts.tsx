@@ -4,7 +4,8 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { Loader2, AlertCircle } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
+import { Alert, Card, Grid, GridItem } from '@so360/design-system';
 import {
     WaterfallChartComponent,
     LineChartComponent,
@@ -36,15 +37,23 @@ export const FinanceCharts: React.FC<FinanceChartsProps> = ({ tenantId, orgId })
             setLoading(true);
             setError(null);
 
-            const [cashFlowRes, burnRateRes, expenseRes] = await Promise.all([
+            // allSettled: one slow/failed chart must not blank the other two.
+            const results = await Promise.allSettled([
                 insightApi.getChartData('finance', 'cash_flow_waterfall'),
                 insightApi.getChartData('finance', 'burn_rate_projection'),
                 insightApi.getChartData('finance', 'expense_variance'),
             ]);
+            const rows = (r: PromiseSettledResult<any>) =>
+                r.status === 'fulfilled' ? r.value?.data?.data?.data || [] : [];
 
-            setCashFlowData(cashFlowRes.data?.data?.data || []);
-            setBurnRateData(burnRateRes.data?.data?.data || []);
-            setExpenseData(expenseRes.data?.data?.data || []);
+            setCashFlowData(rows(results[0]));
+            setBurnRateData(rows(results[1]));
+            setExpenseData(rows(results[2]));
+
+            const firstFailure = results.find((r): r is PromiseRejectedResult => r.status === 'rejected');
+            if (firstFailure && results.every((r) => r.status === 'rejected')) {
+                throw firstFailure.reason;
+            }
         } catch (err: any) {
             setError(err.message || 'Failed to load finance charts');
         } finally {
@@ -55,81 +64,72 @@ export const FinanceCharts: React.FC<FinanceChartsProps> = ({ tenantId, orgId })
     if (loading) {
         return (
             <div className="flex items-center justify-center py-12">
-                <Loader2 className="w-8 h-8 text-red-500 animate-spin" />
+                <Loader2 className="w-8 h-8 text-danger animate-spin" />
             </div>
         );
     }
 
     if (error) {
         return (
-            <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-6 flex items-start gap-4">
-                <AlertCircle className="w-6 h-6 text-red-400 flex-shrink-0 mt-0.5" />
-                <div>
-                    <h3 className="text-lg font-semibold text-red-400 mb-2">Failed to Load Charts</h3>
-                    <p className="text-sm text-red-300">{error}</p>
-                </div>
-            </div>
+            <Alert variant="error" title="Failed to load charts">{error}</Alert>
         );
     }
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Grid columns={12} gap="lg">
             {/* Cash Flow Waterfall */}
             {isModuleEnabled('accounting') && cashFlowData && (
-                <div className="bg-slate-900/50 border border-slate-800 rounded-lg p-6 lg:col-span-2">
-                    <div className="mb-4">
-                        <h3 className="text-lg font-semibold text-slate-100">Cash Flow Waterfall</h3>
-                        <p className="text-sm text-slate-400 mt-1">Receivables, payables, and net position</p>
-                    </div>
-                    <WaterfallChartComponent
-                        data={cashFlowData}
-                        height={320}
-                        formatValue={(value) => formatCurrency(value)}
-                    />
-                </div>
+                <GridItem span={12}>
+                    <Card title="Cash Flow Waterfall">
+                        <p className="text-sm text-fg-muted">Receivables, payables, and net position</p>
+                        <WaterfallChartComponent
+                            data={cashFlowData}
+                            height={320}
+                            formatValue={(value) => formatCurrency(value)}
+                        />
+                    </Card>
+                </GridItem>
             )}
 
             {/* Burn Rate with Projection */}
             {isModuleEnabled('accounting') && burnRateData && (
-                <div className="bg-slate-900/50 border border-slate-800 rounded-lg p-6">
-                    <div className="mb-4">
-                        <h3 className="text-lg font-semibold text-slate-100">Burn Rate & Projection</h3>
-                        <p className="text-sm text-slate-400 mt-1">Historical and forecasted burn</p>
-                    </div>
-                    <LineChartComponent
-                        data={burnRateData}
-                        xAxisKey="month"
-                        series={[
-                            { key: 'actual', name: 'Actual Burn', color: '#ef4444' },
-                            { key: 'projected', name: 'Projected', color: '#f87171' },
-                        ]}
-                        height={280}
-                        segmentColor="finance"
-                        formatValue={(value) => formatCurrency(value)}
-                    />
-                </div>
+                <GridItem span={6}>
+                    <Card title="Burn Rate & Projection">
+                        <p className="text-sm text-fg-muted">Historical and forecasted burn</p>
+                        <LineChartComponent
+                            data={burnRateData}
+                            xAxisKey="month"
+                            series={[
+                                { key: 'actual', name: 'Actual Burn', color: '#ef4444' },
+                                { key: 'projected', name: 'Projected', color: '#f87171' },
+                            ]}
+                            height={280}
+                            segmentColor="finance"
+                            formatValue={(value) => formatCurrency(value)}
+                        />
+                    </Card>
+                </GridItem>
             )}
 
             {/* Expense Variance */}
             {isModuleEnabled('accounting') && expenseData && (
-                <div className="bg-slate-900/50 border border-slate-800 rounded-lg p-6">
-                    <div className="mb-4">
-                        <h3 className="text-lg font-semibold text-slate-100">Expense Variance</h3>
-                        <p className="text-sm text-slate-400 mt-1">Budget vs actual by category</p>
-                    </div>
-                    <BarChartComponent
-                        data={expenseData}
-                        xAxisKey="category"
-                        series={[
-                            { key: 'budgeted', name: 'Budget', color: '#94a3b8' },
-                            { key: 'actual', name: 'Actual', color: '#ef4444' },
-                        ]}
-                        height={280}
-                        segmentColor="finance"
-                        formatValue={(value) => formatCurrency(value)}
-                    />
-                </div>
+                <GridItem span={6}>
+                    <Card title="Expense Variance">
+                        <p className="text-sm text-fg-muted">Budget vs actual by category</p>
+                        <BarChartComponent
+                            data={expenseData}
+                            xAxisKey="category"
+                            series={[
+                                { key: 'budgeted', name: 'Budget', color: '#94a3b8' },
+                                { key: 'actual', name: 'Actual', color: '#ef4444' },
+                            ]}
+                            height={280}
+                            segmentColor="finance"
+                            formatValue={(value) => formatCurrency(value)}
+                        />
+                    </Card>
+                </GridItem>
             )}
-        </div>
+        </Grid>
     );
 };

@@ -51,7 +51,7 @@ describe('RevenueCharts', () => {
       mockApi.getChartData.mockRejectedValue(new Error('fail'));
       render(<RevenueCharts tenantId="t1" orgId="o1" />);
       await waitFor(() => {
-        expect(screen.getByText('Failed to Load Charts')).toBeInTheDocument();
+        expect(screen.getByText('Failed to load charts')).toBeInTheDocument();
       });
     });
   });
@@ -83,7 +83,7 @@ describe('ExecutionCharts', () => {
       mockApi.getChartData.mockRejectedValue(new Error('fail'));
       render(<ExecutionCharts tenantId="t1" orgId="o1" />);
       await waitFor(() => {
-        expect(screen.getByText('Failed to Load Charts')).toBeInTheDocument();
+        expect(screen.getByText('Failed to load charts')).toBeInTheDocument();
       });
     });
   });
@@ -115,7 +115,7 @@ describe('DeliveryCharts', () => {
       mockApi.getChartData.mockRejectedValue(new Error('fail'));
       render(<DeliveryCharts tenantId="t1" orgId="o1" />);
       await waitFor(() => {
-        expect(screen.getByText('Failed to Load Charts')).toBeInTheDocument();
+        expect(screen.getByText('Failed to load charts')).toBeInTheDocument();
       });
     });
   });
@@ -147,7 +147,7 @@ describe('WorkforceCharts', () => {
       mockApi.getChartData.mockRejectedValue(new Error('fail'));
       render(<WorkforceCharts tenantId="t1" orgId="o1" />);
       await waitFor(() => {
-        expect(screen.getByText('Failed to Load Charts')).toBeInTheDocument();
+        expect(screen.getByText('Failed to load charts')).toBeInTheDocument();
       });
     });
   });
@@ -179,7 +179,7 @@ describe('FinanceCharts', () => {
       mockApi.getChartData.mockRejectedValue(new Error('fail'));
       render(<FinanceCharts tenantId="t1" orgId="o1" />);
       await waitFor(() => {
-        expect(screen.getByText('Failed to Load Charts')).toBeInTheDocument();
+        expect(screen.getByText('Failed to load charts')).toBeInTheDocument();
       });
     });
   });

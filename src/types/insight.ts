@@ -137,3 +137,32 @@ export interface AiSummarySections {
     issue: string;
     solution: string;
 }
+
+// ===== My pipeline (GET /v1/insight/my-pipeline) =====
+export interface MyPipelineDeal {
+    id: string;
+    name: string;
+    amount: number;
+    stage: string;
+    probability: number | null;
+    weighted_amount: number;
+    expected_close_date: string | null;
+    overdue: boolean;
+}
+
+export interface MyPipelineForecastBucket {
+    month: string; // YYYY-MM or 'unscheduled'
+    amount: number;
+    weighted_amount: number;
+    deals: number;
+}
+
+export interface MyPipeline {
+    owner_user_id: string;
+    open_deals: number;
+    total_pipeline: number;
+    weighted_forecast: number;
+    won_this_month: number;
+    deals: MyPipelineDeal[];
+    forecast: MyPipelineForecastBucket[];
+}

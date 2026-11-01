@@ -5,7 +5,7 @@
 
 import React, { useState } from 'react';
 import { Download, FileImage, FileSpreadsheet } from 'lucide-react';
-import { toast } from '@so360/design-system';
+import { Button, IconButton, toast } from '@so360/design-system';
 
 interface ChartExportProps {
     chartId: string;
@@ -79,39 +79,39 @@ export const ChartExport: React.FC<ChartExportProps> = ({
 
     return (
         <div className="relative">
-            <button
+            <IconButton
+                label="Export chart"
                 onClick={() => setShowMenu(!showMenu)}
-                className="p-2 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-slate-200 transition-colors"
-                title="Export chart"
-            >
-                <Download className="w-4 h-4" />
-            </button>
+                icon={<Download className="w-4 h-4" />}
+            />
 
             {showMenu && (
                 <>
-                    {/* Backdrop */}
+                    {/* comb-exception: invisible click-away layer for the export menu (no DS popover wraps this IconButton) */}
                     <div
                         className="fixed inset-0 z-10"
                         onClick={() => setShowMenu(false)}
                     />
 
                     {/* Menu */}
-                    <div className="absolute right-0 top-full mt-2 w-48 bg-slate-900 border border-slate-700 rounded-lg shadow-xl z-20">
+                    <div className="absolute right-0 top-full mt-2 w-48 bg-surface border border-line rounded-lg shadow-overlay z-20">
                         <div className="py-1">
-                            <button
+                            <Button
+                                variant="ghost"
+                                className="w-full !justify-start"
                                 onClick={handleExportPNG}
-                                className="w-full px-4 py-2 text-left text-sm text-slate-300 hover:bg-slate-800 hover:text-slate-100 flex items-center gap-2"
                             >
                                 <FileImage className="w-4 h-4" />
                                 Export as PNG
-                            </button>
-                            <button
+                            </Button>
+                            <Button
+                                variant="ghost"
+                                className="w-full !justify-start"
                                 onClick={handleExportCSV}
-                                className="w-full px-4 py-2 text-left text-sm text-slate-300 hover:bg-slate-800 hover:text-slate-100 flex items-center gap-2"
                             >
                                 <FileSpreadsheet className="w-4 h-4" />
                                 Export as CSV
-                            </button>
+                            </Button>
                         </div>
                     </div>
                 </>
