@@ -26,7 +26,16 @@ const apiCache = createTtlCache<any>({ ttlMs: CACHE_TTL, maxEntries: CACHE_MAX }
 // for the same endpoint at once (e.g. /segments, /data-freshness); share one call.
 const inFlight = new Map<string, Promise<any>>();
 
-function cachedGet<T>(key: string, fetcher: () => Promise<T>): Promise<T> {
+// Cache scope = tenant + org. Every key is prefixed with it so data fetched for
+// one org is never served after an org/tenant switch in the same session.
+let cacheTenantId = '';
+let cacheOrgId = '';
+function scopeKey(key: string): string {
+    return `${cacheTenantId}|${cacheOrgId}|${key}`;
+}
+
+function cachedGet<T>(rawKey: string, fetcher: () => Promise<T>): Promise<T> {
+    const key = scopeKey(rawKey);
     const cached = apiCache.get(key);
     if (cached !== undefined) {
         return Promise.resolve(cached as T);
@@ -46,7 +55,7 @@ function cachedGet<T>(key: string, fetcher: () => Promise<T>): Promise<T> {
 }
 
 function invalidateCache(prefix?: string): void {
-    apiCache.invalidate(prefix);
+    apiCache.invalidate(prefix ? scopeKey(prefix) : undefined);
 }
 
 class InsightApiClient {
@@ -95,10 +104,12 @@ class InsightApiClient {
 
     setTenantId(tenantId: string) {
         this.tenantId = tenantId;
+        cacheTenantId = tenantId || '';
     }
 
     setOrgId(orgId: string) {
         this.orgId = orgId;
+        cacheOrgId = orgId || '';
     }
 
     setAccessToken(token: string) {
