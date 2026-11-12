@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent, act } from '@testing-library/react';
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 
 import { ManufacturingSegment } from './ManufacturingSegment';
@@ -211,6 +211,24 @@ describe('ManufacturingSegment', () => {
       });
       expect(fetchMock).not.toHaveBeenCalled();
       spy.mockRestore();
+    });
+  });
+
+  describe('Given the 30s poll', () => {
+    const setHidden = (hidden: boolean) =>
+      Object.defineProperty(document, 'hidden', { configurable: true, get: () => hidden });
+    afterEach(() => { setHidden(false); vi.useRealTimers(); });
+
+    it('When the tab is hidden at the tick / Then no requests are made', async () => {
+      vi.useFakeTimers();
+      const fetchMock = vi.fn().mockResolvedValue(jsonOk(SUMMARY));
+      vi.stubGlobal('fetch', fetchMock);
+      render(<ManufacturingSegment />);
+      await act(async () => { await Promise.resolve(); });
+      const before = fetchMock.mock.calls.length;
+      setHidden(true);
+      await act(async () => { vi.advanceTimersByTime(30_000); });
+      expect(fetchMock.mock.calls.length).toBe(before);
     });
   });
 });

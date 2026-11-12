@@ -19,7 +19,10 @@ export const DataFreshnessIndicator: React.FC = () => {
     useEffect(() => {
         fetchFreshness();
         // Refresh every 5 minutes
-        const interval = setInterval(fetchFreshness, 5 * 60 * 1000);
+        const interval = setInterval(() => {
+            if (typeof document !== 'undefined' && document.hidden) return;
+            fetchFreshness();
+        }, 5 * 60 * 1000);
         return () => clearInterval(interval);
     }, []);
 

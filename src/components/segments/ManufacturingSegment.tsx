@@ -72,7 +72,10 @@ export const ManufacturingSegment: React.FC = () => {
             }
         };
         load();
-        const t = setInterval(load, 30_000);
+        const t = setInterval(() => {
+            if (typeof document !== 'undefined' && document.hidden) return;
+            load();
+        }, 30_000);
         return () => { cancelled = true; clearInterval(t); };
     }, [currentOrg?.id, currentOrg?.tenant_id, accessToken, reloadKey]);
 

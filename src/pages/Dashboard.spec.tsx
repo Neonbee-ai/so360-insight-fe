@@ -1,6 +1,6 @@
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
-import { vi, describe, it, expect, beforeEach } from 'vitest';
+import { render, screen, waitFor, act } from '@testing-library/react';
+import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 
 vi.mock('../services/insightApi', () => ({
   insightApi: {
@@ -82,6 +82,38 @@ describe('Dashboard', () => {
       await waitFor(() => {
         expect(screen.getByTestId('alert-card')).toBeInTheDocument();
       });
+    });
+  });
+
+  describe('Given the 5 minute auto-refresh', () => {
+    const setHidden = (hidden: boolean) =>
+      Object.defineProperty(document, 'hidden', { configurable: true, get: () => hidden });
+    afterEach(() => { setHidden(false); vi.useRealTimers(); });
+
+    it('When the tab is hidden at the tick / Then nothing is refetched', async () => {
+      vi.useFakeTimers();
+      mockApi.getDashboard.mockResolvedValue(dashboardData);
+      mockApi.getAlerts.mockResolvedValue({ data: [], total: 0 });
+      render(<Dashboard />);
+      await act(async () => { await Promise.resolve(); });
+      setHidden(true);
+      await act(async () => { vi.advanceTimersByTime(5 * 60 * 1000); });
+      expect(mockApi.getDashboard).toHaveBeenCalledTimes(1);
+      expect(mockApi.getAlerts).toHaveBeenCalledTimes(1);
+    });
+
+    it('When the tab is visible at the tick / Then it refreshes without showing the spinner again', async () => {
+      vi.useFakeTimers();
+      mockApi.getDashboard.mockResolvedValue(dashboardData);
+      mockApi.getAlerts.mockResolvedValue({ data: [], total: 0 });
+      render(<Dashboard />);
+      await act(async () => { await Promise.resolve(); });
+      expect(screen.getByTestId('kpi-card')).toBeInTheDocument();
+      mockApi.getDashboard.mockReturnValue(new Promise(() => {}));
+      await act(async () => { vi.advanceTimersByTime(5 * 60 * 1000); });
+      expect(mockApi.getDashboard).toHaveBeenCalledTimes(2);
+      // pending background refresh keeps the existing KPI cards on screen
+      expect(screen.getByTestId('kpi-card')).toBeInTheDocument();
     });
   });
 });
