@@ -59,6 +59,40 @@ describe('insightApi', () => {
     });
   });
 
+  describe('Given a cached read for one org', () => {
+    it('When the org changes and the same key is read / Then it refetches instead of serving the other org data', async () => {
+      insightApi.setTenantId('tenant-a');
+      insightApi.setOrgId('org-a');
+      mockGet.mockResolvedValueOnce({ data: { segment_code: 'scope-seg', kpis: ['a'] } });
+      const first = await insightApi.getSegmentDetail('scope-seg');
+      insightApi.setOrgId('org-b');
+      mockGet.mockResolvedValueOnce({ data: { segment_code: 'scope-seg', kpis: ['b'] } });
+      const second = await insightApi.getSegmentDetail('scope-seg');
+      expect(mockGet).toHaveBeenCalledTimes(2);
+      expect(first.kpis).toEqual(['a']);
+      expect(second.kpis).toEqual(['b']);
+    });
+
+    it('When the tenant changes and the same key is read / Then it refetches', async () => {
+      insightApi.setTenantId('tenant-a');
+      insightApi.setOrgId('org-a');
+      mockGet.mockResolvedValue({ data: { segment_code: 'scope-seg2', kpis: [] } });
+      await insightApi.getSegmentDetail('scope-seg2');
+      insightApi.setTenantId('tenant-b');
+      await insightApi.getSegmentDetail('scope-seg2');
+      expect(mockGet).toHaveBeenCalledTimes(2);
+    });
+
+    it('When the same tenant and org read the key again / Then the cached value is served', async () => {
+      insightApi.setTenantId('tenant-a');
+      insightApi.setOrgId('org-a');
+      mockGet.mockResolvedValue({ data: { segment_code: 'scope-seg3', kpis: [] } });
+      await insightApi.getSegmentDetail('scope-seg3');
+      await insightApi.getSegmentDetail('scope-seg3');
+      expect(mockGet).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe('Given two concurrent reads of the same uncached key', () => {
     it('When both fire before the first resolves / Then only one HTTP request is made', async () => {
       mockGet.mockResolvedValue({ data: { module_code: 'dedupe-mod', kpis: [] } });
