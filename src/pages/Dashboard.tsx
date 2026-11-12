@@ -27,16 +27,18 @@ export const Dashboard: React.FC = () => {
 
         // Auto-refresh every 5 minutes so stale KPI data is updated without user interaction
         const pollInterval = setInterval(() => {
-            loadDashboard();
+            if (typeof document !== 'undefined' && document.hidden) return;
+            // Background refresh: keep the current data on screen, no spinner flash.
+            loadDashboard(true);
             loadRecentAlerts();
         }, 5 * 60 * 1000);
 
         return () => clearInterval(pollInterval);
     }, []);
 
-    const loadDashboard = async () => {
+    const loadDashboard = async (background = false) => {
         try {
-            setLoading(true);
+            if (!background) setLoading(true);
             const data = await insightApi.getDashboard();
             setDashboard(data);
             setError(null);

@@ -1,6 +1,6 @@
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
-import { vi, describe, it, expect, beforeEach } from 'vitest';
+import { render, screen, waitFor, act } from '@testing-library/react';
+import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 
 vi.mock('../services/insightApi', () => ({
   insightApi: {
@@ -101,6 +101,33 @@ describe('DataFreshnessIndicator', () => {
         expect(mockApi.getDataFreshness).toHaveBeenCalled();
       });
       expect(container.querySelector('[data-testid="icon-Clock"]')).toBeNull();
+    });
+  });
+
+  describe('Given the 5 minute refresh interval', () => {
+    const setHidden = (hidden: boolean) =>
+      Object.defineProperty(document, 'hidden', { configurable: true, get: () => hidden });
+    afterEach(() => { setHidden(false); vi.useRealTimers(); });
+
+    it('When the tab is hidden at the tick / Then no request is made', async () => {
+      vi.useFakeTimers();
+      mockApi.getDataFreshness.mockResolvedValue({ last_computation: null, is_stale: false, next_scheduled_refresh: null });
+      render(<DataFreshnessIndicator />);
+      await act(async () => { await Promise.resolve(); });
+      expect(mockApi.getDataFreshness).toHaveBeenCalledTimes(1);
+      setHidden(true);
+      await act(async () => { vi.advanceTimersByTime(5 * 60 * 1000); });
+      expect(mockApi.getDataFreshness).toHaveBeenCalledTimes(1);
+    });
+
+    it('When the tab is visible at the tick / Then it refreshes', async () => {
+      vi.useFakeTimers();
+      mockApi.getDataFreshness.mockResolvedValue({ last_computation: null, is_stale: false, next_scheduled_refresh: null });
+      render(<DataFreshnessIndicator />);
+      await act(async () => { await Promise.resolve(); });
+      setHidden(false);
+      await act(async () => { vi.advanceTimersByTime(5 * 60 * 1000); });
+      expect(mockApi.getDataFreshness).toHaveBeenCalledTimes(2);
     });
   });
 });
