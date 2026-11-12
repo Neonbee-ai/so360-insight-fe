@@ -26,9 +26,12 @@ const RouteFallback: React.FC = () => (
     </div>
 );
 
-// Flag-to-segment map: segments that require a specific plan flag
+// Flag-to-segment map: segments that require a specific plan flag.
+// Must match the Shell nav gate (moduleNavConfig `insight:finance`) — the Finance
+// page is the `submodule:insight:finance` submodule (growth), NOT the scale-tier
+// `action:insight:export` action, which wrongly locked Growth owners out.
 const SEGMENT_FLAG_MAP: Record<string, string> = {
-    finance: 'action:insight:export',
+    finance: 'submodule:insight:finance',
 };
 
 // Route-level upgrade prompt shown when a segment's feature is `locked`.

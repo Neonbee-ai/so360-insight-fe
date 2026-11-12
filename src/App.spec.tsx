@@ -94,10 +94,10 @@ describe('App', () => {
       ...overrides,
     });
 
-    describe('When navigating to /finance and action:insight:export is hidden', () => {
+    describe('When navigating to /finance and submodule:insight:finance is hidden', () => {
       it('Then redirects to overview (InsightDashboard at root, no initialTab)', async () => {
         mockShellBridge = syncedBridge({
-          getFeatureState: (key: string) => (key === 'action:insight:export' ? 'hidden' : 'enabled'),
+          getFeatureState: (key: string) => (key === 'submodule:insight:finance' ? 'hidden' : 'enabled'),
         });
         render(<MemoryRouter initialEntries={['/finance']}><App /></MemoryRouter>);
         await waitFor(() => {
@@ -108,7 +108,7 @@ describe('App', () => {
       });
     });
 
-    describe('When navigating to /finance and action:insight:export is enabled', () => {
+    describe('When navigating to /finance and submodule:insight:finance is enabled', () => {
       it('Then renders InsightDashboard with initialTab=finance', async () => {
         mockShellBridge = syncedBridge({ getFeatureState: () => 'enabled' });
         render(<MemoryRouter initialEntries={['/finance']}><App /></MemoryRouter>);
@@ -120,7 +120,20 @@ describe('App', () => {
       });
     });
 
-    describe('When navigating to /finance and action:insight:export is locked', () => {
+    describe('When navigating to /finance on a plan that has submodule:insight:finance but locks action:insight:export', () => {
+      it('Then renders the Finance dashboard (export is an action, not the page gate)', async () => {
+        mockShellBridge = syncedBridge({
+          getFeatureState: (key: string) => (key === 'action:insight:export' ? 'locked' : 'enabled'),
+        });
+        render(<MemoryRouter initialEntries={['/finance']}><App /></MemoryRouter>);
+        await waitFor(() => {
+          expect(screen.getByTestId('insight-dash').getAttribute('data-tab')).toBe('finance');
+        });
+        expect(screen.queryByText(/upgrade plan/i)).not.toBeInTheDocument();
+      });
+    });
+
+    describe('When navigating to /finance and submodule:insight:finance is locked', () => {
       it('Then shows the upgrade prompt instead of the dashboard', async () => {
         mockShellBridge = syncedBridge({ getFeatureState: () => 'locked' });
         render(<MemoryRouter initialEntries={['/finance']}><App /></MemoryRouter>);
@@ -131,7 +144,7 @@ describe('App', () => {
       });
     });
 
-    describe('When navigating to /finance and action:insight:export is disabled', () => {
+    describe('When navigating to /finance and submodule:insight:finance is disabled', () => {
       it('Then shows the unavailable panel and NO upgrade prompt', async () => {
         mockShellBridge = syncedBridge({ getFeatureState: () => 'disabled' });
         render(<MemoryRouter initialEntries={['/finance']}><App /></MemoryRouter>);
