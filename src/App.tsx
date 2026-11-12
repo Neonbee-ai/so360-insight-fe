@@ -3,6 +3,7 @@ import { Routes, Route, Navigate, useParams, useNavigate } from 'react-router-do
 import { useShellBridge } from '@so360/shell-context';
 import { Button, CombScope, FeatureRoute } from '@so360/design-system';
 import { MfeShellInitializer } from './components/MfeShellInitializer';
+import RecordNotFound from './components/RecordNotFound';
 
 // Route components are lazy-loaded so recharts (~150KB gz, pulled in transitively
 // by the dashboard's chart components) and the route trees are split out of the
@@ -89,9 +90,15 @@ const PermissionGuard = ({ permission, children }: { permission: string | string
 // Keeps URL as-is so shell sidenav active state matches correctly.
 // Segments listed in SEGMENT_FLAG_MAP are gated on the resolved 5-state model:
 // enabled→render · read_only→inert · locked→upgrade prompt · disabled→unavailable · hidden→redirect.
+/** Segment codes InsightDashboard can render; anything else in /insight/:segmentCode is an unknown id. */
+export const KNOWN_SEGMENT_CODES = ['at-a-glance', 'revenue', 'execution', 'manufacturing', 'delivery', 'workforce', 'finance'];
+
 const SegmentRoute: React.FC = () => {
     const { segmentCode } = useParams<{ segmentCode: string }>();
     const shell = useShellBridge();
+    if (segmentCode && !KNOWN_SEGMENT_CODES.includes(segmentCode)) {
+        return <RecordNotFound listPath="/insight" listLabel="Insight" />;
+    }
     const requiredFlag = segmentCode ? SEGMENT_FLAG_MAP[segmentCode] : undefined;
     const dashboard = <InsightDashboard initialTab={segmentCode} />;
     if (!requiredFlag) return dashboard;
