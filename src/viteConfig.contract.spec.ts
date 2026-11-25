@@ -77,6 +77,15 @@ describe('Production build configuration (MFE perf contract)', () => {
       expect(manualChunks('/repo/src/pages/InsightDashboard.tsx')).toBeUndefined();
       expect(manualChunks('/repo/node_modules/react/index.js')).toBeUndefined();
     });
+
+    it('Given the federation importShared runtime, When chunks are assigned, Then it gets its own chunk (never hoisted into recharts)', () => {
+      const manualChunks = config.build?.rollupOptions?.output?.manualChunks;
+      // Without this, Rollup hoists importShared into the recharts chunk and the
+      // exposed ./App statically pulls all of recharts on every Insight open.
+      expect(manualChunks('\0virtual:__federation_fn_import')).toBe('__federation_fn_import');
+      expect(manualChunks('__federation_fn_import')).toBe('__federation_fn_import');
+      expect(manualChunks('\0virtual:__federation_fn_import')).not.toBe('recharts');
+    });
   });
 
   describe('Given the module federation shared dependency list', () => {
