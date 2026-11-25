@@ -92,7 +92,15 @@ export default defineConfig(({ mode }) => {
                 // Split recharts (~150KB gz) into its own chunk so it is NOT part
                 // of the initial federated entry. Combined with route-level
                 // React.lazy, recharts is fetched only when a chart route renders.
+                //
+                // The federation runtime (importShared, __federation_fn_import)
+                // MUST get its own chunk: recharts imports React through it, so
+                // Rollup otherwise hoists it INTO the recharts manual chunk and
+                // the exposed ./App statically imports recharts just to reach
+                // importShared — 115 KB (br) loaded on every Insight open (prod
+                // baseline 2026-11-25).
                 manualChunks(id) {
+                    if (id.includes('__federation_fn_import')) return '__federation_fn_import';
                     if (id.includes('node_modules/recharts')) return 'recharts';
                     return undefined;
                 },
