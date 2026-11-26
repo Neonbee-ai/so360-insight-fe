@@ -82,6 +82,7 @@ export const AlertsPage: React.FC = () => {
     return (
         <ListPageTemplate trail={[]}
             title="Alerts"
+            loading={loading}
             description="Manage and resolve intelligent alerts"
             views={
                 <SegmentedControl

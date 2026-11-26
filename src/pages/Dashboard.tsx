@@ -71,7 +71,7 @@ export const Dashboard: React.FC = () => {
     };
 
     if (loading) {
-        return <DashboardPageTemplate trail={[]} title="Insight Dashboard" loading />;
+        return <DashboardPageTemplate trail={[]} title="Insight Dashboard" loading loadingKpis={4} />;
     }
 
     if (error) {
