@@ -152,7 +152,7 @@ export const SegmentOverview: React.FC = () => {
                                 label={segment.primary_kpi.kpi_name}
                                 value={isCurrencyUnit(segment.primary_kpi.unit)
                                     ? formatters.formatCurrency(segment.primary_kpi.value)
-                                    : `${segment.primary_kpi.value.toFixed(1)}${segment.primary_kpi.unit ? ` ${segment.primary_kpi.unit}` : ''}`}
+                                    : `${segment.primary_kpi.value != null ? segment.primary_kpi.value.toFixed(1) : "—"}${segment.primary_kpi.unit ? ` ${segment.primary_kpi.unit}` : ''}`}
                                 delta={segment.primary_kpi.trend_percentage}
                                 deltaLabel={segment.primary_kpi.trend_percentage !== undefined ? 'from last period' : undefined}
                             />

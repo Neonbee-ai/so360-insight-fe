@@ -97,7 +97,7 @@ describe('KPICard', () => {
   });
 
   describe('Performance', () => {
-    it('Then KPICard is wrapped in React.memo (skips re-render on identical props)', () => {
+    it('When rendered with identical props, then KPICard is wrapped in React.memo (skips re-render on identical props)', () => {
       expect((KPICard as any).$$typeof).toBe(Symbol.for('react.memo'));
     });
   });
