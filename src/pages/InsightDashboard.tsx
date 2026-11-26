@@ -74,8 +74,10 @@ const RefreshButton: React.FC<RefreshButtonProps> = ({
 };
 
 export const InsightDashboard: React.FC<InsightDashboardProps> = ({ initialTab }) => {
-    const [, setSearchParams] = useSearchParams();
-    const [activeTab, setActiveTab] = useState<string>(initialTab || 'at-a-glance');
+    const [searchParams, setSearchParams] = useSearchParams();
+    // Deep links such as /insight?tab=revenue (written by handleTabChange) must restore the tab.
+    const requestedTab = initialTab || searchParams.get('tab') || undefined;
+    const [activeTab, setActiveTab] = useState<string>(requestedTab || 'at-a-glance');
     const [segments, setSegments] = useState<SegmentSummary[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -211,6 +213,17 @@ export const InsightDashboard: React.FC<InsightDashboardProps> = ({ initialTab }
 
     // If active tab is no longer visible (module was disabled), fall back to at-a-glance
     const effectiveActiveTab = tabs.some(t => t.id === activeTab) ? activeTab : 'at-a-glance';
+    // A segment route (sidebar -> /insight/workforce) whose tab is hidden by permission/module
+    // must say so; silently rendering the Overview made the sidebar and content disagree.
+    const requestedHidden = Boolean(
+        initialTab && initialTab !== 'at-a-glance' && !tabs.some(t => t.id === initialTab),
+    );
+    const pageTitle = requestedHidden
+        ? (allSegmentTabs.find(t => t.id === initialTab)?.label ?? 'Insight')
+        : (allSegmentTabs.find(t => t.id === effectiveActiveTab)?.label ?? 'Insight Dashboard');
+    const pageDescription = effectiveActiveTab === 'at-a-glance' && !requestedHidden
+        ? 'Monitor key metrics across all business segments'
+        : `${pageTitle} metrics for your organization`;
 
     if (error) {
         return (
@@ -231,8 +244,8 @@ export const InsightDashboard: React.FC<InsightDashboardProps> = ({ initialTab }
 
     return (
         <DashboardPageTemplate trail={[]}
-            title="Insight Dashboard"
-            description="Monitor key metrics across all business segments"
+            title={pageTitle}
+            description={pageDescription}
             meta={
                 <Cluster gap="tight">
                     <DataFreshnessIndicator key={freshnessKey.current} />
@@ -259,7 +272,13 @@ export const InsightDashboard: React.FC<InsightDashboardProps> = ({ initialTab }
                         exit={{ opacity: 0, y: -10 }}
                         transition={{ duration: 0.2 }}
                     >
-                        {effectiveActiveTab === 'at-a-glance' ? (
+                        {requestedHidden ? (
+                            <EmptyState
+                                icon={AlertCircle}
+                                title={`${pageTitle} is not available`}
+                                description="This section is turned off for your organization or your role does not include access to it."
+                            />
+                        ) : effectiveActiveTab === 'at-a-glance' ? (
                             loading ? (
                                 <div className="min-h-48" />
                             ) : (

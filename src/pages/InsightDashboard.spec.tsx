@@ -334,4 +334,30 @@ describe('InsightDashboard', () => {
       mockShell = authorizedShell();
     });
   });
+  describe('Given a segment route the user cannot see (sidebar Workforce, role lacks workforce access)', () => {
+    it('When rendered with initialTab=workforce / Then it says the section is unavailable instead of showing the Overview', async () => {
+      mockShell = { effectiveFlagsLoaded: true, isFeatureEnabled: () => true, isAdmin: false, hasAnyPermission: () => false, hasPermission: () => false };
+      mockApi.getSegments.mockResolvedValue([]);
+      wrap(<InsightDashboard initialTab="workforce" />);
+      await screen.findByText('Workforce is not available');
+      expect(screen.queryByTestId('at-a-glance')).not.toBeInTheDocument();
+      mockShell = authorizedShell();
+    });
+  });
+
+  describe('Given a visible segment route', () => {
+    it('When rendered with initialTab=revenue / Then the page title is Revenue, not Insight Dashboard', async () => {
+      mockApi.getSegments.mockResolvedValue([]);
+      wrap(<InsightDashboard initialTab="revenue" />);
+      await screen.findByTestId('segment-tab');
+      expect(screen.getByRole('heading', { name: 'Revenue' })).toBeInTheDocument();
+      expect(screen.queryByText('Insight Dashboard')).not.toBeInTheDocument();
+    });
+
+    it('When the URL carries ?tab=revenue on the root route / Then the Revenue tab opens', async () => {
+      mockApi.getSegments.mockResolvedValue([]);
+      render(<MemoryRouter initialEntries={['/?tab=revenue']}><InsightDashboard /></MemoryRouter>);
+      await waitFor(() => expect(screen.getByTestId('segment-tab')).toHaveTextContent('revenue'));
+    });
+  });
 });

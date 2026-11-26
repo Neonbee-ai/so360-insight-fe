@@ -144,6 +144,9 @@ function App() {
                     <Route path="/" element={<InsightDashboard />} />
                     <Route path="alerts" element={<PermissionGuard permission="analytics.view"><AlertsPage /></PermissionGuard>} />
 
+                    {/* Shell nav entry "Signals" (/insight/signals) is the alerts page; without this it fell into :segmentCode -> not found. */}
+                    <Route path="signals" element={<PermissionGuard permission="analytics.view"><AlertsPage /></PermissionGuard>} />
+
                     <Route path="my-pipeline" element={<PermissionGuard permission="analytics.view"><MyPipelineRoute /></PermissionGuard>} />
 
                     {/* Path-based segment routes — URL stays as /insight/revenue etc. */}
