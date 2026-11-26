@@ -7,7 +7,12 @@ export enum AlertSeverity {
 export interface KPI {
     kpi_code: string;
     kpi_name: string;
-    value: number;
+    /** null = unavailable (source failed / no target); a genuine zero is 0. */
+    value: number | null;
+    status?: 'ok' | 'unavailable';
+    unavailable_reason?: string;
+    /** When the backend computed this value (per-card freshness). */
+    computed_at?: string | null;
     unit: string;
     trend: 'up' | 'down' | 'stable';
     trend_percentage?: number;
@@ -162,6 +167,9 @@ export interface MyPipeline {
     open_deals: number;
     total_pipeline: number;
     weighted_forecast: number;
+    /** Open deals whose stage has no probability (not in weighted_forecast). */
+    unweighted_deals?: number;
+    unweighted_amount?: number;
     won_this_month: number;
     deals: MyPipelineDeal[];
     forecast: MyPipelineForecastBucket[];

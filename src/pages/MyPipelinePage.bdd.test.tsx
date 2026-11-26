@@ -40,6 +40,12 @@ describe('MyPipelinePage', () => {
         expect(screen.getByText('Overdue')).toBeInTheDocument();
     });
 
+    it('Given deals without a stage probability, When loaded, Then the forecast card says they are not weighted', async () => {
+        api.getMyPipeline.mockResolvedValue({ ...payload, unweighted_deals: 2, unweighted_amount: 300 });
+        render(<MyPipelinePage />);
+        await waitFor(() => expect(screen.getByText('Weighted forecast').closest('[data-testid="kpi-card-ds"]')).toHaveTextContent('2 deals not weighted (no stage probability)'));
+    });
+
     it('Given no open deals, When loaded, Then an empty state shows', async () => {
         api.getMyPipeline.mockResolvedValue({ ...payload, open_deals: 0, deals: [], forecast: [], total_pipeline: 0, weighted_forecast: 0 });
         render(<MyPipelinePage />);

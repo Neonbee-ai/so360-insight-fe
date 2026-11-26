@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter, useLocation } from 'react-router-dom';
 
 /**
  * Default shell for tests that are not about permissions.
@@ -332,6 +332,63 @@ describe('InsightDashboard', () => {
       expect(screen.getByTestId('tab-finance')).toBeInTheDocument();
 
       mockShell = authorizedShell();
+    });
+  });
+  describe('Given a segment route the user cannot see (sidebar Workforce, role lacks workforce access)', () => {
+    it('When rendered with initialTab=workforce / Then it says the section is unavailable instead of showing the Overview', async () => {
+      mockShell = { effectiveFlagsLoaded: true, isFeatureEnabled: () => true, isAdmin: false, hasAnyPermission: () => false, hasPermission: () => false };
+      mockApi.getSegments.mockResolvedValue([]);
+      wrap(<InsightDashboard initialTab="workforce" />);
+      await screen.findByText('Workforce is not available');
+      expect(screen.queryByTestId('at-a-glance')).not.toBeInTheDocument();
+      mockShell = authorizedShell();
+    });
+  });
+
+  describe('Given a visible segment route', () => {
+    it('When rendered with initialTab=revenue / Then the page title is Revenue, not Insight Dashboard', async () => {
+      mockApi.getSegments.mockResolvedValue([]);
+      wrap(<InsightDashboard initialTab="revenue" />);
+      await screen.findByTestId('segment-tab');
+      expect(screen.getByRole('heading', { name: 'Revenue' })).toBeInTheDocument();
+      expect(screen.queryByText('Insight Dashboard')).not.toBeInTheDocument();
+    });
+
+    it('When the URL carries ?tab=revenue on the root route / Then the Revenue tab opens', async () => {
+      mockApi.getSegments.mockResolvedValue([]);
+      render(<MemoryRouter initialEntries={['/?tab=revenue']}><InsightDashboard /></MemoryRouter>);
+      await waitFor(() => expect(screen.getByTestId('segment-tab')).toHaveTextContent('revenue'));
+    });
+  });
+
+  describe('Given tab changes (sidebar and URL must agree)', () => {
+    const Where = () => {
+      const l = useLocation();
+      return <div data-testid="where">{l.pathname}{l.search}</div>;
+    };
+
+    it('When the Finance tab is clicked on the overview / Then the URL becomes /insight/finance', async () => {
+      mockApi.getSegments.mockResolvedValue([]);
+      render(<MemoryRouter initialEntries={['/insight']}><InsightDashboard /><Where /></MemoryRouter>);
+      await screen.findByTestId('at-a-glance');
+      fireEvent.click(screen.getByTestId('tab-finance'));
+      expect(screen.getByTestId('where').textContent).toBe('/insight/finance');
+    });
+
+    it('When a tab is clicked on a segment route / Then the segment is swapped, not appended', async () => {
+      mockApi.getSegments.mockResolvedValue([]);
+      render(<MemoryRouter initialEntries={['/insight/revenue']}><InsightDashboard initialTab="revenue" /><Where /></MemoryRouter>);
+      await screen.findByTestId('segment-tab');
+      fireEvent.click(screen.getByTestId('tab-execution'));
+      expect(screen.getByTestId('where').textContent).toBe('/insight/execution');
+      fireEvent.click(screen.getByTestId('tab-at-a-glance'));
+      expect(screen.getByTestId('where').textContent).toBe('/insight');
+    });
+
+    it('When a legacy ?tab=workforce link loads / Then it is replaced by the canonical /insight/workforce path', async () => {
+      mockApi.getSegments.mockResolvedValue([]);
+      render(<MemoryRouter initialEntries={['/insight?tab=workforce']}><InsightDashboard /><Where /></MemoryRouter>);
+      await waitFor(() => expect(screen.getByTestId('where').textContent).toBe('/insight/workforce'));
     });
   });
 });
