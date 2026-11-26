@@ -172,14 +172,18 @@ const pageShell = (testid: string) => ({
     secondary ?? null,
     bottom ?? null,
     // Real Comb templates swap children for a busy skeleton while loading.
-    loading ? React.createElement('div', { 'data-slot': 'loading', 'aria-busy': 'true' }) : children,
+    loading ? React.createElement('div', { 'data-slot': 'loading', 'aria-busy': 'true' }, React.createElement('span', { className: 'sr-only' }, 'Loading…')) : children,
     sidePanel ?? null,
   );
 export const DashboardPageTemplate = pageShell('dashboard-page-template');
 export const DetailPageTemplate = pageShell('detail-page-template');
 export const ListPageTemplate = pageShell('list-page-template');
-export const Skeleton = ({ className = '', ...props }: any) =>
+const SkeletonBase = ({ className = '', ...props }: any) =>
   React.createElement('div', { 'data-testid': props['data-testid'] ?? 'skeleton', className: `animate-pulse ${className}` });
+const skeletonPreset = (props: any) =>
+  React.createElement('div', { 'data-testid': props['data-testid'] ?? 'skeleton', 'aria-busy': true }, React.createElement('span', { className: 'sr-only' }, 'Loading…'));
+export const Skeleton = Object.assign(SkeletonBase, Object.fromEntries(
+  ['Page', 'Header', 'Toolbar', 'List', 'Dashboard', 'Fields', 'Settings', 'Canvas', 'Form', 'Detail', 'Table', 'Cards', 'Kpis'].map((k) => [k, skeletonPreset])));
 export const Alert = ({ title, children, variant: _v, action }: any) =>
   React.createElement('div', { role: 'alert' }, title ? React.createElement('strong', null, title) : null, children,
     action ? React.createElement('button', { type: 'button', onClick: action.onClick }, action.label) : null);

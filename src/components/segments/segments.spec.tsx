@@ -42,7 +42,7 @@ describe('RevenueCharts', () => {
     it('When fetching / Then shows spinner', () => {
       mockApi.getChartData.mockReturnValue(new Promise(() => {}));
       render(<RevenueCharts tenantId="t1" orgId="o1" />);
-      expect(screen.getByTestId('icon-Loader2')).toBeInTheDocument();
+      expect(screen.getByText('Loading…')).toBeInTheDocument();
     });
   });
 
@@ -74,7 +74,7 @@ describe('ExecutionCharts', () => {
     it('When fetching / Then shows spinner', () => {
       mockApi.getChartData.mockReturnValue(new Promise(() => {}));
       render(<ExecutionCharts tenantId="t1" orgId="o1" />);
-      expect(screen.getByTestId('icon-Loader2')).toBeInTheDocument();
+      expect(screen.getByText('Loading…')).toBeInTheDocument();
     });
   });
 
@@ -106,7 +106,7 @@ describe('DeliveryCharts', () => {
     it('When fetching / Then shows spinner', () => {
       mockApi.getChartData.mockReturnValue(new Promise(() => {}));
       render(<DeliveryCharts tenantId="t1" orgId="o1" />);
-      expect(screen.getByTestId('icon-Loader2')).toBeInTheDocument();
+      expect(screen.getByText('Loading…')).toBeInTheDocument();
     });
   });
 
@@ -138,7 +138,7 @@ describe('WorkforceCharts', () => {
     it('When fetching / Then shows spinner', () => {
       mockApi.getChartData.mockReturnValue(new Promise(() => {}));
       render(<WorkforceCharts tenantId="t1" orgId="o1" />);
-      expect(screen.getByTestId('icon-Loader2')).toBeInTheDocument();
+      expect(screen.getByText('Loading…')).toBeInTheDocument();
     });
   });
 
@@ -170,7 +170,7 @@ describe('FinanceCharts', () => {
     it('When fetching / Then shows spinner', () => {
       mockApi.getChartData.mockReturnValue(new Promise(() => {}));
       render(<FinanceCharts tenantId="t1" orgId="o1" />);
-      expect(screen.getByTestId('icon-Loader2')).toBeInTheDocument();
+      expect(screen.getByText('Loading…')).toBeInTheDocument();
     });
   });
 

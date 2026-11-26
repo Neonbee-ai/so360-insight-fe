@@ -1,8 +1,8 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Loader2, Factory, AlertCircle, RefreshCw } from 'lucide-react';
+import { Factory, AlertCircle, RefreshCw } from 'lucide-react';
 import { formatNumber } from '../charts/chartUtils';
 import { useShell } from '@so360/shell-context';
-import { Button, Grid, KpiCard } from '@so360/design-system';
+import { Button, Grid, KpiCard, Skeleton } from '@so360/design-system';
 import {
     manufacturingApi,
     buildManufacturingHeaders,
@@ -80,11 +80,7 @@ export const ManufacturingSegment: React.FC = () => {
     }, [currentOrg?.id, currentOrg?.tenant_id, accessToken, reloadKey]);
 
     if (loading && !summary) {
-        return (
-            <div className="flex items-center justify-center py-10">
-                <Loader2 className="w-8 h-8 text-success animate-spin" />
-            </div>
-        );
+        return <Skeleton.Cards count={4} />;
     }
     // Only take over the panel when there is nothing to show. If a later poll fails
     // while data is already on screen, the tiles stay and a slim banner appears.

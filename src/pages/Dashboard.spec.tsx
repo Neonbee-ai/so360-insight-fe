@@ -38,7 +38,7 @@ describe('Dashboard', () => {
       mockApi.getDashboard.mockReturnValue(new Promise(() => {}));
       mockApi.getAlerts.mockReturnValue(new Promise(() => {}));
       render(<Dashboard />);
-      expect(screen.getByText('Loading insights...')).toBeInTheDocument();
+      expect(screen.getByText('Loading…')).toBeInTheDocument();
     });
   });
 

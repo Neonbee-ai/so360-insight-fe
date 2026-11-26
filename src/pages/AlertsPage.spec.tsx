@@ -42,7 +42,7 @@ describe('AlertsPage', () => {
     it('When loading / Then shows loading text', () => {
       mockApi.getAlerts.mockReturnValue(new Promise(() => {}));
       render(<AlertsPage />);
-      expect(screen.getByText('Loading alerts...')).toBeInTheDocument();
+      expect(screen.getByText('Loading…')).toBeInTheDocument();
     });
   });
 
@@ -97,7 +97,7 @@ describe('AlertsPage', () => {
       mockShell = { effectiveFlagsLoaded: false, isFeatureEnabled: () => true };
       render(<AlertsPage />);
       // canAccessAlerts is false → shows upgrade panel, not the live alerts list
-      expect(screen.queryByText('Loading alerts...')).not.toBeInTheDocument();
+      expect(screen.queryByText('Loading…')).not.toBeInTheDocument();
       expect(screen.queryByTestId('alert-card')).not.toBeInTheDocument();
     });
   });

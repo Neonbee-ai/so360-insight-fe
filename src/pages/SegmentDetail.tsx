@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { AlertCircle, Loader2 } from 'lucide-react';
+import { AlertCircle } from 'lucide-react';
 import { Button, Card, DetailPageTemplate, EmptyState, Grid, KpiCard, Stack, Cluster } from '@so360/design-system';
 import { insightApi } from '../services/insightApi';
 import { TrendChart } from '../components/TrendChart';
@@ -79,12 +79,7 @@ export const SegmentDetailPage: React.FC = () => {
 
     if (loading) {
         return (
-            <DetailPageTemplate trail={trail} title="Segment" loading>
-                <div className="flex flex-col items-center gap-4 py-12">
-                    <Loader2 className="w-12 h-12 text-primary animate-spin" />
-                    <p className="text-fg-muted">Loading segment details...</p>
-                </div>
-            </DetailPageTemplate>
+            <DetailPageTemplate trail={trail} title="Segment" loading />
         );
     }
 

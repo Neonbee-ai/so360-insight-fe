@@ -1,7 +1,7 @@
 import React, { Suspense, lazy } from 'react';
 import { Routes, Route, Navigate, useParams, useNavigate } from 'react-router-dom';
 import { useShellBridge } from '@so360/shell-context';
-import { Button, CombScope, FeatureRoute } from '@so360/design-system';
+import { Button, CombScope, FeatureRoute, Skeleton } from '@so360/design-system';
 import { MfeShellInitializer } from './components/MfeShellInitializer';
 import RecordNotFound from './components/RecordNotFound';
 
@@ -20,11 +20,7 @@ const AlertsPage = lazy(() =>
 
 // Lightweight fallback shown while a lazy route chunk loads. Mirrors the
 // existing "initializing" visual language so the swap is imperceptible.
-const RouteFallback: React.FC = () => (
-    <div className="min-h-screen bg-bg flex items-center justify-center">
-        <div className="text-fg-muted">Loading…</div>
-    </div>
-);
+const RouteFallback: React.FC = () => <Skeleton.Page template="dashboard" />;
 
 // Flag-to-segment map: segments that require a specific plan flag.
 // Must match the Shell nav gate (moduleNavConfig `insight:finance`) — the Finance
