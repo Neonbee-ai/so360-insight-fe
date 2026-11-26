@@ -162,6 +162,9 @@ export interface MyPipeline {
     open_deals: number;
     total_pipeline: number;
     weighted_forecast: number;
+    /** Open deals whose stage has no probability (not in weighted_forecast). */
+    unweighted_deals?: number;
+    unweighted_amount?: number;
     won_this_month: number;
     deals: MyPipelineDeal[];
     forecast: MyPipelineForecastBucket[];

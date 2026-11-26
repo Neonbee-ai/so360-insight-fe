@@ -49,7 +49,7 @@ export const MyPipelinePage: React.FC = () => {
     const kpis = data
         ? [
               <KpiCard key="pipeline" label="Open pipeline" value={money(data.total_pipeline)} hint={`${data.open_deals} open deals`} icon={DollarSign} />,
-              <KpiCard key="forecast" label="Weighted forecast" value={money(data.weighted_forecast)} hint={coverage === null ? undefined : `${coverage}% of pipeline`} icon={TrendingUp} />,
+              <KpiCard key="forecast" label="Weighted forecast" value={money(data.weighted_forecast)} hint={[coverage === null ? null : `${coverage}% of pipeline`, data.unweighted_deals ? `${data.unweighted_deals} deal${data.unweighted_deals === 1 ? '' : 's'} not weighted (no stage probability)` : null].filter(Boolean).join(' · ') || undefined} icon={TrendingUp} />,
               <KpiCard key="won" label="Won this month" value={money(data.won_this_month)} icon={Target} />,
               <KpiCard key="overdue" label="Past close date" value={overdueCount(deals)} hint="Open deals to update" icon={Clock} />,
           ]
