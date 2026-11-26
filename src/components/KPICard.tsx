@@ -52,7 +52,18 @@ const KPICardInner: React.FC<KPICardProps> = ({ kpi }) => {
         }
     };
 
-    const formatValue = (): string => formatValueFor(kpi.value);
+    const unavailable = kpi.value === null || kpi.value === undefined || kpi.status === 'unavailable';
+    const formatValue = (): string => (unavailable ? '—' : formatValueFor(kpi.value as number));
+    const computedAtLabel = (() => {
+        if (!kpi.computed_at) return null;
+        const d = new Date(kpi.computed_at);
+        if (Number.isNaN(d.getTime())) return null;
+        try {
+            return new Intl.DateTimeFormat(businessSettings?.document_language || 'en-US', { dateStyle: 'medium', timeStyle: 'short', timeZone: businessSettings?.timezone || 'UTC' }).format(d);
+        } catch {
+            return d.toISOString();
+        }
+    })();
 
     const startEditingTarget = () => {
         setTargetInput(effectiveTargetValue !== undefined ? String(effectiveTargetValue) : '');
@@ -70,9 +81,9 @@ const KPICardInner: React.FC<KPICardProps> = ({ kpi }) => {
         setSavingTarget(true);
         try {
             const updated = await insightApi.setTarget(kpi.kpi_code, parsed);
-            const variance = updated.target_value === 0
+            const variance = updated.target_value === 0 || kpi.value === null
                 ? null
-                : Math.round(((kpi.value - updated.target_value) / updated.target_value) * 1000) / 10;
+                : Math.round((((kpi.value as number) - updated.target_value) / updated.target_value) * 1000) / 10;
             setTargetOverride({ value: updated.target_value, variance });
             setIsEditingTarget(false);
         } catch (err) {
@@ -97,7 +108,7 @@ const KPICardInner: React.FC<KPICardProps> = ({ kpi }) => {
         return 'text-fg-muted';
     };
 
-    const targetLine = !isCounter && effectiveTargetValue !== undefined && !isEditingTarget ? (
+    const targetLine = !isCounter && !unavailable && effectiveTargetValue !== undefined && !isEditingTarget ? (
         <div
             className={`text-xs mt-1 ${
                 effectiveVariance === null || effectiveVariance === undefined
@@ -121,10 +132,20 @@ const KPICardInner: React.FC<KPICardProps> = ({ kpi }) => {
                     {kpi.category}
                     {displayUnit && <span className="ml-2 text-fg-muted">{displayUnit}</span>}
                 </span>
-                {!isCounter && getTrendIcon()}
+                {!isCounter && !unavailable && getTrendIcon()}
             </div>
 
-            {!isCounter && kpi.trend_percentage !== undefined && (
+            {computedAtLabel && (
+                <div className="text-xs text-fg-subtle" data-testid="kpi-freshness">Updated {computedAtLabel}</div>
+            )}
+
+            {unavailable && (
+                <div className="text-sm text-fg-muted" data-testid="kpi-unavailable">
+                    Unavailable{kpi.unavailable_reason ? `: ${kpi.unavailable_reason}` : ''}
+                </div>
+            )}
+
+            {!isCounter && !unavailable && kpi.trend_percentage !== undefined && (
                 <div className={`text-sm ${getTrendColor()}`}>
                     {kpi.trend === 'up' ? '+' : kpi.trend === 'down' ? '-' : ''}
                     {formatNumber(Math.abs(kpi.trend_percentage), 1)}% from last period

@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AlertCircle, RefreshCw } from 'lucide-react';
 import { Button, DashboardPageTemplate, Cluster, EmptyState } from '@so360/design-system';
@@ -12,6 +12,8 @@ import { insightApi } from '../services/insightApi';
 import type { SegmentSummary } from '../types/insight';
 import { useModules, useFeatureFlags, useShellBridge } from '@so360/shell-context';
 import { SEGMENT_MODULE_DEPS } from '../constants/moduleMapping';
+
+const KNOWN_SEGMENT_TABS = ['revenue', 'execution', 'manufacturing', 'delivery', 'workforce', 'finance'];
 
 interface InsightDashboardProps {
     initialTab?: string;
@@ -74,8 +76,12 @@ const RefreshButton: React.FC<RefreshButtonProps> = ({
 };
 
 export const InsightDashboard: React.FC<InsightDashboardProps> = ({ initialTab }) => {
-    const [, setSearchParams] = useSearchParams();
-    const [activeTab, setActiveTab] = useState<string>(initialTab || 'at-a-glance');
+    const [searchParams] = useSearchParams();
+    const location = useLocation();
+    const navigate = useNavigate();
+    // Deep links such as /insight?tab=revenue (written by handleTabChange) must restore the tab.
+    const requestedTab = initialTab || searchParams.get('tab') || undefined;
+    const [activeTab, setActiveTab] = useState<string>(requestedTab || 'at-a-glance');
     const [segments, setSegments] = useState<SegmentSummary[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -151,15 +157,30 @@ export const InsightDashboard: React.FC<InsightDashboardProps> = ({ initialTab }
         ? Math.ceil((cooldownUntil - Date.now()) / 1000)
         : 0;
 
+    // Canonical URL of a tab is the path the Shell sidebar links to (/insight, /insight/revenue, ...), so the
+    // sidebar highlight, URL, title and content move together and back/forward/refresh restore the same page.
+    // The module prefix is read from the live location, never hard-coded.
+    const goToTab = (tabId: string, replace = false) => {
+        const trimmed = location.pathname.replace(/\/+$/, '');
+        const base = initialTab ? trimmed.replace(/\/[^/]+$/, '') : trimmed;
+        navigate(tabId === 'at-a-glance' ? (base || '/') : `${base}/${tabId}`, { replace });
+    };
+
+    // Legacy /insight?tab=revenue links land on the canonical path (the sidebar then highlights the right item).
+    useEffect(() => {
+        const legacy = searchParams.get('tab');
+        if (!initialTab && legacy && legacy !== 'at-a-glance' && KNOWN_SEGMENT_TABS.includes(legacy)) goToTab(legacy, true);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
     const handleTabChange = (tabId: string) => {
         setActiveTab(tabId);
-        // Update URL param
-        setSearchParams({ tab: tabId });
+        goToTab(tabId);
     };
 
     const handleSegmentClick = (segmentCode: string) => {
         setActiveTab(segmentCode);
-        setSearchParams({ tab: segmentCode });
+        goToTab(segmentCode);
     };
 
     // All segment tabs with their required modules
@@ -211,6 +232,17 @@ export const InsightDashboard: React.FC<InsightDashboardProps> = ({ initialTab }
 
     // If active tab is no longer visible (module was disabled), fall back to at-a-glance
     const effectiveActiveTab = tabs.some(t => t.id === activeTab) ? activeTab : 'at-a-glance';
+    // A segment route (sidebar -> /insight/workforce) whose tab is hidden by permission/module
+    // must say so; silently rendering the Overview made the sidebar and content disagree.
+    const requestedHidden = Boolean(
+        initialTab && initialTab !== 'at-a-glance' && !tabs.some(t => t.id === initialTab),
+    );
+    const pageTitle = requestedHidden
+        ? (allSegmentTabs.find(t => t.id === initialTab)?.label ?? 'Insight')
+        : (allSegmentTabs.find(t => t.id === effectiveActiveTab)?.label ?? 'Insight Dashboard');
+    const pageDescription = effectiveActiveTab === 'at-a-glance' && !requestedHidden
+        ? 'Monitor key metrics across all business segments'
+        : `${pageTitle} metrics for your organization`;
 
     if (error) {
         return (
@@ -231,8 +263,8 @@ export const InsightDashboard: React.FC<InsightDashboardProps> = ({ initialTab }
 
     return (
         <DashboardPageTemplate trail={[]}
-            title="Insight Dashboard"
-            description="Monitor key metrics across all business segments"
+            title={pageTitle}
+            description={pageDescription}
             meta={
                 <Cluster gap="tight">
                     <DataFreshnessIndicator key={freshnessKey.current} />
@@ -259,7 +291,13 @@ export const InsightDashboard: React.FC<InsightDashboardProps> = ({ initialTab }
                         exit={{ opacity: 0, y: -10 }}
                         transition={{ duration: 0.2 }}
                     >
-                        {effectiveActiveTab === 'at-a-glance' ? (
+                        {requestedHidden ? (
+                            <EmptyState
+                                icon={AlertCircle}
+                                title={`${pageTitle} is not available`}
+                                description="This section is turned off for your organization or your role does not include access to it."
+                            />
+                        ) : effectiveActiveTab === 'at-a-glance' ? (
                             loading ? (
                                 <div className="min-h-48" />
                             ) : (
