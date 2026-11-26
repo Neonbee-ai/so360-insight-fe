@@ -156,6 +156,14 @@ describe('App', () => {
       });
     });
 
+    describe('When navigating to /signals (the shell Signals nav entry)', () => {
+      it('Then renders the alerts page instead of the not-found record state', async () => {
+        mockShellBridge = syncedBridge({ getFeatureState: () => 'enabled' });
+        render(<MemoryRouter initialEntries={['/signals']}><App /></MemoryRouter>);
+        await waitFor(() => expect(screen.getByText('AlertsPage')).toBeInTheDocument());
+      });
+    });
+
     describe('When navigating to /revenue (not in SEGMENT_FLAG_MAP)', () => {
       it('Then renders InsightDashboard with initialTab=revenue without any flag check', async () => {
         mockShellBridge = syncedBridge({ getFeatureState: () => 'hidden' });

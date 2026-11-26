@@ -97,7 +97,7 @@ describe('KPICard', () => {
   });
 
   describe('Performance', () => {
-    it('Then KPICard is wrapped in React.memo (skips re-render on identical props)', () => {
+    it('When rendered with identical props, then KPICard is wrapped in React.memo (skips re-render on identical props)', () => {
       expect((KPICard as any).$$typeof).toBe(Symbol.for('react.memo'));
     });
   });
@@ -229,5 +229,28 @@ describe('KPICard', () => {
       expect(screen.queryByTestId('sparkline')).not.toBeInTheDocument();
       expect(screen.getByText('42')).toBeInTheDocument();
     });
+  });
+});
+
+describe('KPICard unavailable vs zero (BDD)', () => {
+  it('Given a null value When rendered Then it shows a dash and the reason, not 0', () => {
+    render(<KPICard kpi={{ ...baseKPI, value: null, status: 'unavailable', unavailable_reason: 'No monthly revenue target is set' }} />);
+    expect(screen.getByTestId('kpi-unavailable').textContent).toContain('No monthly revenue target is set');
+    expect(screen.queryByText(/from last period/)).toBeNull();
+  });
+
+  it('Given a genuine zero When rendered Then the zero is shown and it is not flagged unavailable', () => {
+    render(<KPICard kpi={{ ...baseKPI, value: 0 }} />);
+    expect(screen.queryByTestId('kpi-unavailable')).toBeNull();
+  });
+
+  it('Given a computed_at timestamp When rendered Then the card shows its own freshness line', () => {
+    render(<KPICard kpi={{ ...baseKPI, computed_at: '2026-11-26T08:00:00Z' }} />);
+    expect(screen.getByTestId('kpi-freshness').textContent).toMatch(/^Updated /);
+  });
+
+  it('Given no computed_at When rendered Then no freshness line is invented', () => {
+    render(<KPICard kpi={baseKPI} />);
+    expect(screen.queryByTestId('kpi-freshness')).toBeNull();
   });
 });

@@ -121,7 +121,7 @@ export const SegmentDetailPage: React.FC = () => {
                                 <Grid.Item key={kpi.kpi_code} span={4}>
                                     <KpiCard
                                         label={kpi.kpi_name}
-                                        value={isCurrencyUnit(kpi.unit) ? formatters.formatCurrency(kpi.value) : `${kpi.value.toFixed(1)}${kpi.unit ? ` ${kpi.unit}` : ''}`}
+                                        value={isCurrencyUnit(kpi.unit) ? formatters.formatCurrency(kpi.value) : `${kpi.value != null ? kpi.value.toFixed(1) : "—"}${kpi.unit ? ` ${kpi.unit}` : ''}`}
                                         delta={kpi.trend_percentage}
                                         deltaLabel={kpi.trend_percentage !== undefined ? 'from last period' : undefined}
                                         hint={kpi.category}
