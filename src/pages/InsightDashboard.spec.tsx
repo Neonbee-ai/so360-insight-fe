@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter, useLocation } from 'react-router-dom';
 
 /**
  * Default shell for tests that are not about permissions.
@@ -358,6 +358,37 @@ describe('InsightDashboard', () => {
       mockApi.getSegments.mockResolvedValue([]);
       render(<MemoryRouter initialEntries={['/?tab=revenue']}><InsightDashboard /></MemoryRouter>);
       await waitFor(() => expect(screen.getByTestId('segment-tab')).toHaveTextContent('revenue'));
+    });
+  });
+
+  describe('Given tab changes (sidebar and URL must agree)', () => {
+    const Where = () => {
+      const l = useLocation();
+      return <div data-testid="where">{l.pathname}{l.search}</div>;
+    };
+
+    it('When the Finance tab is clicked on the overview / Then the URL becomes /insight/finance', async () => {
+      mockApi.getSegments.mockResolvedValue([]);
+      render(<MemoryRouter initialEntries={['/insight']}><InsightDashboard /><Where /></MemoryRouter>);
+      await screen.findByTestId('at-a-glance');
+      fireEvent.click(screen.getByTestId('tab-finance'));
+      expect(screen.getByTestId('where').textContent).toBe('/insight/finance');
+    });
+
+    it('When a tab is clicked on a segment route / Then the segment is swapped, not appended', async () => {
+      mockApi.getSegments.mockResolvedValue([]);
+      render(<MemoryRouter initialEntries={['/insight/revenue']}><InsightDashboard initialTab="revenue" /><Where /></MemoryRouter>);
+      await screen.findByTestId('segment-tab');
+      fireEvent.click(screen.getByTestId('tab-execution'));
+      expect(screen.getByTestId('where').textContent).toBe('/insight/execution');
+      fireEvent.click(screen.getByTestId('tab-at-a-glance'));
+      expect(screen.getByTestId('where').textContent).toBe('/insight');
+    });
+
+    it('When a legacy ?tab=workforce link loads / Then it is replaced by the canonical /insight/workforce path', async () => {
+      mockApi.getSegments.mockResolvedValue([]);
+      render(<MemoryRouter initialEntries={['/insight?tab=workforce']}><InsightDashboard /><Where /></MemoryRouter>);
+      await waitFor(() => expect(screen.getByTestId('where').textContent).toBe('/insight/workforce'));
     });
   });
 });
