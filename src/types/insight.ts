@@ -7,7 +7,12 @@ export enum AlertSeverity {
 export interface KPI {
     kpi_code: string;
     kpi_name: string;
-    value: number;
+    /** null = unavailable (source failed / no target); a genuine zero is 0. */
+    value: number | null;
+    status?: 'ok' | 'unavailable';
+    unavailable_reason?: string;
+    /** When the backend computed this value (per-card freshness). */
+    computed_at?: string | null;
     unit: string;
     trend: 'up' | 'down' | 'stable';
     trend_percentage?: number;

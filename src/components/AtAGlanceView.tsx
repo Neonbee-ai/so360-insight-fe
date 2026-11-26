@@ -430,7 +430,7 @@ export const AtAGlanceView: React.FC<AtAGlanceViewProps> = ({ segments, onSegmen
                                 icon={getInsightIcon(segment.icon_name) ?? undefined}
                                 onClick={() => onSegmentClick(segment.segment_code)}
                                 className="h-full"
-                                value={segment.primary_kpi ? segment.primary_kpi.value.toFixed(1) : '—'}
+                                value={segment.primary_kpi && segment.primary_kpi.value !== null ? segment.primary_kpi.value.toFixed(1) : '—'}
                                 hint={
                                     <span className="flex items-center justify-between gap-2">
                                         <span>
