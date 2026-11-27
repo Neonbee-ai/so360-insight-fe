@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Loader2, AlertCircle } from 'lucide-react';
-import { toast, Button, Card, Grid, Stack, EmptyState } from '@so360/design-system';
+import { AlertCircle } from 'lucide-react';
+import { toast, Button, Card, Grid, Stack, EmptyState, Skeleton } from '@so360/design-system';
 import { getInsightIcon } from '../constants/iconMap';
 import { KPICard } from './KPICard';
 import { AlertCard } from './AlertCard';
@@ -230,14 +230,7 @@ export const SegmentTabContent: React.FC<SegmentTabContentProps> = ({ segmentCod
     };
 
     if (loading) {
-        return (
-            <div className="flex items-center justify-center py-12">
-                <div className="flex flex-col items-center gap-4">
-                    <Loader2 className="w-12 h-12 text-primary animate-spin" />
-                    <p className="text-fg-muted">Loading segment details...</p>
-                </div>
-            </div>
-        );
+        return <Skeleton.Dashboard />;
     }
 
     if (error || !segment) {
@@ -336,9 +329,7 @@ export const SegmentTabContent: React.FC<SegmentTabContentProps> = ({ segmentCod
                     actions={<TimeRangeSelector selected={timeRange} onChange={setTimeRange} />}
                 >
                     {loadingTrends ? (
-                        <div className="flex items-center justify-center py-12">
-                            <Loader2 className="w-8 h-8 text-primary animate-spin" />
-                        </div>
+                        <Skeleton.Cards count={3} />
                     ) : (
                         <Grid>
                             {segment.trends.map((trend) => (

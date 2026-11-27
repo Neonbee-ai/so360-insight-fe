@@ -108,11 +108,10 @@ describe('DeliveryCharts', () => {
     });
 
     describe('Given loading state', () => {
-        it('When data is pending / Then shows spinner', () => {
+        it('When data is pending / Then shows skeleton', () => {
             mockGetChartData.mockReturnValue(new Promise(() => {}));
             render(<DeliveryCharts {...props} />);
-            const spinners = document.querySelectorAll('.animate-spin');
-            expect(spinners.length).toBeGreaterThan(0);
+            expect(screen.getByText('Loading…')).toBeInTheDocument();
         });
     });
 });
@@ -283,11 +282,10 @@ describe('WorkforceCharts', () => {
     });
 
     describe('Given loading state', () => {
-        it('When data is pending / Then shows spinner', () => {
+        it('When data is pending / Then shows skeleton', () => {
             mockGetChartData.mockReturnValue(new Promise(() => {}));
             render(<WorkforceCharts {...props} />);
-            const spinners = document.querySelectorAll('.animate-spin');
-            expect(spinners.length).toBeGreaterThan(0);
+            expect(screen.getByText('Loading…')).toBeInTheDocument();
         });
     });
 });

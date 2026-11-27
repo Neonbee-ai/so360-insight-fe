@@ -71,11 +71,7 @@ export const Dashboard: React.FC = () => {
     };
 
     if (loading) {
-        return (
-            <div className="min-h-screen bg-bg flex items-center justify-center">
-                <div className="text-fg-muted">Loading insights...</div>
-            </div>
-        );
+        return <DashboardPageTemplate trail={[]} title="Insight Dashboard" loading loadingKpis={4} />;
     }
 
     if (error) {
