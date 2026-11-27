@@ -82,6 +82,7 @@ export const AlertsPage: React.FC = () => {
     return (
         <ListPageTemplate trail={[]}
             title="Alerts"
+            loading={loading}
             description="Manage and resolve intelligent alerts"
             views={
                 <SegmentedControl
@@ -110,9 +111,7 @@ export const AlertsPage: React.FC = () => {
                 />
             }
         >
-            {loading ? (
-                <div className="text-center text-fg-muted py-12">Loading alerts...</div>
-            ) : visibleAlerts.length > 0 ? (
+            {visibleAlerts.length > 0 ? (
                 <Stack gap="tight">
                     {visibleAlerts.map((alert) => (
                         <AlertCard key={alert.id} alert={alert} onResolve={handleResolveAlert} />

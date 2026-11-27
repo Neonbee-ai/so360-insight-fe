@@ -45,7 +45,7 @@ describe('ManufacturingSegment', () => {
     it('When fetching / Then shows spinner', () => {
       vi.stubGlobal('fetch', vi.fn().mockReturnValue(new Promise(() => {})));
       render(<ManufacturingSegment />);
-      expect(screen.getByTestId('icon-Loader2')).toBeInTheDocument();
+      expect(screen.getByText('Loading…')).toBeInTheDocument();
     });
   });
 

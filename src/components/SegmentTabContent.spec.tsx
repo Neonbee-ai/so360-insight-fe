@@ -88,7 +88,7 @@ describe('SegmentTabContent', () => {
     it('When data is being fetched / Then shows loading spinner', () => {
       mockApi.getSegmentDetail.mockReturnValue(new Promise(() => {}));
       render(<SegmentTabContent segmentCode="revenue" />);
-      expect(screen.getByText('Loading segment details...')).toBeInTheDocument();
+      expect(screen.getByText('Loading…')).toBeInTheDocument();
     });
   });
 

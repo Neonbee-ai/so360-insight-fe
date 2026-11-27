@@ -4,8 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { Loader2 } from 'lucide-react';
-import { Alert, Card, Grid, GridItem } from '@so360/design-system';
+import { Alert, Skeleton, Card, Grid, GridItem } from '@so360/design-system';
 import {
     AreaChartComponent,
     LineChartComponent,
@@ -56,11 +55,7 @@ export const DeliveryCharts: React.FC<DeliveryChartsProps> = ({ tenantId, orgId 
     };
 
     if (loading) {
-        return (
-            <div className="flex items-center justify-center py-12">
-                <Loader2 className="w-8 h-8 text-success animate-spin" />
-            </div>
-        );
+        return <Skeleton.Cards count={3} />;
     }
 
     if (error) {
