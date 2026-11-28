@@ -37,15 +37,6 @@ vi.mock('../services/insightApi', () => ({
   },
 }));
 
-vi.mock('../components/TabNavigation', () => ({
-  TabNavigation: (props: any) => (
-    <div data-testid="tab-nav">
-      {props.tabs.map((t: any) => (
-        <button key={t.id} data-testid={`tab-${t.id}`} onClick={() => props.onChange(t.id)}>{t.label}</button>
-      ))}
-    </div>
-  ),
-}));
 const atAGlanceRenderCount = { current: 0 };
 vi.mock('../components/AtAGlanceView', () => ({
   // Counts renders so we can prove the per-second cooldown tick does NOT
@@ -106,7 +97,7 @@ describe('InsightDashboard', () => {
       await waitFor(() => {
         expect(screen.getByText('Insight Dashboard')).toBeInTheDocument();
       });
-      expect(screen.getByTestId('tab-nav')).toBeInTheDocument();
+      expect(screen.getByRole('tablist')).toBeInTheDocument();
       expect(screen.getByTestId('at-a-glance')).toBeInTheDocument();
     });
 
@@ -169,7 +160,7 @@ describe('InsightDashboard', () => {
       });
       // dashboard rendered + the cooldown button is disabled during the window
       expect(screen.getByTestId('at-a-glance')).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /refresh/i })).toBeDisabled();
+      expect(screen.getByRole('button', { name: /refresh/i })).toHaveAttribute('aria-disabled', 'true');
     });
 
     it('When cooldown is active / Then a second click is rejected (no extra refresh API call)', async () => {

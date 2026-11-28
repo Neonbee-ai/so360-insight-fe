@@ -22,7 +22,7 @@ export const Tabs = ({ items = [], value, onChange, name, variant: _v, ...props 
     items.map((it: any) =>
       React.createElement(
         'button',
-        { key: it.id, role: 'tab', type: 'button', 'aria-selected': it.id === value, disabled: it.disabled, onClick: () => onChange?.(it.id) },
+        { key: it.id, role: 'tab', type: 'button', 'data-testid': `tab-${it.id}`, 'aria-selected': it.id === value, disabled: it.disabled, onClick: () => onChange?.(it.id) },
         it.icon, it.label,
       ),
     ),
@@ -144,9 +144,47 @@ const TrailNav = ({ trail = [] }: { trail?: any[] }) => {
     ),
   );
 };
+// ── Title area v2 helpers: PageAction objects render as buttons (disabled -> aria-disabled, like the DS Button); legacy nodes pass through ──
+const v2IsPlain = (v: any) => v && typeof v === 'object' && !React.isValidElement(v) && !Array.isArray(v);
+const v2IsAction = (a: any) => v2IsPlain(a) && typeof a.id === 'string' && typeof a.label === 'string';
+const v2Gate = (a: any, node: any) => {
+  let n = node;
+  if (a.gate?.quota) n = React.createElement(QuotaGate, a.gate.quota, n);
+  if (a.gate?.feature) n = React.createElement(FeatureGate, a.gate.feature, n);
+  return React.createElement(React.Fragment, { key: a.id }, n);
+};
+const v2Actions = (items: any): any[] | null => {
+  if (!items) return null;
+  return (Array.isArray(items) ? items : [items]).map((a: any, i: number) => v2IsAction(a)
+    ? v2Gate(a, React.createElement('button', { key: a.id, type: 'button', 'aria-disabled': a.disabled ? 'true' : undefined, onClick: () => { if (!a.disabled) a.onSelect?.(); } }, a.label))
+    : React.createElement(React.Fragment, { key: a?.key ?? `n${i}` }, a));
+};
+const v2Search = (sp: any) => (v2IsPlain(sp)
+  ? React.createElement('input', { type: 'search', 'aria-label': String(sp.placeholder || 'Search').replace(/…$/, ''), placeholder: sp.placeholder, value: sp.value ?? '', onChange: (e: any) => sp.onChange?.(e.target.value) })
+  : sp ?? null);
+const v2Kpis = (k: any) => (Array.isArray(k) && k.length && v2IsPlain(k[0]) && 'id' in k[0] && 'label' in k[0]
+  ? React.createElement('div', { 'data-slot': 'kpis' }, k.map((x: any) => React.createElement('div', { key: x.id }, React.createElement('span', null, x.label), React.createElement('span', null, x.value), x.hint ?? null)))
+  : k ?? null);
+const V2Drawer = ({ cfg }: any) => {
+  const [open, setOpen] = React.useState(false);
+  return React.createElement(React.Fragment, null,
+    React.createElement('button', { type: 'button', onClick: () => setOpen(true) }, 'Filters'),
+    open ? React.createElement('div', { role: 'dialog', 'aria-label': 'Filters' },
+      ...(cfg.fields ?? []).map((f: any) => f.type === 'segment'
+        ? React.createElement('div', { key: f.key, role: 'radiogroup', 'aria-label': f.label },
+          ...(f.options ?? []).map((o: any) => React.createElement('button', { key: o.value, type: 'button', role: 'radio', 'aria-checked': (cfg.values?.[f.key] ?? f.default) === o.value, onClick: () => cfg.onChange({ ...cfg.values, [f.key]: o.value }) }, o.label)))
+        : f.type === 'switch' || f.type === 'boolean'
+          ? React.createElement('label', { key: f.key }, f.label, React.createElement('input', { type: 'checkbox', role: 'switch', checked: !!cfg.values?.[f.key], onChange: (e: any) => cfg.onChange({ ...cfg.values, [f.key]: e.target.checked }) }))
+          : React.createElement('select', {
+            key: f.key, 'aria-label': f.label, value: cfg.values?.[f.key] ?? '',
+            onChange: (e: any) => cfg.onChange({ ...cfg.values, [f.key]: e.target.value }),
+          }, React.createElement('option', { value: '' }, `All ${f.label}`), ...(f.options ?? []).map((o: any) => React.createElement('option', { key: o.value, value: o.value }, o.label)))),
+      React.createElement('button', { type: 'button', onClick: () => cfg.onClear?.() }, 'Clear')) : null);
+};
+const v2Filters = (f: any) => (v2IsPlain(f) && Array.isArray(f.fields) ? React.createElement(V2Drawer, { cfg: f }) : f ?? null);
 const trailNode = (trail: any[] = []) => React.createElement(TrailNav, { trail });
 const pageShell = (testid: string) => ({
-  title, description, trail, meta, status, filters, toolbarEnd, secondaryActions, headerSecondaryActions, primaryAction,
+  title, description, trail, meta, status, filters, toolbarEnd, secondaryActions, moreActions, headerSecondaryActions, primaryAction,
   kpis, primary, secondary, bottom, views, search, tabs, activeTab, onTabChange, sidePanel, children, loading,
 }: any) =>
   React.createElement(
@@ -157,17 +195,20 @@ const pageShell = (testid: string) => ({
     description ? React.createElement('p', null, description) : null,
     status ?? null,
     meta ?? null,
-    secondaryActions ?? null,
+    v2Actions(secondaryActions),
+    v2Actions(moreActions),
     headerSecondaryActions ?? null,
-    primaryAction ?? null,
+    v2Actions(primaryAction),
     views ?? null,
-    search ?? null,
-    filters ?? null,
+    v2Search(search),
+    v2Filters(filters),
     toolbarEnd ?? null,
-    tabs && tabs.length
-      ? React.createElement(Tabs, { items: tabs, value: activeTab, onChange: onTabChange, name: 'Sections' })
-      : null,
-    kpis ?? null,
+    tabs && !Array.isArray(tabs) && Array.isArray(tabs.items)
+      ? React.createElement(Tabs, { items: tabs.items, value: tabs.value, onChange: tabs.onChange, name: tabs.name ?? 'Sections' })
+      : tabs && tabs.length
+        ? React.createElement(Tabs, { items: tabs, value: activeTab, onChange: onTabChange, name: 'Sections' })
+        : null,
+    v2Kpis(kpis),
     primary ?? null,
     secondary ?? null,
     bottom ?? null,

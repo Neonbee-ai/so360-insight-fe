@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { AlertCircle } from 'lucide-react';
-import { EmptyState, ListPageTemplate, SegmentedControl, Select, Stack, toast } from '@so360/design-system';
+import { EmptyState, ListPageTemplate, Stack, toast } from '@so360/design-system';
 import { insightApi } from '../services/insightApi';
 import { AlertCard } from '../components/AlertCard';
 import type { Alert } from '../types/insight';
@@ -84,32 +84,36 @@ export const AlertsPage: React.FC = () => {
             title="Alerts"
             loading={loading}
             description="Manage and resolve intelligent alerts"
-            views={
-                <SegmentedControl
-                    name="alert-status"
-                    aria-label="Alert status"
-                    value={unresolvedOnly ? 'unresolved' : 'all'}
-                    onChange={(v) => setUnresolvedOnly(v === 'unresolved')}
-                    options={[
-                        { value: 'unresolved', label: 'Unresolved' },
-                        { value: 'all', label: 'All' },
-                    ]}
-                />
-            }
-            toolbarEnd={
-                <Select
-                    name="severity"
-                    aria-label="Severity"
-                    value={severityFilter}
-                    onChange={(e) => setSeverityFilter(e.target.value)}
-                    options={[
-                        { value: 'all', label: 'All' },
-                        { value: 'critical', label: 'Critical' },
-                        { value: 'warning', label: 'Warning' },
-                        { value: 'info', label: 'Info' },
-                    ]}
-                />
-            }
+            filters={{
+                fields: [
+                    {
+                        key: 'status',
+                        label: 'Alert status',
+                        type: 'segment',
+                        default: 'unresolved',
+                        options: [
+                            { value: 'unresolved', label: 'Unresolved' },
+                            { value: 'all', label: 'All' },
+                        ],
+                    },
+                    {
+                        key: 'severity',
+                        label: 'Severity',
+                        type: 'select',
+                        options: [
+                            { value: 'critical', label: 'Critical' },
+                            { value: 'warning', label: 'Warning' },
+                            { value: 'info', label: 'Info' },
+                        ],
+                    },
+                ],
+                values: { status: unresolvedOnly ? 'unresolved' : 'all', severity: severityFilter === 'all' ? '' : severityFilter },
+                onChange: (v: any) => {
+                    setUnresolvedOnly((v.status ?? 'unresolved') === 'unresolved');
+                    setSeverityFilter(v.severity || 'all');
+                },
+                onClear: () => { setUnresolvedOnly(true); setSeverityFilter('all'); },
+            }}
         >
             {visibleAlerts.length > 0 ? (
                 <Stack gap="tight">

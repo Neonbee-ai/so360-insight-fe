@@ -3,7 +3,8 @@ import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AlertCircle, RefreshCw } from 'lucide-react';
 import { Button, DashboardPageTemplate, Cluster, EmptyState } from '@so360/design-system';
-import { TabNavigation, type Tab } from '../components/TabNavigation';
+import type { Tab } from '../components/TabNavigation';
+import { getInsightIcon } from '../constants/iconMap';
 import { AtAGlanceView } from '../components/AtAGlanceView';
 import { SegmentTabContent } from '../components/SegmentTabContent';
 import { ManufacturingSegment } from '../components/segments/ManufacturingSegment';
@@ -272,6 +273,7 @@ export const InsightDashboard: React.FC<InsightDashboardProps> = ({ initialTab }
                     {refreshError && <span className="text-xs text-danger">{refreshError}</span>}
                 </Cluster>
             }
+            // comb-exception: the live cooldown countdown stays isolated in <RefreshButton> so its 1 Hz tick never re-renders the dashboard tree (see its doc comment); a PageAction label would need the parent to tick.
             secondaryActions={
                 canRefresh ? (
                     <RefreshButton
@@ -281,7 +283,16 @@ export const InsightDashboard: React.FC<InsightDashboardProps> = ({ initialTab }
                     />
                 ) : undefined
             }
-            filters={<TabNavigation tabs={tabs} activeTab={effectiveActiveTab} onChange={handleTabChange} />}
+            tabs={{
+                name: 'insight-segments',
+                items: tabs.map((tab) => {
+                    const IconComponent = tab.icon ? getInsightIcon(tab.icon) : undefined;
+                    return { id: tab.id, label: tab.label, icon: IconComponent ? <IconComponent className="w-5 h-5" /> : undefined };
+                }),
+                value: effectiveActiveTab,
+                onChange: handleTabChange,
+                maxVisible: 5,
+            }}
             bottom={
                 <AnimatePresence mode="wait">
                     <motion.div

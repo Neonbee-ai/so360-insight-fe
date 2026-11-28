@@ -29,6 +29,7 @@ vi.mock('../components/AlertCard', () => ({
 
 import { AlertsPage } from './AlertsPage';
 import { insightApi } from '../services/insightApi';
+import { openFilters } from '../test/openFilters';
 
 const mockApi = insightApi as any;
 
@@ -71,8 +72,8 @@ describe('AlertsPage', () => {
       await waitFor(() => {
         expect(mockApi.getAlerts).toHaveBeenCalled();
       });
-      const select = screen.getByDisplayValue('All');
-      await userEvent.selectOptions(select, 'critical');
+      openFilters();
+      await userEvent.selectOptions(screen.getByLabelText('Severity'), 'critical');
       await waitFor(() => {
         expect(mockApi.getAlerts).toHaveBeenCalledWith(expect.objectContaining({ severity: 'critical' }));
       });
@@ -82,8 +83,10 @@ describe('AlertsPage', () => {
       mockApi.getAlerts.mockResolvedValue({ data: [] });
       render(<AlertsPage />);
       await waitFor(() => {
-        expect(screen.getByText('Unresolved')).toBeInTheDocument();
+        expect(mockApi.getAlerts).toHaveBeenCalled();
       });
+      openFilters();
+      expect(screen.getByRole('radio', { name: 'Unresolved' })).toBeInTheDocument();
       const allBtn = screen.getByRole('radio', { name: 'All' });
       await userEvent.click(allBtn);
       await waitFor(() => {
