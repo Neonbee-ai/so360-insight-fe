@@ -53,4 +53,24 @@ describe('ChartExport', () => {
       expect(screen.queryByText('Export as CSV')).not.toBeInTheDocument();
     });
   });
+  describe('Given the built-in CSV export runs', () => {
+    it('When the download is triggered / Then the Blob object URL is revoked so it does not leak', async () => {
+      const create = vi.fn(() => 'blob:csv-1');
+      const revoke = vi.fn();
+      Object.assign(URL, { createObjectURL: create, revokeObjectURL: revoke });
+      vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
+      vi.useFakeTimers({ shouldAdvanceTime: true });
+      try {
+        render(<ChartExport chartId="c1" chartTitle="Revenue" data={[{ month: 'Jan', value: 1 }]} />);
+        await userEvent.click(screen.getByLabelText('Export chart'));
+        await userEvent.click(screen.getByText('Export as CSV'));
+
+        expect(create).toHaveBeenCalledTimes(1);
+        vi.advanceTimersByTime(1000);
+        expect(revoke).toHaveBeenCalledWith('blob:csv-1');
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+  });
 });

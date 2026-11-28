@@ -75,6 +75,8 @@ export const ChartExport: React.FC<ChartExportProps> = ({
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+        // Release the CSV Blob; an unrevoked object URL pins it in memory for the tab's lifetime.
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
     };
 
     return (
