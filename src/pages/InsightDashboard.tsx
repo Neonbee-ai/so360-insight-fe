@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AlertCircle, RefreshCw } from 'lucide-react';
-import { Button, DashboardPageTemplate, Cluster, EmptyState } from '@so360/design-system';
+import { DashboardPageTemplate, Cluster, EmptyState } from '@so360/design-system';
 import type { Tab } from '../components/TabNavigation';
 import { getInsightIcon } from '../constants/iconMap';
 import { AtAGlanceView } from '../components/AtAGlanceView';
@@ -22,59 +22,6 @@ interface InsightDashboardProps {
 
 const formatCooldown = (s: number) =>
     Math.floor(s / 60) > 0 ? `${Math.floor(s / 60)}m ${s % 60}s` : `${s}s`;
-
-/**
- * Isolated refresh button + cooldown countdown.
- *
- * The per-second countdown state lives entirely inside this tiny component, so
- * the 1Hz `setCooldownSeconds(prev - 1)` tick re-renders ONLY this button — not
- * the whole dashboard tree (KPIs, charts, segment cards). Behavior is identical:
- * same label text, same disabled state, same spinner, same click handler.
- */
-interface RefreshButtonProps {
-    onRefresh: () => void;
-    isRefreshing: boolean;
-    initialCooldownSeconds: number;
-}
-
-const RefreshButton: React.FC<RefreshButtonProps> = ({
-    onRefresh,
-    isRefreshing,
-    initialCooldownSeconds,
-}) => {
-    const [cooldownSeconds, setCooldownSeconds] = useState(initialCooldownSeconds);
-
-    // Re-seed the countdown whenever the parent reports a new cooldown window
-    // (e.g. after a refresh returns a fresh `cooldown_seconds_remaining`).
-    useEffect(() => {
-        setCooldownSeconds(initialCooldownSeconds);
-    }, [initialCooldownSeconds]);
-
-    // Cooldown countdown timer — ticks isolated to this component only.
-    useEffect(() => {
-        if (cooldownSeconds <= 0) return;
-        const timer = setInterval(() => {
-            setCooldownSeconds(prev => {
-                if (prev <= 1) { clearInterval(timer); return 0; }
-                return prev - 1;
-            });
-        }, 1000);
-        return () => clearInterval(timer);
-    }, [cooldownSeconds]);
-
-    const disabled = isRefreshing || cooldownSeconds > 0;
-
-    return (
-        <Button variant="secondary" size="sm" onClick={onRefresh} disabled={disabled}>
-            <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-            {isRefreshing
-                ? 'Refreshing...'
-                : cooldownSeconds > 0
-                    ? `Refresh in ${formatCooldown(cooldownSeconds)}`
-                    : 'Refresh'}
-        </Button>
-    );
-};
 
 export const InsightDashboard: React.FC<InsightDashboardProps> = ({ initialTab }) => {
     const [searchParams] = useSearchParams();
@@ -152,8 +99,14 @@ export const InsightDashboard: React.FC<InsightDashboardProps> = ({ initialTab }
         }
     }, [isRefreshing, startCooldown]);
 
-    // Seconds remaining at render time — passed once to <RefreshButton>, which
-    // owns the per-second ticking so the dashboard tree does not re-render.
+    // Seconds remaining at render time. No 1 Hz tick: one timer re-renders once when the cooldown ends.
+    const [, setCooldownTick] = useState(0);
+    useEffect(() => {
+        const ms = cooldownUntil - Date.now();
+        if (ms <= 0) return;
+        const timer = setTimeout(() => setCooldownTick((n) => n + 1), ms + 50);
+        return () => clearTimeout(timer);
+    }, [cooldownUntil]);
     const initialCooldownSeconds = cooldownUntil > Date.now()
         ? Math.ceil((cooldownUntil - Date.now()) / 1000)
         : 0;
@@ -273,16 +226,15 @@ export const InsightDashboard: React.FC<InsightDashboardProps> = ({ initialTab }
                     {refreshError && <span className="text-xs text-danger">{refreshError}</span>}
                 </Cluster>
             }
-            // comb-exception: the live cooldown countdown stays isolated in <RefreshButton> so its 1 Hz tick never re-renders the dashboard tree (see its doc comment); a PageAction label would need the parent to tick.
-            secondaryActions={
-                canRefresh ? (
-                    <RefreshButton
-                        onRefresh={handleRefresh}
-                        isRefreshing={isRefreshing}
-                        initialCooldownSeconds={initialCooldownSeconds}
-                    />
-                ) : undefined
-            }
+            moreActions={canRefresh ? [{
+                id: 'refresh',
+                label: isRefreshing ? 'Refreshing…' : 'Refresh',
+                kind: 'refresh',
+                icon: <RefreshCw className={isRefreshing ? 'animate-spin' : undefined} />,
+                onSelect: handleRefresh,
+                disabled: isRefreshing || initialCooldownSeconds > 0,
+                disabledReason: initialCooldownSeconds > 0 ? `Refresh available in ${formatCooldown(initialCooldownSeconds)}` : undefined,
+            }] : undefined}
             tabs={{
                 name: 'insight-segments',
                 items: tabs.map((tab) => {

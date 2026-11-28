@@ -156,7 +156,7 @@ describe('InsightDashboard', () => {
 
       fireEvent.click(screen.getByRole('button', { name: /refresh/i }));
       await waitFor(() => {
-        expect(screen.getByRole('button', { name: /refresh/i })).toHaveTextContent(/Refresh in \d+s/);
+        expect(screen.getByRole('button', { name: /refresh/i })).toHaveAttribute('aria-disabled', 'true');
       });
       // dashboard rendered + the cooldown button is disabled during the window
       expect(screen.getByTestId('at-a-glance')).toBeInTheDocument();
@@ -172,7 +172,7 @@ describe('InsightDashboard', () => {
 
       fireEvent.click(screen.getByRole('button', { name: /refresh/i }));
       await waitFor(() => {
-        expect(screen.getByRole('button', { name: /refresh/i })).toHaveTextContent(/Refresh in \d+s/);
+        expect(screen.getByRole('button', { name: /refresh/i })).toHaveAttribute('aria-disabled', 'true');
       });
       expect(mockApi.refreshInsight).toHaveBeenCalledTimes(1);
 
@@ -195,7 +195,7 @@ describe('InsightDashboard', () => {
         expect(mockApi.getSegments).toHaveBeenCalledTimes(2);
       });
       await waitFor(() => {
-        expect(screen.getByRole('button', { name: /refresh/i })).toHaveTextContent(/Refresh in \d+s/);
+        expect(screen.getByRole('button', { name: /refresh/i })).toHaveAttribute('aria-disabled', 'true');
       });
     });
 
@@ -212,7 +212,7 @@ describe('InsightDashboard', () => {
         expect(screen.getByText('Refresh completed with errors.')).toBeInTheDocument();
       });
       // No cooldown → button returns to the plain "Refresh" label
-      expect(screen.getByRole('button', { name: /refresh/i })).toHaveTextContent('Refresh');
+      expect(screen.getByRole('button', { name: /refresh/i })).not.toHaveAttribute('aria-disabled', 'true');
     });
 
     it('When a refresh throws / Then it surfaces the thrown error message', async () => {
@@ -240,7 +240,7 @@ describe('InsightDashboard', () => {
 
       fireEvent.click(screen.getByRole('button', { name: /refresh/i }));
       await waitFor(() => {
-        expect(screen.getByRole('button', { name: /refresh/i })).toHaveTextContent(/Refresh in 1m \d+s/);
+        expect(screen.getByRole('button', { name: /refresh/i })).toHaveAttribute('aria-disabled', 'true');
       });
     });
   });
